@@ -96,11 +96,6 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // add an empty string for profession if not provided
-    if (!body.profession) {
-      body.profession = "";
-    }
-
     console.log("Received data:", body);
 
     const results = await fetch(
