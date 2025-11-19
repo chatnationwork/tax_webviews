@@ -25,3 +25,10 @@ model SavedItem {
   phone         String?
   createdAt     DateTime @default(now())
 }
+
+model visitedCountires {
+  id        Int      @id @default(autoincrement())
+  country   Json
+  phone     String?
+  createdAt DateTime @default(now())
+}
