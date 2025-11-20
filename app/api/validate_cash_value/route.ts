@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ value: value }, { status: 200 });
   } catch (error) {
     console.error("Error during create entity process:", error);
-    return NextResponse.json({ error,message: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Error with currency conversion";
+    return NextResponse.json({ error,message: errorMessage }, { status: 500 });
   }
 }
 
