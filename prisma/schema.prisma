@@ -23,6 +23,10 @@ model SavedItem {
   cert          String?
   hsCode        String?
   phone         String?
+  make          String?
+  model         String?
+  imei          String?
+  file          String[]
   createdAt     DateTime @default(now())
 }
 
