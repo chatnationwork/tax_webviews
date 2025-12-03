@@ -26,7 +26,7 @@ model SavedItem {
   make          String?
   model         String?
   imei          String?
-  file          String[]
+  file          Json[]
   createdAt     DateTime @default(now())
 }
 

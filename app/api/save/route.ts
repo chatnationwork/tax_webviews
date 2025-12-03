@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     };
 
     // Parse file field (handle both string and array)
-    let fileArray: string[] = [];
+    let fileArray = [];
     if (body.file) {
       if (typeof body.file === 'string') {
         // Parse if it's a JSON string
