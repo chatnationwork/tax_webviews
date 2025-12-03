@@ -58,6 +58,8 @@ export async function POST(req: NextRequest) {
       if (body.hsCode) baseData.hsCode = body.hsCode;
     }
 
+    console.log("Base data:", baseData);
+
     await prisma.savedItem.create({
       data: baseData,
     });
