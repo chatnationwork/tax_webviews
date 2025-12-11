@@ -48,15 +48,15 @@ const ProgressSteps = ({ currentStep }: { currentStep: number }) => {
             <div className="flex flex-col items-center flex-1">
               <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium transition-colors ${
                 currentStep === step.num 
-                  ? 'bg-[#FFB81C] text-[#003366] ring-2 ring-[#003366] ring-offset-2' 
+                  ? 'bg-[#CC0000] text-[#CC0000] ring-2 ring-[#CC0000] ring-offset-2' 
                   : currentStep > step.num
-                  ? 'bg-[#003366] text-white'
+                  ? 'bg-[#CC0000] text-white'
                   : 'bg-gray-200 text-gray-500'
               }`}>
                 {currentStep > step.num ? '✓' : step.num}
               </div>
               <span className={`text-[9px] sm:text-xs mt-1 text-center ${
-                currentStep === step.num ? 'text-[#003366] font-semibold' : 'text-gray-500'
+                currentStep === step.num ? 'text-[#CC0000] font-semibold' : 'text-gray-500'
               }`}>
                 <span className="hidden sm:inline">{step.fullLabel}</span>
                 <span className="sm:hidden">{step.label}</span>
@@ -64,7 +64,7 @@ const ProgressSteps = ({ currentStep }: { currentStep: number }) => {
             </div>
             {idx < STEPS.length - 1 && (
               <div className={`h-0.5 w-full mx-1 transition-colors ${
-                currentStep > step.num ? 'bg-[#003366]' : 'bg-gray-200'
+                currentStep > step.num ? 'bg-[#CC0000]' : 'bg-gray-200'
               }`} />
             )}
           </div>
@@ -265,14 +265,14 @@ function SalesInvoiceContent() {
                     value={pinOrId}
                     onChange={(e) => setPinOrId(e.target.value)}
                     placeholder="Enter PIN or ID number"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm"
                     onKeyPress={(e) => e.key === 'Enter' && handleCustomerLookup()}
                   />
                 </div>
                 <button
                   onClick={handleCustomerLookup}
                   disabled={loading}
-                  className="px-4 sm:px-6 py-3 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors text-sm font-medium flex items-center gap-2 disabled:opacity-50"
+                  className="px-4 sm:px-6 py-3 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium flex items-center gap-2 disabled:opacity-50"
                 >
                   {loading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -305,7 +305,7 @@ function SalesInvoiceContent() {
         return (
           <div className="space-y-4">
             <div className="bg-[#F5F5F5] rounded-lg p-4">
-              <h3 className="text-sm font-medium text-[#003366] mb-3">Customer Information</h3>
+              <h3 className="text-sm font-medium text-[#CC0000] mb-3">Customer Information</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">PIN:</span>
@@ -328,7 +328,7 @@ function SalesInvoiceContent() {
                 placeholder="Add any internal reference or notes..."
                 maxLength={250}
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm resize-none"
               />
               <p className="text-xs text-gray-500 mt-1 text-right">{250 - notes.length} characters left</p>
             </div>
@@ -345,13 +345,13 @@ function SalesInvoiceContent() {
                 onClick={() => { setItemType('products'); setInvoiceType(null); }}
                 className={`p-4 rounded-lg border-2 transition-all text-left ${
                   itemType === 'products'
-                    ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                    ? 'border-[#CC0000] bg-[#CC0000]/10'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                    itemType === 'products' ? 'bg-[#003366] text-white' : 'bg-gray-100 text-gray-500'
+                    itemType === 'products' ? 'bg-[#CC0000] text-white' : 'bg-gray-100 text-gray-500'
                   }`}>
                     <Package className="w-6 h-6" />
                   </div>
@@ -366,13 +366,13 @@ function SalesInvoiceContent() {
                 onClick={() => { setItemType('services'); setInvoiceType(null); }}
                 className={`p-4 rounded-lg border-2 transition-all text-left ${
                   itemType === 'services'
-                    ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                    ? 'border-[#CC0000] bg-[#CC0000]/10'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                    itemType === 'services' ? 'bg-[#003366] text-white' : 'bg-gray-100 text-gray-500'
+                    itemType === 'services' ? 'bg-[#CC0000] text-white' : 'bg-gray-100 text-gray-500'
                   }`}>
                     <Wrench className="w-6 h-6" />
                   </div>
@@ -393,7 +393,7 @@ function SalesInvoiceContent() {
                       onClick={() => setInvoiceType('single')}
                       className={`p-3 rounded-lg border-2 transition-all ${
                         invoiceType === 'single'
-                          ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                          ? 'border-[#CC0000] bg-[#CC0000]/10'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
@@ -405,7 +405,7 @@ function SalesInvoiceContent() {
                       onClick={() => setInvoiceType('multiple')}
                       className={`p-3 rounded-lg border-2 transition-all ${
                         invoiceType === 'multiple'
-                          ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                          ? 'border-[#CC0000] bg-[#CC0000]/10'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
@@ -424,7 +424,7 @@ function SalesInvoiceContent() {
           <div className="space-y-4">
             {/* Current item form */}
             <div className="bg-[#F5F5F5] rounded-lg p-4 space-y-3">
-              <h3 className="text-sm font-medium text-[#003366]">
+              <h3 className="text-sm font-medium text-[#CC0000]">
                 {itemType === 'products' ? 'Product' : 'Service'} Details
               </h3>
               
@@ -437,7 +437,7 @@ function SalesInvoiceContent() {
                   value={currentItem.item_name || ''}
                   onChange={(e) => setCurrentItem({...currentItem, item_name: e.target.value})}
                   placeholder={itemType === 'products' ? 'e.g., Laptop, Office Chair' : 'e.g., Massage, Consultation'}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm"
                 />
               </div>
 
@@ -451,7 +451,7 @@ function SalesInvoiceContent() {
                   placeholder="Add a description..."
                   maxLength={600}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm resize-none"
                 />
               </div>
 
@@ -467,7 +467,7 @@ function SalesInvoiceContent() {
                     placeholder="0.00"
                     min="0"
                     step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm"
                   />
                 </div>
                 <div>
@@ -486,7 +486,7 @@ function SalesInvoiceContent() {
                       value={currentItem.quantity || 1}
                       onChange={(e) => setCurrentItem({...currentItem, quantity: parseInt(e.target.value) || 1})}
                       min="1"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm text-center"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm text-center"
                     />
                     <button
                       onClick={() => setCurrentItem({...currentItem, quantity: (currentItem.quantity || 1) + 1})}
@@ -501,7 +501,7 @@ function SalesInvoiceContent() {
               {(currentItem.taxable_amount || 0) > 0 && (currentItem.quantity || 0) > 0 && (
                 <div className="bg-white rounded-lg p-3 text-center">
                   <p className="text-sm text-gray-600">Item Total</p>
-                  <p className="text-xl font-bold text-[#003366]">
+                  <p className="text-xl font-bold text-[#CC0000]">
                     KES {calculateItemTotal(currentItem.taxable_amount || 0, currentItem.quantity || 1).toLocaleString('en-KE', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
@@ -509,7 +509,7 @@ function SalesInvoiceContent() {
 
               <button
                 onClick={handleAddItem}
-                className="w-full py-2.5 bg-[#FFB81C] text-[#003366] rounded-lg hover:bg-[#D4A017] transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-[#CC0000] text-[#CC0000] rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 {invoiceType === 'multiple' ? 'Add Item' : 'Add to Invoice'}
@@ -519,7 +519,7 @@ function SalesInvoiceContent() {
             {/* Items list */}
             {items.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-[#003366] mb-2">Added Items ({items.length})</h3>
+                <h3 className="text-sm font-medium text-[#CC0000] mb-2">Added Items ({items.length})</h3>
                 <div className="space-y-2">
                   {items.map((item, index) => (
                     <div key={index} className="bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-between">
@@ -539,7 +539,7 @@ function SalesInvoiceContent() {
                   ))}
                 </div>
 
-                <div className="bg-[#003366] text-white rounded-lg p-4 mt-3">
+                <div className="bg-[#CC0000] text-white rounded-lg p-4 mt-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Total Amount</span>
                     <span className="text-xl font-bold">
@@ -564,7 +564,7 @@ function SalesInvoiceContent() {
           <div className="space-y-4">
             {/* Customer info */}
             <div className="bg-[#F5F5F5] rounded-lg p-4">
-              <h3 className="text-sm font-medium text-[#003366] mb-3">Customer</h3>
+              <h3 className="text-sm font-medium text-[#CC0000] mb-3">Customer</h3>
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">PIN:</span>
@@ -579,7 +579,7 @@ function SalesInvoiceContent() {
 
             {/* Items */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <div className="bg-[#003366] text-white px-4 py-2">
+              <div className="bg-[#CC0000] text-white px-4 py-2">
                 <h3 className="text-sm font-medium">Invoice Items</h3>
               </div>
               <div className="divide-y divide-gray-100">
@@ -600,9 +600,9 @@ function SalesInvoiceContent() {
                   </div>
                 ))}
               </div>
-              <div className="bg-[#FFB81C]/20 px-4 py-3 flex items-center justify-between">
-                <span className="font-medium text-[#003366]">Total Amount</span>
-                <span className="text-xl font-bold text-[#003366]">
+              <div className="bg-[#CC0000]/20 px-4 py-3 flex items-center justify-between">
+                <span className="font-medium text-[#CC0000]">Total Amount</span>
+                <span className="text-xl font-bold text-[#CC0000]">
                   KES {totalAmount.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
                 </span>
               </div>
@@ -612,7 +612,7 @@ function SalesInvoiceContent() {
             <button
               onClick={handleSubmitInvoice}
               disabled={loading}
-              className="w-full py-3 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -638,11 +638,11 @@ function SalesInvoiceContent() {
   if (success) {
     return (
       <div className="min-h-screen bg-[#F5F5F5]">
-        <header className="bg-[#003366] shadow-lg sticky top-0 z-10">
+        <header className="bg-[#CC0000] shadow-lg sticky top-0 z-10">
           <div className="max-w-2xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#FFB81C] flex items-center justify-center">
-                <Receipt className="w-5 h-5 text-[#003366]" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#CC0000] flex items-center justify-center">
+                <Receipt className="w-5 h-5 text-[#CC0000]" />
               </div>
               <div>
                 <h1 className="text-lg sm:text-xl font-bold text-white">eTIMS Sales Invoice</h1>
@@ -663,7 +663,7 @@ function SalesInvoiceContent() {
             {invoiceResult?.invoice_id && (
               <div className="bg-[#F5F5F5] rounded-lg p-4 mb-4">
                 <p className="text-sm text-gray-600">Invoice Reference</p>
-                <p className="text-lg font-bold text-[#003366]">{invoiceResult.invoice_id}</p>
+                <p className="text-lg font-bold text-[#CC0000]">{invoiceResult.invoice_id}</p>
               </div>
             )}
 
@@ -679,14 +679,14 @@ function SalesInvoiceContent() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Total Amount:</span>
-                  <span className="font-bold text-[#003366]">KES {totalAmount.toLocaleString('en-KE', { minimumFractionDigits: 2 })}</span>
+                  <span className="font-bold text-[#CC0000]">KES {totalAmount.toLocaleString('en-KE', { minimumFractionDigits: 2 })}</span>
                 </div>
               </div>
             </div>
 
             <button
               onClick={handleReset}
-              className="w-full py-3 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors text-sm font-medium"
+              className="w-full py-3 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium"
             >
               Create New Invoice
             </button>
@@ -699,11 +699,11 @@ function SalesInvoiceContent() {
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
       {/* Header */}
-      <header className="bg-[#003366] shadow-lg sticky top-0 z-10">
+      <header className="bg-[#CC0000] shadow-lg sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#FFB81C] flex items-center justify-center">
-              <Receipt className="w-5 h-5 text-[#003366]" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#CC0000] flex items-center justify-center">
+              <Receipt className="w-5 h-5 text-[#CC0000]" />
             </div>
             <div>
               <h1 className="text-lg sm:text-xl font-bold text-white">eTIMS Sales Invoice</h1>
@@ -723,7 +723,7 @@ function SalesInvoiceContent() {
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-3 sm:px-4 py-4">
-        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-t-4 border-[#FFB81C]">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-t-4 border-[#CC0000]">
           <ProgressSteps currentStep={currentStep} />
 
           {/* Error message */}
@@ -750,7 +750,7 @@ function SalesInvoiceContent() {
               {((currentStep === 3 && itemType && invoiceType) || (currentStep === 4 && items.length > 0)) && (
                 <button
                   onClick={() => goToStep(currentStep + 1)}
-                  className="flex-1 py-2.5 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium flex items-center justify-center gap-2"
                 >
                   Continue
                   <ArrowRight className="w-4 h-4" />
@@ -770,7 +770,7 @@ function SalesInvoiceContent() {
               </button>
               <button
                 onClick={() => goToStep(3)}
-                className="flex-1 py-2.5 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium flex items-center justify-center gap-2"
               >
                 Continue
                 <ArrowRight className="w-4 h-4" />
@@ -799,7 +799,7 @@ export default function SalesInvoicePage() {
     <Suspense fallback={
       <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center">
         <div className="flex items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[#003366]" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#CC0000]" />
           <span className="text-gray-600 font-medium">Loading...</span>
         </div>
       </div>

@@ -1,18 +1,27 @@
 @import "tailwindcss";
 
-/* KRA (Kenya Revenue Authority) Color Theme */
+/* KRA (Kenya Revenue Authority) Official Color Theme */
 :root {
-  --kra-navy: #003366;
-  --kra-navy-dark: #002244;
-  --kra-navy-light: #004488;
-  --kra-gold: #FFB81C;
-  --kra-gold-dark: #D4A017;
-  --kra-gold-light: #FFD54F;
-  --kra-red: #C8102E;
-  --kra-red-dark: #A00D24;
-  --kra-green: #008751;
+  /* Official KRA Red - Primary */
+  --kra-red: #CC0000;
+  --kra-red-dark: #990000;
+  --kra-red-light: #E53935;
+  
+  /* Black for text and secondary elements */
+  --kra-black: #000000;
+  --kra-black-light: #333333;
+  
+  /* Grays */
   --kra-gray: #5A5A5A;
   --kra-light-gray: #F5F5F5;
+  --kra-border-gray: #CCCCCC;
+  
+  /* Success/Green */
+  --kra-green: #008751;
+  --kra-green-dark: #006741;
+  
+  /* White */
+  --kra-white: #FFFFFF;
 }
 
 /* Toast notification animation */
@@ -32,36 +41,43 @@
   animation: slide-in 0.3s ease-out forwards;
 }
 
-/* KRA Button Styles */
+/* KRA Button Styles - Primary Red */
 .btn-kra-primary {
-  background-color: var(--kra-navy);
+  background-color: var(--kra-red);
   color: white;
 }
 
 .btn-kra-primary:hover {
-  background-color: var(--kra-navy-dark);
+  background-color: var(--kra-red-dark);
 }
 
+/* KRA Button Styles - Secondary */
 .btn-kra-secondary {
-  background-color: var(--kra-gold);
-  color: var(--kra-navy);
+  background-color: var(--kra-light-gray);
+  color: var(--kra-black);
+  border: 1px solid var(--kra-border-gray);
 }
 
 .btn-kra-secondary:hover {
-  background-color: var(--kra-gold-dark);
+  background-color: var(--kra-border-gray);
 }
 
-/* KRA Input Focus */
+/* KRA Input Focus - Red accent */
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--kra-navy) !important;
-  box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.2);
+  border-color: var(--kra-red) !important;
+  box-shadow: 0 0 0 2px rgba(204, 0, 0, 0.2);
 }
 
-/* Radio Button Theme - KRA Gold */
+/* Radio Button Theme - KRA Red */
 input[type="radio"]:checked {
-  accent-color: var(--kra-gold);
+  accent-color: var(--kra-red);
+}
+
+/* Checkbox Theme - KRA Red */
+input[type="checkbox"]:checked {
+  accent-color: var(--kra-red);
 }
 
 /* Mobile-friendly touch targets */

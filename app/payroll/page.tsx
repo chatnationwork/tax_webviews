@@ -887,11 +887,11 @@ function PayrollPageContent() {
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
       {/* Header */}
-      <header className="bg-[#003366] shadow-lg sticky top-0 z-10">
+      <header className="bg-[#CC0000] shadow-lg sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#FFB81C] flex items-center justify-center flex-shrink-0">
-              <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-[#003366]" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#CC0000] flex items-center justify-center flex-shrink-0">
+              <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-[#CC0000]" />
             </div>
             <div className="min-w-0">
               <h1 className="text-lg sm:text-2xl font-bold text-white truncate">Payroll Management</h1>
@@ -904,8 +904,8 @@ function PayrollPageContent() {
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Search Section */}
-        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-8 border-t-4 border-[#FFB81C]">
-          <h2 className="text-base sm:text-lg font-semibold text-[#003366] mb-3 sm:mb-4">Search Employees</h2>
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-8 border-t-4 border-[#CC0000]">
+          <h2 className="text-base sm:text-lg font-semibold text-[#CC0000] mb-3 sm:mb-4">Search Employees</h2>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -915,13 +915,13 @@ function PayrollPageContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-transparent text-gray-800 placeholder-gray-400 text-sm sm:text-base"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] focus:border-transparent text-gray-800 placeholder-gray-400 text-sm sm:text-base"
               />
             </div>
             <button
               onClick={() => handleSearch()}
               disabled={loading}
-              className="px-6 py-3 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-all duration-200 font-medium flex items-center justify-center gap-2 disabled:opacity-50 shadow-md hover:shadow-lg text-sm sm:text-base"
+              className="px-6 py-3 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-all duration-200 font-medium flex items-center justify-center gap-2 disabled:opacity-50 shadow-md hover:shadow-lg text-sm sm:text-base"
             >
               {loading ? (
                 <>

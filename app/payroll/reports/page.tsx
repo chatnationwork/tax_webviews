@@ -192,11 +192,11 @@ function ReportsPageContent() {
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
       {/* Header */}
-      <header className="bg-[#003366] shadow-lg sticky top-0 z-10">
+      <header className="bg-[#CC0000] shadow-lg sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#FFB81C] flex items-center justify-center flex-shrink-0">
-              <FileSpreadsheet className="w-4 h-4 sm:w-5 sm:h-5 text-[#003366]" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#CC0000] flex items-center justify-center flex-shrink-0">
+              <FileSpreadsheet className="w-4 h-4 sm:w-5 sm:h-5 text-[#CC0000]" />
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="text-lg sm:text-xl font-bold text-white truncate">Payroll Reports</h1>
@@ -204,7 +204,7 @@ function ReportsPageContent() {
             </div>
             {/* WhatsApp Number Badge */}
             <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-white/10 border border-white/30 rounded-lg">
-              <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FFB81C]" />
+              <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#CC0000]" />
               <span className="text-xs sm:text-sm font-medium text-white hidden sm:inline">{formatWhatsAppNumber(whatsappNumber)}</span>
               <span className="text-xs font-medium text-white sm:hidden">{whatsappNumber.slice(-4)}</span>
             </div>
@@ -237,7 +237,7 @@ function ReportsPageContent() {
               </div>
               <button
                 onClick={resetForm}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors text-sm font-medium"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium"
               >
                 Generate Another Report
               </button>
@@ -257,15 +257,15 @@ function ReportsPageContent() {
         {!success && (
           <div className="space-y-4">
             {/* Step 1: Select Period */}
-            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-5 border-t-4 border-[#FFB81C]">
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-5 border-t-4 border-[#CC0000]">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 rounded-full bg-[#003366] text-white flex items-center justify-center text-xs font-bold">1</div>
-                <h2 className="text-sm sm:text-base font-semibold text-[#003366]">Select Payroll Period</h2>
+                <div className="w-6 h-6 rounded-full bg-[#CC0000] text-white flex items-center justify-center text-xs font-bold">1</div>
+                <h2 className="text-sm sm:text-base font-semibold text-[#CC0000]">Select Payroll Period</h2>
               </div>
 
               {loadingPayrolls ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-[#003366]" />
+                  <Loader2 className="w-6 h-6 animate-spin text-[#CC0000]" />
                   <span className="ml-2 text-sm text-gray-600">Loading payrolls...</span>
                 </div>
               ) : payrolls.length === 0 ? (
@@ -281,7 +281,7 @@ function ReportsPageContent() {
                       onClick={() => setSelectedPayroll(payroll)}
                       className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
                         selectedPayroll?.id === payroll.id
-                          ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                          ? 'border-[#CC0000] bg-[#CC0000]/10'
                           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                       }`}
                     >
@@ -307,11 +307,11 @@ function ReportsPageContent() {
 
             {/* Step 2: Select Report Type */}
             <div className={`bg-white rounded-xl shadow-lg p-4 sm:p-5 border-t-4 transition-all ${
-              selectedPayroll ? 'border-[#FFB81C] opacity-100' : 'border-gray-200 opacity-50 pointer-events-none'
+              selectedPayroll ? 'border-[#CC0000] opacity-100' : 'border-gray-200 opacity-50 pointer-events-none'
             }`}>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 rounded-full bg-[#003366] text-white flex items-center justify-center text-xs font-bold">2</div>
-                <h2 className="text-sm sm:text-base font-semibold text-[#003366]">Select Report Type</h2>
+                <div className="w-6 h-6 rounded-full bg-[#CC0000] text-white flex items-center justify-center text-xs font-bold">2</div>
+                <h2 className="text-sm sm:text-base font-semibold text-[#CC0000]">Select Report Type</h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -321,13 +321,13 @@ function ReportsPageContent() {
                     onClick={() => setSelectedReportType(report.value)}
                     className={`text-left p-3 rounded-lg border-2 transition-all ${
                       selectedReportType === report.value
-                        ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                        ? 'border-[#CC0000] bg-[#CC0000]/10'
                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
                     <div className="flex items-start gap-2">
                       <FileText className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                        selectedReportType === report.value ? 'text-[#003366]' : 'text-gray-400'
+                        selectedReportType === report.value ? 'text-[#CC0000]' : 'text-gray-400'
                       }`} />
                       <div>
                         <p className="text-sm font-medium text-gray-900">{report.label}</p>
@@ -341,11 +341,11 @@ function ReportsPageContent() {
 
             {/* Step 3: Get Report */}
             <div className={`bg-white rounded-xl shadow-lg p-4 sm:p-5 border-t-4 transition-all ${
-              selectedPayroll && selectedReportType ? 'border-[#FFB81C] opacity-100' : 'border-gray-200 opacity-50 pointer-events-none'
+              selectedPayroll && selectedReportType ? 'border-[#CC0000] opacity-100' : 'border-gray-200 opacity-50 pointer-events-none'
             }`}>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 rounded-full bg-[#003366] text-white flex items-center justify-center text-xs font-bold">3</div>
-                <h2 className="text-sm sm:text-base font-semibold text-[#003366]">Get Report</h2>
+                <div className="w-6 h-6 rounded-full bg-[#CC0000] text-white flex items-center justify-center text-xs font-bold">3</div>
+                <h2 className="text-sm sm:text-base font-semibold text-[#CC0000]">Get Report</h2>
               </div>
 
               {/* Summary */}
@@ -374,7 +374,7 @@ function ReportsPageContent() {
               <button
                 onClick={handleGetReport}
                 disabled={loading || !selectedPayroll || !selectedReportType}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>

@@ -73,22 +73,22 @@ const ProgressSteps = ({ currentStep, steps }: { currentStep: number; steps: typ
             <div className="flex flex-col items-center">
               <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${
                 currentStep === step.num 
-                  ? 'bg-[#FFB81C] text-[#003366] ring-2 ring-[#003366] ring-offset-1' 
+                  ? 'bg-[#CC0000] text-[#CC0000] ring-2 ring-[#CC0000] ring-offset-1' 
                   : currentStep > step.num
-                  ? 'bg-[#003366] text-white'
+                  ? 'bg-[#CC0000] text-white'
                   : 'bg-gray-200 text-gray-500'
               }`}>
                 {currentStep > step.num ? '✓' : step.num}
               </div>
               <span className={`text-[8px] sm:text-[10px] mt-1 text-center whitespace-nowrap ${
-                currentStep === step.num ? 'text-[#003366] font-semibold' : 'text-gray-500'
+                currentStep === step.num ? 'text-[#CC0000] font-semibold' : 'text-gray-500'
               }`}>
                 {step.label}
               </span>
             </div>
             {idx < steps.length - 1 && (
               <div className={`h-0.5 w-4 sm:w-6 mx-0.5 transition-colors ${
-                currentStep > step.num ? 'bg-[#003366]' : 'bg-gray-200'
+                currentStep > step.num ? 'bg-[#CC0000]' : 'bg-gray-200'
               }`} />
             )}
           </div>
@@ -116,12 +116,12 @@ const MenuItem = ({
     onClick={onClick}
     className={`w-full flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${
       selected 
-        ? 'border-[#FFB81C] bg-[#FFB81C]/10' 
+        ? 'border-[#CC0000] bg-[#CC0000]/10' 
         : 'border-gray-200 hover:border-gray-300'
     }`}
   >
     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-      selected ? 'bg-[#003366] text-white' : 'bg-gray-100 text-gray-500'
+      selected ? 'bg-[#CC0000] text-white' : 'bg-gray-100 text-gray-500'
     }`}>
       <Icon className="w-5 h-5" />
     </div>
@@ -157,7 +157,7 @@ const ExpandableInvoiceItem = ({
         className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center justify-between mb-2">
-          <span className="font-bold text-[#003366]">{invoice.reference}</span>
+          <span className="font-bold text-[#CC0000]">{invoice.reference}</span>
           <span className="font-bold text-gray-900">
             KES {invoice.total_amount.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
           </span>
@@ -185,7 +185,7 @@ const ExpandableInvoiceItem = ({
       {/* Expanded details */}
       {expanded && (
         <div className="border-t border-gray-200 p-4 bg-[#F5F5F5]">
-          <h4 className="text-sm font-medium text-[#003366] mb-3">Invoice Details</h4>
+          <h4 className="text-sm font-medium text-[#CC0000] mb-3">Invoice Details</h4>
           
           <div className="space-y-2 text-sm mb-4">
             <div className="flex justify-between">
@@ -198,7 +198,7 @@ const ExpandableInvoiceItem = ({
             </div>
           </div>
 
-          <h4 className="text-sm font-medium text-[#003366] mb-2">Items</h4>
+          <h4 className="text-sm font-medium text-[#CC0000] mb-2">Items</h4>
           <div className="space-y-2 mb-4">
             {invoice.items.map((item, index) => (
               <div key={index} className="bg-white rounded-lg p-3 text-sm">
@@ -211,9 +211,9 @@ const ExpandableInvoiceItem = ({
             ))}
           </div>
 
-          <div className="bg-[#FFB81C]/20 rounded-lg p-3 flex justify-between items-center">
-            <span className="font-medium text-[#003366]">Total Amount</span>
-            <span className="text-lg font-bold text-[#003366]">
+          <div className="bg-[#CC0000]/20 rounded-lg p-3 flex justify-between items-center">
+            <span className="font-medium text-[#CC0000]">Total Amount</span>
+            <span className="text-lg font-bold text-[#CC0000]">
               KES {invoice.total_amount.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
             </span>
           </div>
@@ -474,7 +474,7 @@ function BuyerInitiatedContent() {
   // Render main menu
   const renderMenu = () => (
     <div className="space-y-3">
-      <h2 className="text-lg font-bold text-[#003366] mb-4">Select One</h2>
+      <h2 className="text-lg font-bold text-[#CC0000] mb-4">Select One</h2>
       
       <MenuItem
         icon={Plus}
@@ -520,11 +520,11 @@ function BuyerInitiatedContent() {
                   onClick={() => setTransactionType('b2b')}
                   className={`p-3 rounded-lg border-2 transition-all ${
                     transactionType === 'b2b'
-                      ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                      ? 'border-[#CC0000] bg-[#CC0000]/10'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <Building2 className={`w-6 h-6 mx-auto mb-1 ${transactionType === 'b2b' ? 'text-[#003366]' : 'text-gray-400'}`} />
+                  <Building2 className={`w-6 h-6 mx-auto mb-1 ${transactionType === 'b2b' ? 'text-[#CC0000]' : 'text-gray-400'}`} />
                   <p className="text-sm font-medium">B2B</p>
                   <p className="text-[10px] text-gray-500">Business to Business</p>
                 </button>
@@ -532,11 +532,11 @@ function BuyerInitiatedContent() {
                   onClick={() => setTransactionType('b2c')}
                   className={`p-3 rounded-lg border-2 transition-all ${
                     transactionType === 'b2c'
-                      ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                      ? 'border-[#CC0000] bg-[#CC0000]/10'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <UserCircle className={`w-6 h-6 mx-auto mb-1 ${transactionType === 'b2c' ? 'text-[#003366]' : 'text-gray-400'}`} />
+                  <UserCircle className={`w-6 h-6 mx-auto mb-1 ${transactionType === 'b2c' ? 'text-[#CC0000]' : 'text-gray-400'}`} />
                   <p className="text-sm font-medium">B2C</p>
                   <p className="text-[10px] text-gray-500">Business to Customer</p>
                 </button>
@@ -556,13 +556,13 @@ function BuyerInitiatedContent() {
                       value={sellerPin}
                       onChange={(e) => setSellerPin(e.target.value)}
                       placeholder="Enter PIN or ID"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm"
                     />
                   </div>
                   <button
                     onClick={handleSellerValidation}
                     disabled={loading}
-                    className="px-4 py-3 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors text-sm font-medium flex items-center gap-2 disabled:opacity-50"
+                    className="px-4 py-3 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium flex items-center gap-2 disabled:opacity-50"
                   >
                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Validate'}
                   </button>
@@ -577,7 +577,7 @@ function BuyerInitiatedContent() {
         return (
           <div className="space-y-4">
             <div className="bg-[#F5F5F5] rounded-lg p-4">
-              <h3 className="text-sm font-medium text-[#003366] mb-3">Seller Information</h3>
+              <h3 className="text-sm font-medium text-[#CC0000] mb-3">Seller Information</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">PIN/ID:</span>
@@ -601,7 +601,7 @@ function BuyerInitiatedContent() {
                   value={sellerPhone}
                   onChange={(e) => setSellerPhone(e.target.value)}
                   placeholder="254XXXXXXXXX"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm"
                 />
               </div>
             </div>
@@ -617,7 +617,7 @@ function BuyerInitiatedContent() {
                   value={sellerEmail}
                   onChange={(e) => setSellerEmail(e.target.value)}
                   placeholder="seller@example.com"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm"
                 />
               </div>
             </div>
@@ -631,7 +631,7 @@ function BuyerInitiatedContent() {
                 setError(null);
                 setCreateStep(3);
               }}
-              className="w-full py-3 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors text-sm font-medium"
+              className="w-full py-3 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium"
             >
               Continue
             </button>
@@ -650,14 +650,14 @@ function BuyerInitiatedContent() {
                   onClick={() => setTaxType('vat')}
                   className={`w-full p-4 rounded-lg border-2 transition-all text-left flex items-center gap-3 ${
                     taxType === 'vat'
-                      ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                      ? 'border-[#CC0000] bg-[#CC0000]/10'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    taxType === 'vat' ? 'border-[#003366]' : 'border-gray-300'
+                    taxType === 'vat' ? 'border-[#CC0000]' : 'border-gray-300'
                   }`}>
-                    {taxType === 'vat' && <div className="w-3 h-3 rounded-full bg-[#003366]" />}
+                    {taxType === 'vat' && <div className="w-3 h-3 rounded-full bg-[#CC0000]" />}
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">VAT</p>
@@ -668,14 +668,14 @@ function BuyerInitiatedContent() {
                   onClick={() => setTaxType('non-vat')}
                   className={`w-full p-4 rounded-lg border-2 transition-all text-left flex items-center gap-3 ${
                     taxType === 'non-vat'
-                      ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                      ? 'border-[#CC0000] bg-[#CC0000]/10'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    taxType === 'non-vat' ? 'border-[#003366]' : 'border-gray-300'
+                    taxType === 'non-vat' ? 'border-[#CC0000]' : 'border-gray-300'
                   }`}>
-                    {taxType === 'non-vat' && <div className="w-3 h-3 rounded-full bg-[#003366]" />}
+                    {taxType === 'non-vat' && <div className="w-3 h-3 rounded-full bg-[#CC0000]" />}
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">Non-VAT</p>
@@ -687,7 +687,7 @@ function BuyerInitiatedContent() {
 
             <button
               onClick={() => setCreateStep(4)}
-              className="w-full py-3 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors text-sm font-medium"
+              className="w-full py-3 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium"
             >
               Continue
             </button>
@@ -704,11 +704,11 @@ function BuyerInitiatedContent() {
                   onClick={() => setItemType('products')}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     itemType === 'products'
-                      ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                      ? 'border-[#CC0000] bg-[#CC0000]/10'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <Package className={`w-8 h-8 mx-auto mb-2 ${itemType === 'products' ? 'text-[#003366]' : 'text-gray-400'}`} />
+                  <Package className={`w-8 h-8 mx-auto mb-2 ${itemType === 'products' ? 'text-[#CC0000]' : 'text-gray-400'}`} />
                   <p className="font-medium text-gray-900">Products</p>
                   <p className="text-[10px] text-gray-500">Physical goods</p>
                 </button>
@@ -716,11 +716,11 @@ function BuyerInitiatedContent() {
                   onClick={() => setItemType('services')}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     itemType === 'services'
-                      ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                      ? 'border-[#CC0000] bg-[#CC0000]/10'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <Wrench className={`w-8 h-8 mx-auto mb-2 ${itemType === 'services' ? 'text-[#003366]' : 'text-gray-400'}`} />
+                  <Wrench className={`w-8 h-8 mx-auto mb-2 ${itemType === 'services' ? 'text-[#CC0000]' : 'text-gray-400'}`} />
                   <p className="font-medium text-gray-900">Services</p>
                   <p className="text-[10px] text-gray-500">Non-physical items</p>
                 </button>
@@ -735,7 +735,7 @@ function BuyerInitiatedContent() {
                     onClick={() => setInvoiceType('single')}
                     className={`p-3 rounded-lg border-2 transition-all ${
                       invoiceType === 'single'
-                        ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                        ? 'border-[#CC0000] bg-[#CC0000]/10'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -746,7 +746,7 @@ function BuyerInitiatedContent() {
                     onClick={() => setInvoiceType('multiple')}
                     className={`p-3 rounded-lg border-2 transition-all ${
                       invoiceType === 'multiple'
-                        ? 'border-[#FFB81C] bg-[#FFB81C]/10'
+                        ? 'border-[#CC0000] bg-[#CC0000]/10'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -760,7 +760,7 @@ function BuyerInitiatedContent() {
             {itemType && invoiceType && (
               <button
                 onClick={() => setCreateStep(5)}
-                className="w-full py-3 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors text-sm font-medium"
+                className="w-full py-3 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium"
               >
                 Continue
               </button>
@@ -772,7 +772,7 @@ function BuyerInitiatedContent() {
         return (
           <div className="space-y-4">
             <div className="bg-[#F5F5F5] rounded-lg p-4 space-y-3">
-              <h3 className="text-sm font-medium text-[#003366]">
+              <h3 className="text-sm font-medium text-[#CC0000]">
                 {itemType === 'products' ? 'Product' : 'Service'} Details
               </h3>
               
@@ -785,7 +785,7 @@ function BuyerInitiatedContent() {
                   value={currentItem.item_name || ''}
                   onChange={(e) => setCurrentItem({...currentItem, item_name: e.target.value})}
                   placeholder="Enter name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm"
                 />
               </div>
 
@@ -796,7 +796,7 @@ function BuyerInitiatedContent() {
                   onChange={(e) => setCurrentItem({...currentItem, description: e.target.value})}
                   placeholder="Add description"
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm resize-none"
                 />
               </div>
 
@@ -809,7 +809,7 @@ function BuyerInitiatedContent() {
                     onChange={(e) => setCurrentItem({...currentItem, taxable_amount: parseFloat(e.target.value) || 0})}
                     placeholder="0.00"
                     min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm"
                   />
                 </div>
                 <div>
@@ -819,14 +819,14 @@ function BuyerInitiatedContent() {
                     value={currentItem.quantity || 1}
                     onChange={(e) => setCurrentItem({...currentItem, quantity: parseInt(e.target.value) || 1})}
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC0000] text-sm"
                   />
                 </div>
               </div>
 
               {(currentItem.taxable_amount || 0) > 0 && (
                 <div className="bg-white rounded-lg p-2 text-center">
-                  <p className="text-xs text-gray-600">Total: <span className="font-bold text-[#003366]">
+                  <p className="text-xs text-gray-600">Total: <span className="font-bold text-[#CC0000]">
                     KES {calculateItemTotal(currentItem.taxable_amount || 0, currentItem.quantity || 1).toLocaleString('en-KE', { minimumFractionDigits: 2 })}
                   </span></p>
                 </div>
@@ -834,7 +834,7 @@ function BuyerInitiatedContent() {
 
               <button
                 onClick={handleAddItem}
-                className="w-full py-2 bg-[#FFB81C] text-[#003366] rounded-lg hover:bg-[#D4A017] transition-colors text-sm font-medium"
+                className="w-full py-2 bg-[#CC0000] text-[#CC0000] rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium"
               >
                 {invoiceType === 'multiple' ? 'Save and Add More Item' : 'Add to Invoice'}
               </button>
@@ -842,7 +842,7 @@ function BuyerInitiatedContent() {
 
             {items.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-[#003366] mb-2">Added Items ({items.length})</h3>
+                <h3 className="text-sm font-medium text-[#CC0000] mb-2">Added Items ({items.length})</h3>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {items.map((item, index) => (
                     <div key={index} className="bg-white border border-gray-200 rounded-lg p-2 flex items-center justify-between">
@@ -853,7 +853,7 @@ function BuyerInitiatedContent() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-[#003366]">
+                        <span className="text-sm font-medium text-[#CC0000]">
                           KES {item.item_total.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
                         </span>
                         <button onClick={() => handleRemoveItem(index)} className="p-1 text-red-500 hover:bg-red-50 rounded">
@@ -864,14 +864,14 @@ function BuyerInitiatedContent() {
                   ))}
                 </div>
 
-                <div className="bg-[#003366] text-white rounded-lg p-3 mt-3 flex justify-between items-center">
+                <div className="bg-[#CC0000] text-white rounded-lg p-3 mt-3 flex justify-between items-center">
                   <span className="text-sm">Total Amount</span>
                   <span className="text-lg font-bold">KES {totalAmount.toLocaleString('en-KE', { minimumFractionDigits: 2 })}</span>
                 </div>
 
                 <button
                   onClick={() => setCreateStep(6)}
-                  className="w-full py-3 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors text-sm font-medium mt-3"
+                  className="w-full py-3 bg-[#CC0000] text-white rounded-lg hover:bg-[#990000] transition-colors text-sm font-medium mt-3"
                 >
                   Continue to Review
                 </button>
@@ -890,7 +890,7 @@ function BuyerInitiatedContent() {
       case 6: // Review & Submit
         return (
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-[#003366]">
+            <h3 className="text-sm font-medium text-[#CC0000]">
               Invoice Preview - {invoiceType === 'single' ? 'Single' : 'Multi'} Item
             </h3>
 
@@ -903,7 +903,7 @@ function BuyerInitiatedContent() {
             </div>
 
             <div className="border border-gray-200 rounded-lg overflow-hidden">
-              <div className="bg-[#003366] text-white px-3 py-2 text-sm font-medium">Select Items</div>
+              <div className="bg-[#CC0000] text-white px-3 py-2 text-sm font-medium">Select Items</div>
               <div className="divide-y divide-gray-100">
                 {items.map((item, index) => (
                   <div key={index} className="p-3 flex items-center gap-3">
@@ -920,9 +920,9 @@ function BuyerInitiatedContent() {
               </div>
             </div>
 
-            <div className="bg-[#FFB81C]/20 rounded-lg p-4 flex justify-between items-center">
-              <span className="font-medium text-[#003366]">Total Amount :</span>
-              <span className="text-xl font-bold text-[#003366]">
+            <div className="bg-[#CC0000]/20 rounded-lg p-4 flex justify-between items-center">
+              <span className="font-medium text-[#CC0000]">Total Amount :</span>
+              <span className="text-xl font-bold text-[#CC0000]">
                 {totalAmount.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
               </span>
             </div>
@@ -962,11 +962,11 @@ function BuyerInitiatedContent() {
   // Render invoice list
   const renderInvoiceList = (invoices: Invoice[], title: string, status: 'pending' | 'completed' | 'rejected') => (
     <div className="space-y-4">
-      <h2 className="text-lg font-bold text-[#003366]">{title}</h2>
+      <h2 className="text-lg font-bold text-[#CC0000]">{title}</h2>
       
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-[#003366]" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#CC0000]" />
         </div>
       ) : invoices.length === 0 ? (
         <div className="text-center py-12">
@@ -976,7 +976,7 @@ function BuyerInitiatedContent() {
           <p className="text-gray-600">No {status} invoices found</p>
           <button
             onClick={() => handleMenuSelect('create')}
-            className="mt-4 px-4 py-2 bg-[#003366] text-white rounded-lg text-sm font-medium"
+            className="mt-4 px-4 py-2 bg-[#CC0000] text-white rounded-lg text-sm font-medium"
           >
             Create New Invoice
           </button>
@@ -1000,7 +1000,7 @@ function BuyerInitiatedContent() {
 
     return (
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-[#003366]">Invoice Details</h2>
+        <h2 className="text-lg font-bold text-[#CC0000]">Invoice Details</h2>
 
         <div className="bg-[#F5F5F5] rounded-lg p-4 space-y-2 text-sm">
           <div className="flex justify-between">
@@ -1014,7 +1014,7 @@ function BuyerInitiatedContent() {
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-[#003366] mb-2">Items :</h3>
+          <h3 className="text-sm font-medium text-[#CC0000] mb-2">Items :</h3>
           <div className="space-y-2">
             {selectedInvoice.items.map((item, index) => (
               <div key={index} className="bg-white border border-gray-200 rounded-lg p-3 text-sm">
@@ -1026,9 +1026,9 @@ function BuyerInitiatedContent() {
           </div>
         </div>
 
-        <div className="bg-[#FFB81C]/20 rounded-lg p-4 flex justify-between items-center">
-          <span className="font-medium text-[#003366]">Total Amount :</span>
-          <span className="text-xl font-bold text-[#003366]">
+        <div className="bg-[#CC0000]/20 rounded-lg p-4 flex justify-between items-center">
+          <span className="font-medium text-[#CC0000]">Total Amount :</span>
+          <span className="text-xl font-bold text-[#CC0000]">
             {selectedInvoice.total_amount.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
           </span>
         </div>
@@ -1040,7 +1040,7 @@ function BuyerInitiatedContent() {
           </button>
           <button
             onClick={() => setCurrentView(selectedInvoice.status as any)}
-            className="px-4 py-3 bg-[#003366] text-white rounded-lg text-sm font-medium flex items-center gap-2"
+            className="px-4 py-3 bg-[#CC0000] text-white rounded-lg text-sm font-medium flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -1063,11 +1063,11 @@ function BuyerInitiatedContent() {
   if (success && currentView === 'create') {
     return (
       <div className="min-h-screen bg-[#F5F5F5]">
-        <header className="bg-[#003366] shadow-lg sticky top-0 z-10">
+        <header className="bg-[#CC0000] shadow-lg sticky top-0 z-10">
           <div className="max-w-2xl mx-auto px-3 sm:px-4 py-3">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[#FFB81C] flex items-center justify-center">
-                <FileText className="w-5 h-5 text-[#003366]" />
+              <div className="w-9 h-9 rounded-lg bg-[#CC0000] flex items-center justify-center">
+                <FileText className="w-5 h-5 text-[#CC0000]" />
               </div>
               <div>
                 <h1 className="text-lg font-bold text-white">Buyer Initiated Invoice</h1>
@@ -1088,14 +1088,14 @@ function BuyerInitiatedContent() {
             {invoiceResult?.invoice_id && (
               <div className="bg-[#F5F5F5] rounded-lg p-4 mb-4">
                 <p className="text-sm text-gray-600">Invoice Reference</p>
-                <p className="text-lg font-bold text-[#003366]">{invoiceResult.invoice_id}</p>
+                <p className="text-lg font-bold text-[#CC0000]">{invoiceResult.invoice_id}</p>
               </div>
             )}
 
             <div className="flex gap-3">
               <button
                 onClick={() => handleMenuSelect('pending')}
-                className="flex-1 py-3 border border-[#003366] text-[#003366] rounded-lg text-sm font-medium"
+                className="flex-1 py-3 border border-[#CC0000] text-[#CC0000] rounded-lg text-sm font-medium"
               >
                 View Invoices
               </button>
@@ -1104,7 +1104,7 @@ function BuyerInitiatedContent() {
                   resetCreateForm();
                   setCurrentView('create');
                 }}
-                className="flex-1 py-3 bg-[#003366] text-white rounded-lg text-sm font-medium"
+                className="flex-1 py-3 bg-[#CC0000] text-white rounded-lg text-sm font-medium"
               >
                 Create Another
               </button>
@@ -1118,7 +1118,7 @@ function BuyerInitiatedContent() {
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
       {/* Header */}
-      <header className="bg-[#003366] shadow-lg sticky top-0 z-10">
+      <header className="bg-[#CC0000] shadow-lg sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-3 sm:px-4 py-3">
           <div className="flex items-center gap-3">
             {currentView !== 'menu' && (
@@ -1129,8 +1129,8 @@ function BuyerInitiatedContent() {
                 <ArrowLeft className="w-5 h-5 text-white" />
               </button>
             )}
-            <div className="w-9 h-9 rounded-lg bg-[#FFB81C] flex items-center justify-center">
-              <FileText className="w-5 h-5 text-[#003366]" />
+            <div className="w-9 h-9 rounded-lg bg-[#CC0000] flex items-center justify-center">
+              <FileText className="w-5 h-5 text-[#CC0000]" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-white">Buyer Initiated Invoice</h1>
@@ -1150,7 +1150,7 @@ function BuyerInitiatedContent() {
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-3 py-4">
-        <div className="bg-white rounded-xl shadow-lg p-4 border-t-4 border-[#FFB81C]">
+        <div className="bg-white rounded-xl shadow-lg p-4 border-t-4 border-[#CC0000]">
           {/* Error */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-start gap-2">
@@ -1180,7 +1180,7 @@ export default function BuyerInitiatedPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center">
         <div className="flex items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[#003366]" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#CC0000]" />
           <span className="text-gray-600 font-medium">Loading...</span>
         </div>
       </div>

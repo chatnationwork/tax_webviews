@@ -181,15 +181,15 @@ const ProgressSteps = ({ currentStep }: { currentStep: number }) => {
             <div className="flex flex-col items-center">
               <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium transition-colors ${
                 currentStep === step.num 
-                  ? 'bg-[#FFB81C] text-[#003366] ring-2 ring-[#003366] ring-offset-2' 
+                  ? 'bg-[#CC0000] text-[#CC0000] ring-2 ring-[#CC0000] ring-offset-2' 
                   : currentStep > step.num
-                  ? 'bg-[#003366] text-white'
+                  ? 'bg-[#CC0000] text-white'
                   : 'bg-gray-200 text-gray-500'
               }`}>
                 {currentStep > step.num ? '✓' : step.num}
               </div>
               <span className={`text-[10px] sm:text-xs mt-1.5 sm:mt-2 text-center ${
-                currentStep === step.num ? 'text-[#003366] font-semibold' : 'text-gray-500'
+                currentStep === step.num ? 'text-[#CC0000] font-semibold' : 'text-gray-500'
               }`}>
                 <span className="hidden sm:inline">{step.label}</span>
                 <span className="sm:hidden">{step.shortLabel}</span>
@@ -197,7 +197,7 @@ const ProgressSteps = ({ currentStep }: { currentStep: number }) => {
             </div>
             {idx < steps.length - 1 && (
               <div className={`h-0.5 w-6 sm:w-12 mx-1 sm:mx-2 transition-colors ${
-                currentStep > step.num ? 'bg-[#003366]' : 'bg-gray-200'
+                currentStep > step.num ? 'bg-[#CC0000]' : 'bg-gray-200'
               }`} />
             )}
           </div>
@@ -611,7 +611,7 @@ const PassengerInformation = () => {
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-[#003366]">Passenger Information</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-[#CC0000]">Passenger Information</h1>
         <div className="flex gap-2">
           <button className="px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-xs sm:text-sm hover:bg-gray-50 transition-colors">
             Save Draft
@@ -624,7 +624,7 @@ const PassengerInformation = () => {
 
       <div className="space-y-6">
         <div>
-          <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#003366]">Citizenship</h2>
+          <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#CC0000]">Citizenship</h2>
           <label className="block text-sm font-medium mb-2 text-gray-700">
             Select Citizenship <span className="text-[#C8102E]">*</span>
           </label>
@@ -634,7 +634,7 @@ const PassengerInformation = () => {
                 key={option} 
                 className={`flex items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all touch-target ${
                   formData.citizenship === option 
-                    ? 'border-[#FFB81C] bg-[#FFB81C]/10' 
+                    ? 'border-[#CC0000] bg-[#CC0000]/10' 
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
@@ -654,7 +654,7 @@ const PassengerInformation = () => {
         </div>
 
         <div>
-          <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#003366]">Basic Information</h2>
+          <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#CC0000]">Basic Information</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -773,7 +773,7 @@ const PassengerInformation = () => {
                   key={option} 
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 cursor-pointer transition-all touch-target ${
                     formData.gender === option 
-                      ? 'border-[#FFB81C] bg-[#FFB81C]/10' 
+                      ? 'border-[#CC0000] bg-[#CC0000]/10' 
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -794,7 +794,7 @@ const PassengerInformation = () => {
         </div>
 
         <div>
-          <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#003366]">Contact Information</h2>
+          <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#CC0000]">Contact Information</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -862,7 +862,7 @@ const PassengerInformation = () => {
         </button>
         <button 
           onClick={handleNext}
-          className="w-full sm:w-auto px-6 py-2.5 sm:py-2 bg-[#003366] text-white rounded-md text-sm font-medium hover:bg-[#002244] transition-colors"
+          className="w-full sm:w-auto px-6 py-2.5 sm:py-2 bg-[#CC0000] text-white rounded-md text-sm font-medium hover:bg-[#990000] transition-colors"
         >
           {useFormContext().loading ? 'Saving...' : 'Next'}
         </button>
@@ -1361,10 +1361,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
       {/* Header */}
-      <div className="bg-[#003366] shadow-lg sticky top-0 z-10">
+      <div className="bg-[#CC0000] shadow-lg sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#FFB81C] rounded-lg flex items-center justify-center text-[#003366] font-bold text-sm sm:text-base">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#CC0000] rounded-lg flex items-center justify-center text-[#CC0000] font-bold text-sm sm:text-base">
               KRA
             </div>
             <div>
@@ -1373,7 +1373,7 @@ export default function Home() {
             </div>
           </div>
           <div className="flex gap-1.5 sm:gap-2">
-            <button className="px-2 sm:px-3 py-1.5 bg-[#FFB81C] text-[#003366] rounded-md text-xs sm:text-sm font-medium hover:bg-[#D4A017] transition-colors">
+            <button className="px-2 sm:px-3 py-1.5 bg-[#CC0000] text-[#CC0000] rounded-md text-xs sm:text-sm font-medium hover:bg-[#990000] transition-colors">
               <span className="hidden sm:inline">Save Draft</span>
               <span className="sm:hidden">Save</span>
             </button>
@@ -1388,7 +1388,7 @@ export default function Home() {
       <div className="max-w-4xl mx-auto py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
         <Suspense fallback={
           <div className="bg-white rounded-xl shadow-sm p-8 flex items-center justify-center">
-            <div className="animate-spin w-8 h-8 border-4 border-[#003366] border-t-transparent rounded-full"></div>
+            <div className="animate-spin w-8 h-8 border-4 border-[#CC0000] border-t-transparent rounded-full"></div>
           </div>
         }>
           <FormProvider>
@@ -1398,7 +1398,7 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <div className="bg-[#003366] py-4 mt-8">
+      <div className="bg-[#CC0000] py-4 mt-8">
         <div className="max-w-4xl mx-auto px-3 sm:px-6 text-center">
           <p className="text-white/70 text-xs sm:text-sm">
             © {new Date().getFullYear()} Kenya Revenue Authority. All rights reserved.
@@ -1413,7 +1413,7 @@ const MainContent = () => {
   const { currentStep } = useFormContext();
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 md:p-8 border-t-4 border-[#FFB81C]">
+    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 md:p-8 border-t-4 border-[#CC0000]">
       <ProgressSteps currentStep={currentStep} />
       
       {currentStep === 1 && <PassengerInformation />}
