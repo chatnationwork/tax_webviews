@@ -1,0 +1,2926 @@
+{
+	"info": {
+		"_postman_id": "32be8328-06e2-40ed-b76d-41729d4f8362",
+		"name": "F88 Api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26799658"
+	},
+	"item": [
+		{
+			"name": "Initiate",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "Application/json"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en-GB,en;q=0.7"
+					},
+					{
+						"key": "Access-Control-Allow-Origin",
+						"value": "*"
+					},
+					{
+						"key": "Cache-Control",
+						"value": "no-cache"
+					},
+					{
+						"key": "Connection",
+						"value": "keep-alive"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Origin",
+						"value": "http://localhost:4000"
+					},
+					{
+						"key": "Pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "Referer",
+						"value": "http://localhost:4000/passenger-declaration"
+					},
+					{
+						"key": "Sec-Fetch-Dest",
+						"value": "empty"
+					},
+					{
+						"key": "Sec-Fetch-Mode",
+						"value": "cors"
+					},
+					{
+						"key": "Sec-Fetch-Site",
+						"value": "same-origin"
+					},
+					{
+						"key": "Sec-GPC",
+						"value": "1"
+					},
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"macOS\""
+					},
+					{
+						"key": "Cookie",
+						"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"uid\": 308\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/customs/passenger-declaration",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"customs",
+						"passenger-declaration"
+					]
+				},
+				"description": "Generated from cURL: curl '[http://localhost:4000/api/customs/passenger-declaration'](http://localhost:4000/api/customs/passenger-declaration')  \n\\-H 'Accept: Application/json'  \n\\-H 'Accept-Language: en-GB,en;q=0.7'  \n\\-H 'Access-Control-Allow-Origin: \\*'  \n\\-H 'Cache-Control: no-cache'  \n\\-H 'Connection: keep-alive'  \n\\-H 'Content-Type: application/json'  \n\\-b '_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo'  \n\\-H 'Origin: [http://localhost:4000'](http://localhost:4000')  \n\\-H 'Pragma: no-cache'  \n\\-H 'Referer: [http://localhost:4000/passenger-declaration'](http://localhost:4000/passenger-declaration')  \n\\-H 'Sec-Fetch-Dest: empty'  \n\\-H 'Sec-Fetch-Mode: cors'  \n\\-H 'Sec-Fetch-Site: same-origin'  \n\\-H 'Sec-GPC: 1'  \n\\-H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'  \n\\-H 'sec-ch-ua: \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\"'  \n\\-H 'sec-ch-ua-mobile: ?0'  \n\\-H 'sec-ch-ua-platform: \"macOS\"'  \n\\--data-raw '{}'"
+			},
+			"response": [
+				{
+					"name": "201",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"value": "http://localhost:4000"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uid\": 308\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/customs/passenger-declaration",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customs",
+								"passenger-declaration"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "451"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 15 Jul 2025 22:55:06 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GFKOs4rjm9HgDjUAAddB"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"assesments\": [],\n    \"contact_information\": null,\n    \"dob\": null,\n    \"eslip_number\": null,\n    \"external_id\": null,\n    \"external_status\": null,\n    \"firstname\": null,\n    \"gender\": null,\n    \"id\": 53,\n    \"inserted_at\": \"2025-07-15T22:55:06.798549\",\n    \"items\": [],\n    \"language\": \"en\",\n    \"nationality\": null,\n    \"passport_number\": null,\n    \"payable\": null,\n    \"profession\": null,\n    \"ref_no\": \"F88-20250715WQIE\",\n    \"status\": \"draft\",\n    \"surname\": null,\n    \"travel_information\": null,\n    \"type\": null,\n    \"uid\": 308,\n    \"updated_at\": \"2025-07-15T22:55:06.798549\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Passanger Information",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "Application/json"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en-GB,en;q=0.7"
+					},
+					{
+						"key": "Access-Control-Allow-Origin",
+						"value": "*"
+					},
+					{
+						"key": "Cache-Control",
+						"value": "no-cache"
+					},
+					{
+						"key": "Connection",
+						"value": "keep-alive"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Origin",
+						"value": "http://localhost:4000"
+					},
+					{
+						"key": "Pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "Referer",
+						"value": "http://localhost:4000/passenger-declaration/passenger-information/F88-20250711VLGGZ"
+					},
+					{
+						"key": "Sec-Fetch-Dest",
+						"value": "empty"
+					},
+					{
+						"key": "Sec-Fetch-Mode",
+						"value": "cors"
+					},
+					{
+						"key": "Sec-Fetch-Site",
+						"value": "same-origin"
+					},
+					{
+						"key": "Sec-GPC",
+						"value": "1"
+					},
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"macOS\""
+					},
+					{
+						"key": "Cookie",
+						"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ref_no\":\"F88-20251118JEAR\",\n    \"contact_information\": {\n        \"msisdn\": \"0708338855\",\n        \"email\": \"michaelkinare@gmail.com\",\n        \"address\": \"Kiambu road\",\n        \"residence\": \"Winston\"\n    },\n    \"firstname\": \"Michael\",\n    \"surname\": \"Karanja\",\n    \"passport_number\": \"30985578\",\n    \"nationality\": \"KE\",\n    \"residence\": \"Winston\",\n    \"dob\": \"1985-07-11T09:02:00.000Z\",\n    \"profession\": \"Deceloper\",\n    \"gender\": \"M\",\n    \"language\": \"en\",\n    \"type\": \"01\",\n    \"address\": \"Kiambu road\",\n    \"msisdn\": \"0708338855\",\n    \"email\": \"michaelkinare@gmail.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/customs/passenger-declaration",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"customs",
+						"passenger-declaration"
+					]
+				},
+				"description": "Generated from cURL: curl 'http://localhost:4000/api/customs/passenger-declaration' \\\n  -H 'Accept: Application/json' \\\n  -H 'Accept-Language: en-GB,en;q=0.7' \\\n  -H 'Access-Control-Allow-Origin: *' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -H 'Content-Type: application/json' \\\n  -b '_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo' \\\n  -H 'Origin: http://localhost:4000' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:4000/passenger-declaration/passenger-information/F88-20250711VLGGZ' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-origin' \\\n  -H 'Sec-GPC: 1' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"' \\\n  --data-raw '{\"ref_no\":\"F88-20250711VLGGZ\",\"contact_information\":{\"msisdn\":\"0708338855\",\"email\":\"michaelkinare@gmail.com\",\"address\":\"Kiambu road\",\"residence\":\"Winston\"},\"firstname\":\"Michael\",\"surname\":\"Karanja\",\"passport_number\":\"30985578\",\"nationality\":\"KE\",\"residence\":\"Winston\",\"dob\":\"1985-07-11T09:02:00.000Z\",\"profession\":\"Deceloper\",\"gender\":\"M\",\"language\":\"en\",\"type\":\"01\",\"address\":\"Kiambu road\",\"msisdn\":\"0708338855\",\"email\":\"michaelkinare@gmail.com\"}'"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"value": "http://localhost:4000"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/passenger-information/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ref_no\": \"F88-20250715WQIE\",\n    \"contact_information\": {\n        \"msisdn\": \"0708338855\",\n        \"email\": \"michaelkinare@gmail.com\",\n        \"address\": \"Kiambu road\",\n        \"residence\": \"Winston\"\n    },\n    \"firstname\": \"Michael\",\n    \"surname\": \"Karanja\",\n    \"passport_number\": \"30985578\",\n    \"nationality\": \"KE\",\n    \"residence\": \"Winston\",\n    \"dob\": \"1985-07-11T09:02:00.000Z\",\n    \"profession\": \"Deceloper\",\n    \"gender\": \"M\",\n    \"language\": \"en\",\n    \"type\": \"01\",\n    \"address\": \"Kiambu road\",\n    \"msisdn\": \"0708338855\",\n    \"email\": \"michaelkinare@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/customs/passenger-declaration",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customs",
+								"passenger-declaration"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "624"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 15 Jul 2025 22:55:44 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GFKOvEGLA8nkkeUAAdeB"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"assesments\": [],\n    \"contact_information\": {\n        \"address\": \"Kiambu road\",\n        \"email\": \"michaelkinare@gmail.com\",\n        \"id\": \"39f4b9f3-9f33-4315-94fc-212d1d3d30b8\",\n        \"msisdn\": \"0708338855\",\n        \"residence\": \"Winston\"\n    },\n    \"dob\": \"1985-07-11\",\n    \"eslip_number\": null,\n    \"external_id\": null,\n    \"external_status\": null,\n    \"firstname\": \"Michael\",\n    \"gender\": \"M\",\n    \"id\": 53,\n    \"inserted_at\": \"2025-07-15T22:55:07.000000\",\n    \"items\": [],\n    \"language\": \"en\",\n    \"nationality\": \"KE\",\n    \"passport_number\": \"30985578\",\n    \"payable\": null,\n    \"profession\": \"Deceloper\",\n    \"ref_no\": \"F88-20250715WQIE\",\n    \"status\": \"draft\",\n    \"surname\": \"Karanja\",\n    \"travel_information\": null,\n    \"type\": \"01\",\n    \"uid\": 308,\n    \"updated_at\": \"2025-07-15T22:55:44.207197\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Travel Information",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "Application/json"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en-GB,en;q=0.7"
+					},
+					{
+						"key": "Access-Control-Allow-Origin",
+						"value": "*"
+					},
+					{
+						"key": "Cache-Control",
+						"value": "no-cache"
+					},
+					{
+						"key": "Connection",
+						"value": "keep-alive"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Origin",
+						"value": "http://localhost:4000"
+					},
+					{
+						"key": "Pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "Referer",
+						"value": "http://localhost:4000/passenger-declaration/travel-information/F88-20250711VLGGZ"
+					},
+					{
+						"key": "Sec-Fetch-Dest",
+						"value": "empty"
+					},
+					{
+						"key": "Sec-Fetch-Mode",
+						"value": "cors"
+					},
+					{
+						"key": "Sec-Fetch-Site",
+						"value": "same-origin"
+					},
+					{
+						"key": "Sec-GPC",
+						"value": "1"
+					},
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"macOS\""
+					},
+					{
+						"key": "Cookie",
+						"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ref_no\": \"F88-20251118JEAR\",\n    \"travel_information\": {\n        \"arrival_date\": \"2025-07-26T09:04:00.000Z\",\n        \"arrival_from\": \"TZ\",\n        \"mode_of_conveyance\": \"L\",\n        \"point_of_boarding\": \"KSM\",\n        \"ticket_number\": \"KCX809T\",\n        \"recently_visited_countries\": [\n            \"UG\"\n        ]\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/customs/passenger-declaration",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"customs",
+						"passenger-declaration"
+					]
+				},
+				"description": "Generated from cURL: curl 'http://localhost:4000/api/customs/passenger-declaration' \\\n  -H 'Accept: Application/json' \\\n  -H 'Accept-Language: en-GB,en;q=0.7' \\\n  -H 'Access-Control-Allow-Origin: *' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -H 'Content-Type: application/json' \\\n  -b '_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo' \\\n  -H 'Origin: http://localhost:4000' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:4000/passenger-declaration/travel-information/F88-20250711VLGGZ' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-origin' \\\n  -H 'Sec-GPC: 1' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"' \\\n  --data-raw '{\"ref_no\":\"F88-20250711VLGGZ\",\"travel_information\":{\"arrival_date\":\"2025-07-26T09:04:00.000Z\",\"arrival_from\":\"TZ\",\"mode_of_conveyance\":\"L\",\"point_of_boarding\":\"KSM\",\"ticket_number\":\"KCX809T\",\"recently_visited_countries\":[\"UG\"]}}'"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"value": "http://localhost:4000"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/travel-information/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ref_no\": \"F88-20250715WQIE\",\n    \"travel_information\": {\n        \"arrival_date\": \"2025-07-26T09:04:00.000Z\",\n        \"arrival_from\": \"TZ\",\n        \"mode_of_conveyance\": \"L\",\n        \"point_of_boarding\": \"KSM\",\n        \"ticket_number\": \"KCX809T\",\n        \"recently_visited_countries\": [\n            \"UG\"\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/customs/passenger-declaration",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customs",
+								"passenger-declaration"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "826"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 15 Jul 2025 22:56:23 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GFKOxX4cecMqXPoAAdfB"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"assesments\": [],\n    \"contact_information\": {\n        \"address\": \"Kiambu road\",\n        \"email\": \"michaelkinare@gmail.com\",\n        \"id\": \"39f4b9f3-9f33-4315-94fc-212d1d3d30b8\",\n        \"msisdn\": \"0708338855\",\n        \"residence\": \"Winston\"\n    },\n    \"dob\": \"1985-07-11\",\n    \"eslip_number\": null,\n    \"external_id\": null,\n    \"external_status\": null,\n    \"firstname\": \"Michael\",\n    \"gender\": \"M\",\n    \"id\": 53,\n    \"inserted_at\": \"2025-07-15T22:55:07.000000\",\n    \"items\": [],\n    \"language\": \"en\",\n    \"nationality\": \"KE\",\n    \"passport_number\": \"30985578\",\n    \"payable\": null,\n    \"profession\": \"Deceloper\",\n    \"ref_no\": \"F88-20250715WQIE\",\n    \"status\": \"draft\",\n    \"surname\": \"Karanja\",\n    \"travel_information\": {\n        \"arrival_date\": \"2025-07-26\",\n        \"arrival_from\": \"TZ\",\n        \"id\": \"f2adf8b1-39ca-487a-9ed0-d78d54ef7003\",\n        \"mode_of_conveyance\": \"L\",\n        \"point_of_boarding\": \"KSM\",\n        \"recently_visited_countries\": [\n            \"UG\"\n        ],\n        \"ticket_number\": \"KCX809T\"\n    },\n    \"type\": \"01\",\n    \"uid\": 308,\n    \"updated_at\": \"2025-07-15T22:56:23.877404\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Declaration",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "Application/json"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en-GB,en;q=0.7"
+					},
+					{
+						"key": "Access-Control-Allow-Origin",
+						"value": "*"
+					},
+					{
+						"key": "Cache-Control",
+						"value": "no-cache"
+					},
+					{
+						"key": "Connection",
+						"value": "keep-alive"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Origin",
+						"value": "http://localhost:4000"
+					},
+					{
+						"key": "Pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "Referer",
+						"value": "http://localhost:4000/passenger-declaration/declarations/F88-20250711VLGGZ"
+					},
+					{
+						"key": "Sec-Fetch-Dest",
+						"value": "empty"
+					},
+					{
+						"key": "Sec-Fetch-Mode",
+						"value": "cors"
+					},
+					{
+						"key": "Sec-Fetch-Site",
+						"value": "same-origin"
+					},
+					{
+						"key": "Sec-GPC",
+						"value": "1"
+					},
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"macOS\""
+					},
+					{
+						"key": "Cookie",
+						"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": " {\n  \"ref_no\":\"F88-20251118JEAR\",\n  \"items\": [\n    {\n      \"type\": \"Restricted Items\",\n      \"hscode\": \"16010000\",\n      \"description\": \"Food\",\n      \"quantity\": 10,\n      \"value\": 100,\n      \"currency\": \"CAD\"\n    }\n  ],\n  \"compute_assessments\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/customs/passenger-declaration",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"customs",
+						"passenger-declaration"
+					]
+				},
+				"description": "Generated from cURL: curl 'http://localhost:4000/api/customs/passenger-declaration' \\\n  -H 'Accept: Application/json' \\\n  -H 'Accept-Language: en-GB,en;q=0.7' \\\n  -H 'Access-Control-Allow-Origin: *' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -H 'Content-Type: application/json' \\\n  -b '_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo' \\\n  -H 'Origin: http://localhost:4000' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:4000/passenger-declaration/declarations/F88-20250711VLGGZ' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-origin' \\\n  -H 'Sec-GPC: 1' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"' \\\n  --data-raw '{\"ref_no\":\"F88-20250711VLGGZ\",\"items\":[{\"type\":\"restricted_items\",\"hscode\":\"93019010\",\"description\":\" Fully automatic shotguns_x000D_\\r\\n\",\"quantity\":\"2\",\"value\":\"100000\",\"currency\":\"USD\"},{\"type\":\"gifts\",\"hscode\":\"91144000\",\"description\":\"Plates and bridges, for clocks or watches.\",\"quantity\":\"4\",\"value\":\"5000000\",\"currency\":\"USD\"}],\"compute_assessments\":true}'"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"value": "http://localhost:4000"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/declarations/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ref_no\": \"F88-20250715DGKI\",\n    \"items\": [\n        {\n            \"type\": \"restricted_items\",\n            \"hscode\": \"93019010\",\n            \"description\": \" Fully automatic shotguns_x000D_\\r\\n\",\n            \"quantity\": \"2\",\n            \"value\": \"100000\",\n            \"currency\": \"USD\"\n        }\n    ],\n    \"compute_assessments\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/customs/passenger-declaration",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customs",
+								"passenger-declaration"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "2968"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 15 Jul 2025 22:56:45 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GFKOyoE0bKy9yS4AAdgB"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"assesments\": [\n        {\n            \"id\": \"5cb673be-223c-440e-8d5a-4cb9cb9f6472\",\n            \"metadata\": {\n                \"createdBy\": null,\n                \"createdDate\": null,\n                \"f88GsId\": null,\n                \"f88ItemId\": 1,\n                \"id\": null,\n                \"lastModifiedBy\": null,\n                \"lastModifiedDate\": null,\n                \"submissionDate\": null,\n                \"taxAmount\": 250,\n                \"taxBase\": 1,\n                \"taxRate\": 250,\n                \"taxType\": \"1518\",\n                \"uniqueAppId\": null\n            },\n            \"status\": \"active\",\n            \"tax_amount\": \"250.0\",\n            \"tax_base\": \"1.0\",\n            \"tax_rate\": \"250.0\",\n            \"tax_type\": \"1518\"\n        },\n        {\n            \"id\": \"1eab8b2e-a6f8-401c-8ff6-e180524a3633\",\n            \"metadata\": {\n                \"createdBy\": null,\n                \"createdDate\": null,\n                \"f88GsId\": null,\n                \"f88ItemId\": 1,\n                \"id\": null,\n                \"lastModifiedBy\": null,\n                \"lastModifiedDate\": null,\n                \"submissionDate\": null,\n                \"taxAmount\": 3500000,\n                \"taxBase\": 14000000,\n                \"taxRate\": 0.25,\n                \"taxType\": \"1002\",\n                \"uniqueAppId\": null\n            },\n            \"status\": \"active\",\n            \"tax_amount\": \"3.5E+6\",\n            \"tax_base\": \"1.4E+7\",\n            \"tax_rate\": \"0.25\",\n            \"tax_type\": \"1002\"\n        },\n        {\n            \"id\": \"e8db9250-fb35-40fc-8845-ae2bf150a307\",\n            \"metadata\": {\n                \"createdBy\": null,\n                \"createdDate\": null,\n                \"f88GsId\": null,\n                \"f88ItemId\": 1,\n                \"id\": null,\n                \"lastModifiedBy\": null,\n                \"lastModifiedDate\": null,\n                \"submissionDate\": null,\n                \"taxAmount\": 2800000,\n                \"taxBase\": 17500000,\n                \"taxRate\": 0.16,\n                \"taxType\": \"1202\",\n                \"uniqueAppId\": null\n            },\n            \"status\": \"active\",\n            \"tax_amount\": \"2.8E+6\",\n            \"tax_base\": \"1.75E+7\",\n            \"tax_rate\": \"0.16\",\n            \"tax_type\": \"1202\"\n        },\n        {\n            \"id\": \"c238ba03-9df8-41dd-9233-3ee1c36683fe\",\n            \"metadata\": {\n                \"createdBy\": null,\n                \"createdDate\": null,\n                \"f88GsId\": null,\n                \"f88ItemId\": 1,\n                \"id\": null,\n                \"lastModifiedBy\": null,\n                \"lastModifiedDate\": null,\n                \"submissionDate\": null,\n                \"taxAmount\": 490000,\n                \"taxBase\": 14000000,\n                \"taxRate\": 0.035,\n                \"taxType\": \"1801\",\n                \"uniqueAppId\": null\n            },\n            \"status\": \"active\",\n            \"tax_amount\": \"4.9E+5\",\n            \"tax_base\": \"1.4E+7\",\n            \"tax_rate\": \"0.035\",\n            \"tax_type\": \"1801\"\n        },\n        {\n            \"id\": \"2218b124-0fdc-4f7c-b744-eb039a42c351\",\n            \"metadata\": {\n                \"createdBy\": null,\n                \"createdDate\": null,\n                \"f88GsId\": null,\n                \"f88ItemId\": 1,\n                \"id\": null,\n                \"lastModifiedBy\": null,\n                \"lastModifiedDate\": null,\n                \"submissionDate\": null,\n                \"taxAmount\": 280000,\n                \"taxBase\": 14000000,\n                \"taxRate\": 0.02,\n                \"taxType\": \"6001\",\n                \"uniqueAppId\": null\n            },\n            \"status\": \"active\",\n            \"tax_amount\": \"2.8E+5\",\n            \"tax_base\": \"1.4E+7\",\n            \"tax_rate\": \"0.02\",\n            \"tax_type\": \"6001\"\n        }\n    ],\n    \"contact_information\": {\n        \"address\": \"Kirinyaga road\",\n        \"email\": \"michaelkinare@gmail.com\",\n        \"id\": \"69edec83-84a8-48fd-9533-85745c1719fc\",\n        \"msisdn\": \"0708338855\",\n        \"residence\": \"Hilton\"\n    },\n    \"dob\": \"2018-08-18\",\n    \"eslip_number\": \"1020250000425308\",\n    \"external_id\": 2030,\n    \"external_status\": \"30\",\n    \"firstname\": \"karash\",\n    \"gender\": \"M\",\n    \"id\": 51,\n    \"inserted_at\": \"2025-07-15T18:51:55.000000\",\n    \"items\": [\n        {\n            \"currency\": \"USD\",\n            \"description\": \" Fully automatic shotguns_x000D_\\r\\n\",\n            \"hscode\": \"93019010\",\n            \"id\": \"e8451ba1-8262-474b-ab07-9771a3ae13a2\",\n            \"quantity\": 2,\n            \"status\": \"active\",\n            \"type\": \"restricted_items\",\n            \"value\": \"100000\"\n        }\n    ],\n    \"language\": \"en\",\n    \"nationality\": \"AO\",\n    \"passport_number\": \"939494949\",\n    \"payable\": true,\n    \"profession\": \"Fundi\",\n    \"ref_no\": \"F88-20250715DGKI\",\n    \"status\": \"pending-payment\",\n    \"surname\": \"Mike\",\n    \"travel_information\": {\n        \"arrival_date\": \"2025-07-16\",\n        \"arrival_from\": \"AO\",\n        \"id\": \"9fd7fc1a-e069-4631-8be7-471ea4e44868\",\n        \"mode_of_conveyance\": \"A\",\n        \"point_of_boarding\": \"JKA\",\n        \"recently_visited_countries\": [\n            \"RW\"\n        ],\n        \"ticket_number\": \"KQ56789\"\n    },\n    \"type\": \"01\",\n    \"uid\": 328,\n    \"updated_at\": \"2025-07-15T22:56:45.694730\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Standard Codes",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "Application/json"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en-GB,en;q=0.7"
+					},
+					{
+						"key": "Access-Control-Allow-Origin",
+						"value": "*"
+					},
+					{
+						"key": "Cache-Control",
+						"value": "no-cache"
+					},
+					{
+						"key": "Connection",
+						"value": "keep-alive"
+					},
+					{
+						"key": "Pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "Referer",
+						"value": "http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ"
+					},
+					{
+						"key": "Sec-Fetch-Dest",
+						"value": "empty"
+					},
+					{
+						"key": "Sec-Fetch-Mode",
+						"value": "cors"
+					},
+					{
+						"key": "Sec-Fetch-Site",
+						"value": "same-origin"
+					},
+					{
+						"key": "Sec-GPC",
+						"value": "1"
+					},
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"macOS\""
+					},
+					{
+						"key": "Cookie",
+						"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+					}
+				],
+				"url": {
+					"raw": "{{url}}api/static/custom/f88?type=tax_types&code=1001",
+					"host": [
+						"{{url}}api"
+					],
+					"path": [
+						"static",
+						"custom",
+						"f88"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "tax_types"
+						},
+						{
+							"key": "code",
+							"value": "1001"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl 'http://localhost:4000/api/static/custom/f88' \\\n  -H 'Accept: Application/json' \\\n  -H 'Accept-Language: en-GB,en;q=0.7' \\\n  -H 'Access-Control-Allow-Origin: *' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -b '_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-origin' \\\n  -H 'Sec-GPC: 1' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"'"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/static/custom/f88",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"static",
+								"custom",
+								"f88"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "5429"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 15 Jul 2025 22:57:13 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GFKO0TaKfdz_KMIAAdhB"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"channels\": [\n        {\n            \"code\": \"3\",\n            \"description\": \"Channel Yellow\"\n        },\n        {\n            \"code\": \"1\",\n            \"description\": \"Channel Green\"\n        },\n        {\n            \"code\": \"2\",\n            \"description\": \"Channel Red\"\n        },\n        {\n            \"code\": \"0\",\n            \"description\": \"Channel Blue\"\n        }\n    ],\n    \"conveyance_modes\": [\n        {\n            \"code\": \"A\",\n            \"description\": \"Air\"\n        },\n        {\n            \"code\": \"S\",\n            \"description\": \"Sea\"\n        },\n        {\n            \"code\": \"L\",\n            \"description\": \"Land\"\n        }\n    ],\n    \"passenger_types\": [\n        {\n            \"code\": \"01\",\n            \"description\": \"Foreigner\"\n        },\n        {\n            \"code\": \"02\",\n            \"description\": \"Kenyans & EastAfrican Citizen\"\n        },\n        {\n            \"code\": \"03\",\n            \"description\": \"Diplomats\"\n        }\n    ],\n    \"tax_types\": [\n        {\n            \"code\": \"1206\",\n            \"description\": \"VAT Oils 8%\"\n        },\n        {\n            \"code\": \"2302\",\n            \"description\": \"Anti-Adulteration Levy (AAL)\"\n        },\n        {\n            \"code\": \"1001\",\n            \"description\": \"Import Duty - Oil\"\n        },\n        {\n            \"code\": \"1002\",\n            \"description\": \"Import Duty\"\n        },\n        {\n            \"code\": \"1003\",\n            \"description\": \"Import Duty - Ppo (Post Parcels)\"\n        },\n        {\n            \"code\": \"2801\",\n            \"description\": \"Export Duty\"\n        },\n        {\n            \"code\": \"1101\",\n            \"description\": \"Excise Duty - Oils\"\n        },\n        {\n            \"code\": \"1102\",\n            \"description\": \"Excise Duty\"\n        },\n        {\n            \"code\": \"1103\",\n            \"description\": \"Excise Duty - Ppo\"\n        },\n        {\n            \"code\": \"1201\",\n            \"description\": \"Vat Oils\"\n        },\n        {\n            \"code\": \"1202\",\n            \"description\": \"Vat Imports\"\n        },\n        {\n            \"code\": \"1203\",\n            \"description\": \"Vat Ppo (Post Parcels)\"\n        },\n        {\n            \"code\": \"1205\",\n            \"description\": \"Vat Treo\"\n        },\n        {\n            \"code\": \"1301\",\n            \"description\": \"Apsc-International\"\n        },\n        {\n            \"code\": \"1302\",\n            \"description\": \"Apsc-Local\"\n        },\n        {\n            \"code\": \"6101\",\n            \"description\": \"Sale of Number Plates- C&BC\"\n        },\n        {\n            \"code\": \"6102\",\n            \"description\": \"Sale of Number Plates pair -C&BC\"\n        },\n        {\n            \"code\": \"1501\",\n            \"description\": \"Alteration Fee\"\n        },\n        {\n            \"code\": \"1502\",\n            \"description\": \"Certificate Fee for Customs Documents\"\n        },\n        {\n            \"code\": \"1503\",\n            \"description\": \"Overtime Fee\"\n        },\n        {\n            \"code\": \"1504\",\n            \"description\": \"Manifest Amendment\"\n        },\n        {\n            \"code\": \"1505\",\n            \"description\": \"Cancellation Fee\"\n        },\n        {\n            \"code\": \"1506\",\n            \"description\": \"Licence Application Fee\"\n        },\n        {\n            \"code\": \"1507\",\n            \"description\": \"Licence Renewal Fee\"\n        },\n        {\n            \"code\": \"1508\",\n            \"description\": \"Customs Agent Licence Fee\"\n        },\n        {\n            \"code\": \"1510\",\n            \"description\": \"Transit Shed Licence Fee\"\n        },\n        {\n            \"code\": \"1511\",\n            \"description\": \"Bonded Warehouse Licence Fee\"\n        },\n        {\n            \"code\": \"1513\",\n            \"description\": \"Manufacture Under Bond Licence Fee\"\n        },\n        {\n            \"code\": \"1514\",\n            \"description\": \"Transit Goods Licence Fee\"\n        },\n        {\n            \"code\": \"1515\",\n            \"description\": \"Transit Godown Licence\"\n        },\n        {\n            \"code\": \"1522\",\n            \"description\": \"Licence (Certificate) Amendment Fee\"\n        },\n        {\n            \"code\": \"1523\",\n            \"description\": \"Licence (Certificate) Duplicate fee\"\n        },\n        {\n            \"code\": \"1907\",\n            \"description\": \"Rent-In-Situ\"\n        },\n        {\n            \"code\": \"1908\",\n            \"description\": \"Customs Warehouse Rent\"\n        },\n        {\n            \"code\": \"1909\",\n            \"description\": \"Sundry Revenue\"\n        },\n        {\n            \"code\": \"1999\",\n            \"description\": \"Forfeited Refunds\"\n        },\n        {\n            \"code\": \"6501\",\n            \"description\": \"Road Safety fund\"\n        },\n        {\n            \"code\": \"1601\",\n            \"description\": \"Fines Under East Africa Community Customs Management Act\"\n        },\n        {\n            \"code\": \"1602\",\n            \"description\": \"Penalty Section 135 of East Africa Community Customs Management Act\"\n        },\n        {\n            \"code\": \"1604\",\n            \"description\": \"Interest for late payment (Section 249)\"\n        },\n        {\n            \"code\": \"1605\",\n            \"description\": \"Interest for late payment (Section 135)\"\n        },\n        {\n            \"code\": \"1603\",\n            \"description\": \"Penalty To Bond\"\n        },\n        {\n            \"code\": \"1901\",\n            \"description\": \"Proceeds From Auctions\"\n        },\n        {\n            \"code\": \"1701\",\n            \"description\": \"Duty Deposits\"\n        },\n        {\n            \"code\": \"1702\",\n            \"description\": \"Duty Deposit - Transits\"\n        },\n        {\n            \"code\": \"1703\",\n            \"description\": \"Cash Deposits - Security Bonds\"\n        },\n        {\n            \"code\": \"1902\",\n            \"description\": \"Sale Of Tamperproof Seals\"\n        },\n        {\n            \"code\": \"1905\",\n            \"description\": \"Excess Cash\"\n        },\n        {\n            \"code\": \"1906\",\n            \"description\": \"Bank Interest\"\n        },\n        {\n            \"code\": \"1521\",\n            \"description\": \"Transit Vehicle Licence Fee\"\n        },\n        {\n            \"code\": \"1006\",\n            \"description\": \"Transfer of Ownership - C&BC\"\n        },\n        {\n            \"code\": \"1801\",\n            \"description\": \"IDF Fees\"\n        },\n        {\n            \"code\": \"1802\",\n            \"description\": \"IDF Fee Oils\"\n        },\n        {\n            \"code\": \"2101\",\n            \"description\": \"Road Maintenance Levy (RML)\"\n        },\n        {\n            \"code\": \"2301\",\n            \"description\": \"Petroleum Regulatory Levy(PRL)\"\n        },\n        {\n            \"code\": \"6601\",\n            \"description\": \"SHMV purchase tax - C&BC\"\n        },\n        {\n            \"code\": \"2401\",\n            \"description\": \"Directorate of Civil Aviation(DCA)Revenue\"\n        },\n        {\n            \"code\": \"2501\",\n            \"description\": \"Gross Payment-Petroleum Development Fund(PDF)\"\n        },\n        {\n            \"code\": \"1517\",\n            \"description\": \"Transit Toll Fees\"\n        },\n        {\n            \"code\": \"2601\",\n            \"description\": \"Sugar Development Levy\"\n        },\n        {\n            \"code\": \"1518\",\n            \"description\": \"Concession Fees\"\n        },\n        {\n            \"code\": \"1519\",\n            \"description\": \"Registration fees\"\n        },\n        {\n            \"code\": \"6301\",\n            \"description\": \"Transfer Fees for Motor Vehicle Registration\"\n        },\n        {\n            \"code\": \"6001\",\n            \"description\": \"Kenya Railway Development Levy(RDL)\"\n        },\n        {\n            \"code\": \"6201\",\n            \"description\": \"Foreign Motor Vehicle Fees - C&BC\"\n        },\n        {\n            \"code\": \"2701\",\n            \"description\": \"COMESA Certificate of origin Fee\"\n        },\n        {\n            \"code\": \"2702\",\n            \"description\": \"EAC Certificate of origin fee\"\n        },\n        {\n            \"code\": \"2703\",\n            \"description\": \"AGOA (African Growth and Opportunity Act) Certificate of Origin fee\"\n        },\n        {\n            \"code\": \"2704\",\n            \"description\": \"EUR1 Certificate of origin fee\"\n        },\n        {\n            \"code\": \"2705\",\n            \"description\": \"GSP Certificate of origin fee\"\n        },\n        {\n            \"code\": \"6401\",\n            \"description\": \"Merchant Shipping Superitendent (MSS) Levy\"\n        },\n        {\n            \"code\": \"1705\",\n            \"description\": \"Bank guarantee\"\n        },\n        {\n            \"code\": \"1516\",\n            \"description\": \"TGV License Modification Fee\"\n        },\n        {\n            \"code\": \"1525\",\n            \"description\": \"Re-importation certificate fee\"\n        },\n        {\n            \"code\": \"1910\",\n            \"description\": \"Surcharge fee EX-EPZ-2.5%\"\n        },\n        {\n            \"code\": \"6002\",\n            \"description\": \"Kenya Railway Development Levy(RDL)- Oil\"\n        },\n        {\n            \"code\": \"1520\",\n            \"description\": \"Calibration chart certification Fee\"\n        },\n        {\n            \"code\": \"1704\",\n            \"description\": \"Duty Deposits- Kenya Film Commission\"\n        },\n        {\n            \"code\": \"6402\",\n            \"description\": \"Merchant Shipping Superitendent (MSS) Levy-Oil\"\n        },\n        {\n            \"code\": \"1528\",\n            \"description\": \"Processing fee- Duty Free Motor vehicles\"\n        },\n        {\n            \"code\": \"2802\",\n            \"description\": \"EIP Levy\"\n        },\n        {\n            \"code\": \"1531\",\n            \"description\": \"Re-importation Certificate Fee\"\n        },\n        {\n            \"code\": \"1104\",\n            \"description\": \"Solatium contribution\"\n        },\n        {\n            \"code\": \"1527\",\n            \"description\": \"Transhipment Fees\"\n        },\n        {\n            \"code\": \"1524\",\n            \"description\": \"Manifest transhipment td fee\"\n        }\n    ]\n}"
+				},
+				{
+					"name": "Standard Codes",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/static/custom/f88?type=tax_types&code=1001",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"static",
+								"custom",
+								"f88"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "tax_types"
+								},
+								{
+									"key": "code",
+									"value": "1001"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "Text",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "19"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Fri, 29 Aug 2025 12:47:26 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GGA9qEjm6IiaCMcAADIC"
+						}
+					],
+					"cookie": [],
+					"body": "\"Import Duty - Oil\""
+				}
+			]
+		},
+		{
+			"name": "Countries",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "Application/json"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/static/custom/countries",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"static",
+						"custom",
+						"countries"
+					]
+				},
+				"description": "Generated from cURL: curl 'http://localhost:4000/api/static/custom/f88' \\\n  -H 'Accept: Application/json' \\\n  -H 'Accept-Language: en-GB,en;q=0.7' \\\n  -H 'Access-Control-Allow-Origin: *' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -b '_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-origin' \\\n  -H 'Sec-GPC: 1' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"'"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/static/custom/f88",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"static",
+								"custom",
+								"f88"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "5429"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 15 Jul 2025 22:57:13 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GFKO0TaKfdz_KMIAAdhB"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"channels\": [\n        {\n            \"code\": \"3\",\n            \"description\": \"Channel Yellow\"\n        },\n        {\n            \"code\": \"1\",\n            \"description\": \"Channel Green\"\n        },\n        {\n            \"code\": \"2\",\n            \"description\": \"Channel Red\"\n        },\n        {\n            \"code\": \"0\",\n            \"description\": \"Channel Blue\"\n        }\n    ],\n    \"conveyance_modes\": [\n        {\n            \"code\": \"A\",\n            \"description\": \"Air\"\n        },\n        {\n            \"code\": \"S\",\n            \"description\": \"Sea\"\n        },\n        {\n            \"code\": \"L\",\n            \"description\": \"Land\"\n        }\n    ],\n    \"passenger_types\": [\n        {\n            \"code\": \"01\",\n            \"description\": \"Foreigner\"\n        },\n        {\n            \"code\": \"02\",\n            \"description\": \"Kenyans & EastAfrican Citizen\"\n        },\n        {\n            \"code\": \"03\",\n            \"description\": \"Diplomats\"\n        }\n    ],\n    \"tax_types\": [\n        {\n            \"code\": \"1206\",\n            \"description\": \"VAT Oils 8%\"\n        },\n        {\n            \"code\": \"2302\",\n            \"description\": \"Anti-Adulteration Levy (AAL)\"\n        },\n        {\n            \"code\": \"1001\",\n            \"description\": \"Import Duty - Oil\"\n        },\n        {\n            \"code\": \"1002\",\n            \"description\": \"Import Duty\"\n        },\n        {\n            \"code\": \"1003\",\n            \"description\": \"Import Duty - Ppo (Post Parcels)\"\n        },\n        {\n            \"code\": \"2801\",\n            \"description\": \"Export Duty\"\n        },\n        {\n            \"code\": \"1101\",\n            \"description\": \"Excise Duty - Oils\"\n        },\n        {\n            \"code\": \"1102\",\n            \"description\": \"Excise Duty\"\n        },\n        {\n            \"code\": \"1103\",\n            \"description\": \"Excise Duty - Ppo\"\n        },\n        {\n            \"code\": \"1201\",\n            \"description\": \"Vat Oils\"\n        },\n        {\n            \"code\": \"1202\",\n            \"description\": \"Vat Imports\"\n        },\n        {\n            \"code\": \"1203\",\n            \"description\": \"Vat Ppo (Post Parcels)\"\n        },\n        {\n            \"code\": \"1205\",\n            \"description\": \"Vat Treo\"\n        },\n        {\n            \"code\": \"1301\",\n            \"description\": \"Apsc-International\"\n        },\n        {\n            \"code\": \"1302\",\n            \"description\": \"Apsc-Local\"\n        },\n        {\n            \"code\": \"6101\",\n            \"description\": \"Sale of Number Plates- C&BC\"\n        },\n        {\n            \"code\": \"6102\",\n            \"description\": \"Sale of Number Plates pair -C&BC\"\n        },\n        {\n            \"code\": \"1501\",\n            \"description\": \"Alteration Fee\"\n        },\n        {\n            \"code\": \"1502\",\n            \"description\": \"Certificate Fee for Customs Documents\"\n        },\n        {\n            \"code\": \"1503\",\n            \"description\": \"Overtime Fee\"\n        },\n        {\n            \"code\": \"1504\",\n            \"description\": \"Manifest Amendment\"\n        },\n        {\n            \"code\": \"1505\",\n            \"description\": \"Cancellation Fee\"\n        },\n        {\n            \"code\": \"1506\",\n            \"description\": \"Licence Application Fee\"\n        },\n        {\n            \"code\": \"1507\",\n            \"description\": \"Licence Renewal Fee\"\n        },\n        {\n            \"code\": \"1508\",\n            \"description\": \"Customs Agent Licence Fee\"\n        },\n        {\n            \"code\": \"1510\",\n            \"description\": \"Transit Shed Licence Fee\"\n        },\n        {\n            \"code\": \"1511\",\n            \"description\": \"Bonded Warehouse Licence Fee\"\n        },\n        {\n            \"code\": \"1513\",\n            \"description\": \"Manufacture Under Bond Licence Fee\"\n        },\n        {\n            \"code\": \"1514\",\n            \"description\": \"Transit Goods Licence Fee\"\n        },\n        {\n            \"code\": \"1515\",\n            \"description\": \"Transit Godown Licence\"\n        },\n        {\n            \"code\": \"1522\",\n            \"description\": \"Licence (Certificate) Amendment Fee\"\n        },\n        {\n            \"code\": \"1523\",\n            \"description\": \"Licence (Certificate) Duplicate fee\"\n        },\n        {\n            \"code\": \"1907\",\n            \"description\": \"Rent-In-Situ\"\n        },\n        {\n            \"code\": \"1908\",\n            \"description\": \"Customs Warehouse Rent\"\n        },\n        {\n            \"code\": \"1909\",\n            \"description\": \"Sundry Revenue\"\n        },\n        {\n            \"code\": \"1999\",\n            \"description\": \"Forfeited Refunds\"\n        },\n        {\n            \"code\": \"6501\",\n            \"description\": \"Road Safety fund\"\n        },\n        {\n            \"code\": \"1601\",\n            \"description\": \"Fines Under East Africa Community Customs Management Act\"\n        },\n        {\n            \"code\": \"1602\",\n            \"description\": \"Penalty Section 135 of East Africa Community Customs Management Act\"\n        },\n        {\n            \"code\": \"1604\",\n            \"description\": \"Interest for late payment (Section 249)\"\n        },\n        {\n            \"code\": \"1605\",\n            \"description\": \"Interest for late payment (Section 135)\"\n        },\n        {\n            \"code\": \"1603\",\n            \"description\": \"Penalty To Bond\"\n        },\n        {\n            \"code\": \"1901\",\n            \"description\": \"Proceeds From Auctions\"\n        },\n        {\n            \"code\": \"1701\",\n            \"description\": \"Duty Deposits\"\n        },\n        {\n            \"code\": \"1702\",\n            \"description\": \"Duty Deposit - Transits\"\n        },\n        {\n            \"code\": \"1703\",\n            \"description\": \"Cash Deposits - Security Bonds\"\n        },\n        {\n            \"code\": \"1902\",\n            \"description\": \"Sale Of Tamperproof Seals\"\n        },\n        {\n            \"code\": \"1905\",\n            \"description\": \"Excess Cash\"\n        },\n        {\n            \"code\": \"1906\",\n            \"description\": \"Bank Interest\"\n        },\n        {\n            \"code\": \"1521\",\n            \"description\": \"Transit Vehicle Licence Fee\"\n        },\n        {\n            \"code\": \"1006\",\n            \"description\": \"Transfer of Ownership - C&BC\"\n        },\n        {\n            \"code\": \"1801\",\n            \"description\": \"IDF Fees\"\n        },\n        {\n            \"code\": \"1802\",\n            \"description\": \"IDF Fee Oils\"\n        },\n        {\n            \"code\": \"2101\",\n            \"description\": \"Road Maintenance Levy (RML)\"\n        },\n        {\n            \"code\": \"2301\",\n            \"description\": \"Petroleum Regulatory Levy(PRL)\"\n        },\n        {\n            \"code\": \"6601\",\n            \"description\": \"SHMV purchase tax - C&BC\"\n        },\n        {\n            \"code\": \"2401\",\n            \"description\": \"Directorate of Civil Aviation(DCA)Revenue\"\n        },\n        {\n            \"code\": \"2501\",\n            \"description\": \"Gross Payment-Petroleum Development Fund(PDF)\"\n        },\n        {\n            \"code\": \"1517\",\n            \"description\": \"Transit Toll Fees\"\n        },\n        {\n            \"code\": \"2601\",\n            \"description\": \"Sugar Development Levy\"\n        },\n        {\n            \"code\": \"1518\",\n            \"description\": \"Concession Fees\"\n        },\n        {\n            \"code\": \"1519\",\n            \"description\": \"Registration fees\"\n        },\n        {\n            \"code\": \"6301\",\n            \"description\": \"Transfer Fees for Motor Vehicle Registration\"\n        },\n        {\n            \"code\": \"6001\",\n            \"description\": \"Kenya Railway Development Levy(RDL)\"\n        },\n        {\n            \"code\": \"6201\",\n            \"description\": \"Foreign Motor Vehicle Fees - C&BC\"\n        },\n        {\n            \"code\": \"2701\",\n            \"description\": \"COMESA Certificate of origin Fee\"\n        },\n        {\n            \"code\": \"2702\",\n            \"description\": \"EAC Certificate of origin fee\"\n        },\n        {\n            \"code\": \"2703\",\n            \"description\": \"AGOA (African Growth and Opportunity Act) Certificate of Origin fee\"\n        },\n        {\n            \"code\": \"2704\",\n            \"description\": \"EUR1 Certificate of origin fee\"\n        },\n        {\n            \"code\": \"2705\",\n            \"description\": \"GSP Certificate of origin fee\"\n        },\n        {\n            \"code\": \"6401\",\n            \"description\": \"Merchant Shipping Superitendent (MSS) Levy\"\n        },\n        {\n            \"code\": \"1705\",\n            \"description\": \"Bank guarantee\"\n        },\n        {\n            \"code\": \"1516\",\n            \"description\": \"TGV License Modification Fee\"\n        },\n        {\n            \"code\": \"1525\",\n            \"description\": \"Re-importation certificate fee\"\n        },\n        {\n            \"code\": \"1910\",\n            \"description\": \"Surcharge fee EX-EPZ-2.5%\"\n        },\n        {\n            \"code\": \"6002\",\n            \"description\": \"Kenya Railway Development Levy(RDL)- Oil\"\n        },\n        {\n            \"code\": \"1520\",\n            \"description\": \"Calibration chart certification Fee\"\n        },\n        {\n            \"code\": \"1704\",\n            \"description\": \"Duty Deposits- Kenya Film Commission\"\n        },\n        {\n            \"code\": \"6402\",\n            \"description\": \"Merchant Shipping Superitendent (MSS) Levy-Oil\"\n        },\n        {\n            \"code\": \"1528\",\n            \"description\": \"Processing fee- Duty Free Motor vehicles\"\n        },\n        {\n            \"code\": \"2802\",\n            \"description\": \"EIP Levy\"\n        },\n        {\n            \"code\": \"1531\",\n            \"description\": \"Re-importation Certificate Fee\"\n        },\n        {\n            \"code\": \"1104\",\n            \"description\": \"Solatium contribution\"\n        },\n        {\n            \"code\": \"1527\",\n            \"description\": \"Transhipment Fees\"\n        },\n        {\n            \"code\": \"1524\",\n            \"description\": \"Manifest transhipment td fee\"\n        }\n    ]\n}"
+				},
+				{
+					"name": "Standard Codes",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/static/custom/f88?type=tax_types&code=1001",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"static",
+								"custom",
+								"f88"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "tax_types"
+								},
+								{
+									"key": "code",
+									"value": "1001"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "Text",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "19"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Fri, 29 Aug 2025 12:47:26 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GGA9qEjm6IiaCMcAADIC"
+						}
+					],
+					"cookie": [],
+					"body": "\"Import Duty - Oil\""
+				}
+			]
+		},
+		{
+			"name": "Currencies",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "Application/json"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/static/custom/currencies",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"static",
+						"custom",
+						"currencies"
+					]
+				},
+				"description": "Generated from cURL: curl 'http://localhost:4000/api/static/custom/f88' \\\n  -H 'Accept: Application/json' \\\n  -H 'Accept-Language: en-GB,en;q=0.7' \\\n  -H 'Access-Control-Allow-Origin: *' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -b '_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-origin' \\\n  -H 'Sec-GPC: 1' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"'"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/static/custom/f88",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"static",
+								"custom",
+								"f88"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "5429"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 15 Jul 2025 22:57:13 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GFKO0TaKfdz_KMIAAdhB"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"channels\": [\n        {\n            \"code\": \"3\",\n            \"description\": \"Channel Yellow\"\n        },\n        {\n            \"code\": \"1\",\n            \"description\": \"Channel Green\"\n        },\n        {\n            \"code\": \"2\",\n            \"description\": \"Channel Red\"\n        },\n        {\n            \"code\": \"0\",\n            \"description\": \"Channel Blue\"\n        }\n    ],\n    \"conveyance_modes\": [\n        {\n            \"code\": \"A\",\n            \"description\": \"Air\"\n        },\n        {\n            \"code\": \"S\",\n            \"description\": \"Sea\"\n        },\n        {\n            \"code\": \"L\",\n            \"description\": \"Land\"\n        }\n    ],\n    \"passenger_types\": [\n        {\n            \"code\": \"01\",\n            \"description\": \"Foreigner\"\n        },\n        {\n            \"code\": \"02\",\n            \"description\": \"Kenyans & EastAfrican Citizen\"\n        },\n        {\n            \"code\": \"03\",\n            \"description\": \"Diplomats\"\n        }\n    ],\n    \"tax_types\": [\n        {\n            \"code\": \"1206\",\n            \"description\": \"VAT Oils 8%\"\n        },\n        {\n            \"code\": \"2302\",\n            \"description\": \"Anti-Adulteration Levy (AAL)\"\n        },\n        {\n            \"code\": \"1001\",\n            \"description\": \"Import Duty - Oil\"\n        },\n        {\n            \"code\": \"1002\",\n            \"description\": \"Import Duty\"\n        },\n        {\n            \"code\": \"1003\",\n            \"description\": \"Import Duty - Ppo (Post Parcels)\"\n        },\n        {\n            \"code\": \"2801\",\n            \"description\": \"Export Duty\"\n        },\n        {\n            \"code\": \"1101\",\n            \"description\": \"Excise Duty - Oils\"\n        },\n        {\n            \"code\": \"1102\",\n            \"description\": \"Excise Duty\"\n        },\n        {\n            \"code\": \"1103\",\n            \"description\": \"Excise Duty - Ppo\"\n        },\n        {\n            \"code\": \"1201\",\n            \"description\": \"Vat Oils\"\n        },\n        {\n            \"code\": \"1202\",\n            \"description\": \"Vat Imports\"\n        },\n        {\n            \"code\": \"1203\",\n            \"description\": \"Vat Ppo (Post Parcels)\"\n        },\n        {\n            \"code\": \"1205\",\n            \"description\": \"Vat Treo\"\n        },\n        {\n            \"code\": \"1301\",\n            \"description\": \"Apsc-International\"\n        },\n        {\n            \"code\": \"1302\",\n            \"description\": \"Apsc-Local\"\n        },\n        {\n            \"code\": \"6101\",\n            \"description\": \"Sale of Number Plates- C&BC\"\n        },\n        {\n            \"code\": \"6102\",\n            \"description\": \"Sale of Number Plates pair -C&BC\"\n        },\n        {\n            \"code\": \"1501\",\n            \"description\": \"Alteration Fee\"\n        },\n        {\n            \"code\": \"1502\",\n            \"description\": \"Certificate Fee for Customs Documents\"\n        },\n        {\n            \"code\": \"1503\",\n            \"description\": \"Overtime Fee\"\n        },\n        {\n            \"code\": \"1504\",\n            \"description\": \"Manifest Amendment\"\n        },\n        {\n            \"code\": \"1505\",\n            \"description\": \"Cancellation Fee\"\n        },\n        {\n            \"code\": \"1506\",\n            \"description\": \"Licence Application Fee\"\n        },\n        {\n            \"code\": \"1507\",\n            \"description\": \"Licence Renewal Fee\"\n        },\n        {\n            \"code\": \"1508\",\n            \"description\": \"Customs Agent Licence Fee\"\n        },\n        {\n            \"code\": \"1510\",\n            \"description\": \"Transit Shed Licence Fee\"\n        },\n        {\n            \"code\": \"1511\",\n            \"description\": \"Bonded Warehouse Licence Fee\"\n        },\n        {\n            \"code\": \"1513\",\n            \"description\": \"Manufacture Under Bond Licence Fee\"\n        },\n        {\n            \"code\": \"1514\",\n            \"description\": \"Transit Goods Licence Fee\"\n        },\n        {\n            \"code\": \"1515\",\n            \"description\": \"Transit Godown Licence\"\n        },\n        {\n            \"code\": \"1522\",\n            \"description\": \"Licence (Certificate) Amendment Fee\"\n        },\n        {\n            \"code\": \"1523\",\n            \"description\": \"Licence (Certificate) Duplicate fee\"\n        },\n        {\n            \"code\": \"1907\",\n            \"description\": \"Rent-In-Situ\"\n        },\n        {\n            \"code\": \"1908\",\n            \"description\": \"Customs Warehouse Rent\"\n        },\n        {\n            \"code\": \"1909\",\n            \"description\": \"Sundry Revenue\"\n        },\n        {\n            \"code\": \"1999\",\n            \"description\": \"Forfeited Refunds\"\n        },\n        {\n            \"code\": \"6501\",\n            \"description\": \"Road Safety fund\"\n        },\n        {\n            \"code\": \"1601\",\n            \"description\": \"Fines Under East Africa Community Customs Management Act\"\n        },\n        {\n            \"code\": \"1602\",\n            \"description\": \"Penalty Section 135 of East Africa Community Customs Management Act\"\n        },\n        {\n            \"code\": \"1604\",\n            \"description\": \"Interest for late payment (Section 249)\"\n        },\n        {\n            \"code\": \"1605\",\n            \"description\": \"Interest for late payment (Section 135)\"\n        },\n        {\n            \"code\": \"1603\",\n            \"description\": \"Penalty To Bond\"\n        },\n        {\n            \"code\": \"1901\",\n            \"description\": \"Proceeds From Auctions\"\n        },\n        {\n            \"code\": \"1701\",\n            \"description\": \"Duty Deposits\"\n        },\n        {\n            \"code\": \"1702\",\n            \"description\": \"Duty Deposit - Transits\"\n        },\n        {\n            \"code\": \"1703\",\n            \"description\": \"Cash Deposits - Security Bonds\"\n        },\n        {\n            \"code\": \"1902\",\n            \"description\": \"Sale Of Tamperproof Seals\"\n        },\n        {\n            \"code\": \"1905\",\n            \"description\": \"Excess Cash\"\n        },\n        {\n            \"code\": \"1906\",\n            \"description\": \"Bank Interest\"\n        },\n        {\n            \"code\": \"1521\",\n            \"description\": \"Transit Vehicle Licence Fee\"\n        },\n        {\n            \"code\": \"1006\",\n            \"description\": \"Transfer of Ownership - C&BC\"\n        },\n        {\n            \"code\": \"1801\",\n            \"description\": \"IDF Fees\"\n        },\n        {\n            \"code\": \"1802\",\n            \"description\": \"IDF Fee Oils\"\n        },\n        {\n            \"code\": \"2101\",\n            \"description\": \"Road Maintenance Levy (RML)\"\n        },\n        {\n            \"code\": \"2301\",\n            \"description\": \"Petroleum Regulatory Levy(PRL)\"\n        },\n        {\n            \"code\": \"6601\",\n            \"description\": \"SHMV purchase tax - C&BC\"\n        },\n        {\n            \"code\": \"2401\",\n            \"description\": \"Directorate of Civil Aviation(DCA)Revenue\"\n        },\n        {\n            \"code\": \"2501\",\n            \"description\": \"Gross Payment-Petroleum Development Fund(PDF)\"\n        },\n        {\n            \"code\": \"1517\",\n            \"description\": \"Transit Toll Fees\"\n        },\n        {\n            \"code\": \"2601\",\n            \"description\": \"Sugar Development Levy\"\n        },\n        {\n            \"code\": \"1518\",\n            \"description\": \"Concession Fees\"\n        },\n        {\n            \"code\": \"1519\",\n            \"description\": \"Registration fees\"\n        },\n        {\n            \"code\": \"6301\",\n            \"description\": \"Transfer Fees for Motor Vehicle Registration\"\n        },\n        {\n            \"code\": \"6001\",\n            \"description\": \"Kenya Railway Development Levy(RDL)\"\n        },\n        {\n            \"code\": \"6201\",\n            \"description\": \"Foreign Motor Vehicle Fees - C&BC\"\n        },\n        {\n            \"code\": \"2701\",\n            \"description\": \"COMESA Certificate of origin Fee\"\n        },\n        {\n            \"code\": \"2702\",\n            \"description\": \"EAC Certificate of origin fee\"\n        },\n        {\n            \"code\": \"2703\",\n            \"description\": \"AGOA (African Growth and Opportunity Act) Certificate of Origin fee\"\n        },\n        {\n            \"code\": \"2704\",\n            \"description\": \"EUR1 Certificate of origin fee\"\n        },\n        {\n            \"code\": \"2705\",\n            \"description\": \"GSP Certificate of origin fee\"\n        },\n        {\n            \"code\": \"6401\",\n            \"description\": \"Merchant Shipping Superitendent (MSS) Levy\"\n        },\n        {\n            \"code\": \"1705\",\n            \"description\": \"Bank guarantee\"\n        },\n        {\n            \"code\": \"1516\",\n            \"description\": \"TGV License Modification Fee\"\n        },\n        {\n            \"code\": \"1525\",\n            \"description\": \"Re-importation certificate fee\"\n        },\n        {\n            \"code\": \"1910\",\n            \"description\": \"Surcharge fee EX-EPZ-2.5%\"\n        },\n        {\n            \"code\": \"6002\",\n            \"description\": \"Kenya Railway Development Levy(RDL)- Oil\"\n        },\n        {\n            \"code\": \"1520\",\n            \"description\": \"Calibration chart certification Fee\"\n        },\n        {\n            \"code\": \"1704\",\n            \"description\": \"Duty Deposits- Kenya Film Commission\"\n        },\n        {\n            \"code\": \"6402\",\n            \"description\": \"Merchant Shipping Superitendent (MSS) Levy-Oil\"\n        },\n        {\n            \"code\": \"1528\",\n            \"description\": \"Processing fee- Duty Free Motor vehicles\"\n        },\n        {\n            \"code\": \"2802\",\n            \"description\": \"EIP Levy\"\n        },\n        {\n            \"code\": \"1531\",\n            \"description\": \"Re-importation Certificate Fee\"\n        },\n        {\n            \"code\": \"1104\",\n            \"description\": \"Solatium contribution\"\n        },\n        {\n            \"code\": \"1527\",\n            \"description\": \"Transhipment Fees\"\n        },\n        {\n            \"code\": \"1524\",\n            \"description\": \"Manifest transhipment td fee\"\n        }\n    ]\n}"
+				},
+				{
+					"name": "Standard Codes",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/static/custom/f88?type=tax_types&code=1001",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"static",
+								"custom",
+								"f88"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "tax_types"
+								},
+								{
+									"key": "code",
+									"value": "1001"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "Text",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "19"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Fri, 29 Aug 2025 12:47:26 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GGA9qEjm6IiaCMcAADIC"
+						}
+					],
+					"cookie": [],
+					"body": "\"Import Duty - Oil\""
+				},
+				{
+					"name": "Currencies",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/static/custom/currencies",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"static",
+								"custom",
+								"currencies"
+							]
+						}
+					},
+					"status": "Service Unavailable",
+					"code": 503,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "no-cache"
+						},
+						{
+							"key": "content-type",
+							"value": "text/html"
+						}
+					],
+					"cookie": [],
+					"body": "<html>\n    <body>\n        <h1>503 Service Unavailable</h1>\nNo server is available to handle this request.\n    </body>\n</html>"
+				}
+			]
+		},
+		{
+			"name": "Fetch F88",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "Application/json"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en-GB,en;q=0.7"
+					},
+					{
+						"key": "Access-Control-Allow-Origin",
+						"value": "*"
+					},
+					{
+						"key": "Cache-Control",
+						"value": "no-cache"
+					},
+					{
+						"key": "Connection",
+						"value": "keep-alive"
+					},
+					{
+						"key": "Pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "Referer",
+						"value": "http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ"
+					},
+					{
+						"key": "Sec-Fetch-Dest",
+						"value": "empty"
+					},
+					{
+						"key": "Sec-Fetch-Mode",
+						"value": "cors"
+					},
+					{
+						"key": "Sec-Fetch-Site",
+						"value": "same-origin"
+					},
+					{
+						"key": "Sec-GPC",
+						"value": "1"
+					},
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"macOS\""
+					},
+					{
+						"key": "Cookie",
+						"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/customs/passenger-declaration/F88-20251118XRIB",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"customs",
+						"passenger-declaration",
+						"F88-20251118XRIB"
+					]
+				},
+				"description": "Generated from cURL: curl 'http://localhost:4000/api/customs/passenger-declaration/F88-20250711VLGGZ' \\\n  -H 'Accept: Application/json' \\\n  -H 'Accept-Language: en-GB,en;q=0.7' \\\n  -H 'Access-Control-Allow-Origin: *' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -b '_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-origin' \\\n  -H 'Sec-GPC: 1' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"'"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/customs/passenger-declaration/F88-20250715WQIE",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customs",
+								"passenger-declaration",
+								"F88-20250715WQIE"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "826"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 15 Jul 2025 22:58:07 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GFKO3ctU0_kJH9cAAdjB"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"assesments\": [],\n    \"contact_information\": {\n        \"address\": \"Kiambu road\",\n        \"email\": \"michaelkinare@gmail.com\",\n        \"id\": \"39f4b9f3-9f33-4315-94fc-212d1d3d30b8\",\n        \"msisdn\": \"0708338855\",\n        \"residence\": \"Winston\"\n    },\n    \"dob\": \"1985-07-11\",\n    \"eslip_number\": null,\n    \"external_id\": null,\n    \"external_status\": null,\n    \"firstname\": \"Michael\",\n    \"gender\": \"M\",\n    \"id\": 53,\n    \"inserted_at\": \"2025-07-15T22:55:07.000000\",\n    \"items\": [],\n    \"language\": \"en\",\n    \"nationality\": \"KE\",\n    \"passport_number\": \"30985578\",\n    \"payable\": null,\n    \"profession\": \"Deceloper\",\n    \"ref_no\": \"F88-20250715WQIE\",\n    \"status\": \"draft\",\n    \"surname\": \"Karanja\",\n    \"travel_information\": {\n        \"arrival_date\": \"2025-07-26\",\n        \"arrival_from\": \"TZ\",\n        \"id\": \"f2adf8b1-39ca-487a-9ed0-d78d54ef7003\",\n        \"mode_of_conveyance\": \"L\",\n        \"point_of_boarding\": \"KSM\",\n        \"recently_visited_countries\": [\n            \"UG\"\n        ],\n        \"ticket_number\": \"KCX809T\"\n    },\n    \"type\": \"01\",\n    \"uid\": 308,\n    \"updated_at\": \"2025-07-15T22:56:24.000000\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Submit",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "Application/json"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en-GB,en;q=0.7"
+					},
+					{
+						"key": "Access-Control-Allow-Origin",
+						"value": "*"
+					},
+					{
+						"key": "Cache-Control",
+						"value": "no-cache"
+					},
+					{
+						"key": "Connection",
+						"value": "keep-alive"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Origin",
+						"value": "http://localhost:4000"
+					},
+					{
+						"key": "Pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "Referer",
+						"value": "http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ"
+					},
+					{
+						"key": "Sec-Fetch-Dest",
+						"value": "empty"
+					},
+					{
+						"key": "Sec-Fetch-Mode",
+						"value": "cors"
+					},
+					{
+						"key": "Sec-Fetch-Site",
+						"value": "same-origin"
+					},
+					{
+						"key": "Sec-GPC",
+						"value": "1"
+					},
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"macOS\""
+					},
+					{
+						"key": "Cookie",
+						"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"checkout\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/customs/passenger-declaration/F88-20251118XRIB",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"customs",
+						"passenger-declaration",
+						"F88-20251118XRIB"
+					]
+				},
+				"description": "Generated from cURL: curl 'http://localhost:4000/api/customs/passenger-declaration/F88-20250711VLGGZ' \\\n  -H 'Accept: Application/json' \\\n  -H 'Accept-Language: en-GB,en;q=0.7' \\\n  -H 'Access-Control-Allow-Origin: *' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -H 'Content-Type: application/json' \\\n  -b '_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo' \\\n  -H 'Origin: http://localhost:4000' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-origin' \\\n  -H 'Sec-GPC: 1' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"' \\\n  --data-raw '{}'"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"value": "http://localhost:4000"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/customs/passenger-declaration/F88-20250715WQIE",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customs",
+								"passenger-declaration",
+								"F88-20250715WQIE"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "831"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 15 Jul 2025 22:58:51 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GFKO56x6qLT2-lIAAdkB"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"assesments\": [],\n    \"contact_information\": {\n        \"address\": \"Kiambu road\",\n        \"email\": \"michaelkinare@gmail.com\",\n        \"id\": \"39f4b9f3-9f33-4315-94fc-212d1d3d30b8\",\n        \"msisdn\": \"0708338855\",\n        \"residence\": \"Winston\"\n    },\n    \"dob\": \"1985-07-11\",\n    \"eslip_number\": null,\n    \"external_id\": 2034,\n    \"external_status\": \"20\",\n    \"firstname\": \"Michael\",\n    \"gender\": \"M\",\n    \"id\": 53,\n    \"inserted_at\": \"2025-07-15T22:55:07.000000\",\n    \"items\": [],\n    \"language\": \"en\",\n    \"nationality\": \"KE\",\n    \"passport_number\": \"30985578\",\n    \"payable\": false,\n    \"profession\": \"Deceloper\",\n    \"ref_no\": \"F88-20250715WQIE\",\n    \"status\": \"submitted\",\n    \"surname\": \"Karanja\",\n    \"travel_information\": {\n        \"arrival_date\": \"2025-07-26\",\n        \"arrival_from\": \"TZ\",\n        \"id\": \"f2adf8b1-39ca-487a-9ed0-d78d54ef7003\",\n        \"mode_of_conveyance\": \"L\",\n        \"point_of_boarding\": \"KSM\",\n        \"recently_visited_countries\": [\n            \"UG\"\n        ],\n        \"ticket_number\": \"KCX809T\"\n    },\n    \"type\": \"01\",\n    \"uid\": 332,\n    \"updated_at\": \"2025-07-15T22:58:51.761447\"\n}"
+				},
+				{
+					"name": "Success checkout",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"value": "http://localhost:4000"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/tax-computation/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"checkout\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/customs/passenger-declaration/F88-20250829HNTC",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customs",
+								"passenger-declaration",
+								"F88-20250829HNTC"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "Text",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "111"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Fri, 29 Aug 2025 12:22:42 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GGA8TiTr88xtK0MAABXB"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"checkout_url\": \"https://test.pesaflow.com/checkout?request_id=ehPWRSelaJZooO3eMC8l\",\n    \"invoice_number\": \"MKRRKP\"\n}"
+				}
+			]
+		},
+		{
+			"name": "HS Code Search",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "Application/json"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en-GB,en;q=0.7"
+					},
+					{
+						"key": "Access-Control-Allow-Origin",
+						"value": "*"
+					},
+					{
+						"key": "Cache-Control",
+						"value": "no-cache"
+					},
+					{
+						"key": "Connection",
+						"value": "keep-alive"
+					},
+					{
+						"key": "Pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "Referer",
+						"value": "http://localhost:4000/passenger-declaration/declarations/F88-20250711VLGGZ"
+					},
+					{
+						"key": "Sec-Fetch-Dest",
+						"value": "empty"
+					},
+					{
+						"key": "Sec-Fetch-Mode",
+						"value": "cors"
+					},
+					{
+						"key": "Sec-Fetch-Site",
+						"value": "same-origin"
+					},
+					{
+						"key": "Sec-GPC",
+						"value": "1"
+					},
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"macOS\""
+					},
+					{
+						"key": "Cookie",
+						"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/customs/hs-codes?search=phone&page_size=5",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"customs",
+						"hs-codes"
+					],
+					"query": [
+						{
+							"key": "search",
+							"value": "phone"
+						},
+						{
+							"key": "page_size",
+							"value": "5"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl 'http://localhost:4000/api/customs/hs-codes?search=f&page_size=50' \\\n  -H 'Accept: Application/json' \\\n  -H 'Accept-Language: en-GB,en;q=0.7' \\\n  -H 'Access-Control-Allow-Origin: *' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -b '_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:4000/passenger-declaration/declarations/F88-20250711VLGGZ' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-origin' \\\n  -H 'Sec-GPC: 1' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"'"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "Application/json"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en-GB,en;q=0.7"
+							},
+							{
+								"key": "Access-Control-Allow-Origin",
+								"value": "*"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Referer",
+								"value": "http://localhost:4000/passenger-declaration/declarations/F88-20250711VLGGZ"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-GPC",
+								"value": "1"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "Cookie",
+								"value": "_kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYMnRRRW42dTlWRnhKQXJPUTNCM2tOZDRw.lBEFeh4wVmbUAE6Fy10ZdtZZ8TZ_gb5AEbjlAUmPWHo"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/customs/hs-codes?search=phone&page_size=50",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customs",
+								"hs-codes"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "phone"
+								},
+								{
+									"key": "page_size",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "cache-control",
+							"value": "max-age=0, private, must-revalidate"
+						},
+						{
+							"key": "content-length",
+							"value": "3289"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 15 Jul 2025 22:59:15 GMT"
+						},
+						{
+							"key": "server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "x-request-id",
+							"value": "GFKO7YkjHU8NyAQAAdlB"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"entries\": [\n        {\n            \"description\": \"Lithophone and other pigments and preparations based on zinc sulphide.\",\n            \"hs_code\": \"32064200\",\n            \"id\": 1866,\n            \"inserted_at\": \"2025-06-24T14:25:04.668901\",\n            \"uom\": \"KGM\",\n            \"updated_at\": \"2025-06-24T14:25:04.668901\"\n        },\n        {\n            \"description\": \"Concentrates of poppy straw; buprenorphine (INN), codeine, dihydrocodeine (INN), hydromorphone (INN), morphine, nicomorphine (INN), oxycodone (INN), oxymorphone (INN), pholcodine (INN), thebacon (INN), and thebaine; salts thereof\",\n            \"hs_code\": \"29391100\",\n            \"id\": 1745,\n            \"inserted_at\": \"2025-06-24T14:25:04.594756\",\n            \"uom\": \"KGM\",\n            \"updated_at\": \"2025-06-24T14:25:04.594756\"\n        },\n        {\n            \"description\": \"Polysulphites, polysulphones and other products specified in Note 3 to this chapter, n.e.s. or included, in primary form._x000D_\\r\\n\",\n            \"hs_code\": \"39119000\",\n            \"id\": 2198,\n            \"inserted_at\": \"2025-06-24T14:25:04.948664\",\n            \"uom\": \"KGM\",\n            \"updated_at\": \"2025-06-24T14:25:04.948664\"\n        },\n        {\n            \"description\": \"-- Other telephones for cellular networks or for other wireless networks\",\n            \"hs_code\": \"85171400\",\n            \"id\": 5090,\n            \"inserted_at\": \"2025-06-24T14:25:07.174844\",\n            \"uom\": \"UNT\",\n            \"updated_at\": \"2025-06-24T14:25:07.174844\"\n        },\n        {\n            \"description\": \"Other telephone sets.\",\n            \"hs_code\": \"85171800\",\n            \"id\": 5091,\n            \"inserted_at\": \"2025-06-24T14:25:07.175748\",\n            \"uom\": \"UNT\",\n            \"updated_at\": \"2025-06-24T14:25:07.175748\"\n        },\n        {\n            \"description\": \"-- Other parts of telephone sets, including smartphones and other telephones, including telephones for cellular networks or for other wireless networks; other apparatus for the transmission or reception of voice, images or other data, including apparatus for communication in a wired or wireless network (such as a local or wide area network), other than transmission or reception apparatus of heading 84.43, 85.25, 85.27 or 85.28\",\n            \"hs_code\": \"85177900\",\n            \"id\": 5096,\n            \"inserted_at\": \"2025-06-24T14:25:07.178915\",\n            \"uom\": \"KGM\",\n            \"updated_at\": \"2025-06-24T14:25:07.178915\"\n        },\n        {\n            \"description\": \"Headphones and earphones, whether or not combined with a microphone, and sets consisting of a microphone and one or more loudspeakers.\",\n            \"hs_code\": \"85183000\",\n            \"id\": 5101,\n            \"inserted_at\": \"2025-06-24T14:25:07.181886\",\n            \"uom\": \"UNT\",\n            \"updated_at\": \"2025-06-24T14:25:07.181886\"\n        },\n        {\n            \"description\": \"Microphones and stands thereof.\",\n            \"hs_code\": \"85181000\",\n            \"id\": 5097,\n            \"inserted_at\": \"2025-06-24T14:25:07.179738\",\n            \"uom\": \"UNT\",\n            \"updated_at\": \"2025-06-24T14:25:07.179738\"\n        },\n        {\n            \"description\": \"Line telephone sets with cordless handsets.\",\n            \"hs_code\": \"85171100\",\n            \"id\": 5088,\n            \"inserted_at\": \"2025-06-24T14:25:07.173461\",\n            \"uom\": \"UNT\",\n            \"updated_at\": \"2025-06-24T14:25:07.173461\"\n        },\n        {\n            \"description\": \"-- Smartphones\",\n            \"hs_code\": \"85171300\",\n            \"id\": 5089,\n            \"inserted_at\": \"2025-06-24T14:25:07.174048\",\n            \"uom\": \"UNT\",\n            \"updated_at\": \"2025-06-24T14:25:07.174048\"\n        },\n        {\n            \"description\": \"Parts of microphone and stands, loud-speakers, headphones, earphones, combined microphones/speaker sets, audio-frequency electric amplifiers and electric sound amplifiers sets.\",\n            \"hs_code\": \"85189000\",\n            \"id\": 5104,\n            \"inserted_at\": \"2025-06-24T14:25:07.184276\",\n            \"uom\": \"KGM\",\n            \"updated_at\": \"2025-06-24T14:25:07.184276\"\n        },\n        {\n            \"description\": \"Percussion musical instruments (for example, drums, xylophones, cymbals, castanets, maraccas).\",\n            \"hs_code\": \"92060000\",\n            \"id\": 5729,\n            \"inserted_at\": \"2025-06-24T14:25:07.658388\",\n            \"uom\": \"UNT\",\n            \"updated_at\": \"2025-06-24T14:25:07.658388\"\n        }\n    ],\n    \"page_number\": 1,\n    \"page_size\": 50,\n    \"total_entries\": 12,\n    \"total_pages\": 1\n}"
+				}
+			]
+		},
+		{
+			"name": "Payment Slip",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "Application/json"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en-GB,en;q=0.8"
+					},
+					{
+						"key": "Access-Control-Allow-Origin",
+						"value": "*"
+					},
+					{
+						"key": "Cache-Control",
+						"value": "no-cache"
+					},
+					{
+						"key": "Connection",
+						"value": "keep-alive"
+					},
+					{
+						"key": "Pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "Referer",
+						"value": "http://localhost:4000/passenger-declaration/payment/F88-20250715CABY"
+					},
+					{
+						"key": "Sec-Fetch-Dest",
+						"value": "empty"
+					},
+					{
+						"key": "Sec-Fetch-Mode",
+						"value": "cors"
+					},
+					{
+						"key": "Sec-Fetch-Site",
+						"value": "same-origin"
+					},
+					{
+						"key": "Sec-GPC",
+						"value": "1"
+					},
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"macOS\""
+					},
+					{
+						"key": "Cookie",
+						"value": "sidebar_state=true; appearance=system; _kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYUzFTNno1ZzI3MEVjYlVHWUFJZmtyRmZi.v9B2i_6z-VysinIM1h7ulgcw5NFIZfN2D19mou2Pooc"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/customs/passenger-declaration/F88-20250715CABY/download-payment-slip",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"customs",
+						"passenger-declaration",
+						"F88-20250715CABY",
+						"download-payment-slip"
+					]
+				},
+				"description": "Generated from cURL: curl 'http://localhost:4000/api/customs/passenger-declaration/F88-20250715CABY/download-payment-slip' \\\n  -H 'Accept: Application/json' \\\n  -H 'Accept-Language: en-GB,en;q=0.8' \\\n  -H 'Access-Control-Allow-Origin: *' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -b 'sidebar_state=true; appearance=system; _kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYUzFTNno1ZzI3MEVjYlVHWUFJZmtyRmZi.v9B2i_6z-VysinIM1h7ulgcw5NFIZfN2D19mou2Pooc' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:4000/passenger-declaration/payment/F88-20250715CABY' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-origin' \\\n  -H 'Sec-GPC: 1' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"'"
+			},
+			"response": []
+		},
+		{
+			"name": "F88 Form",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "Application/json"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en-GB,en;q=0.8"
+					},
+					{
+						"key": "Access-Control-Allow-Origin",
+						"value": "*"
+					},
+					{
+						"key": "Cache-Control",
+						"value": "no-cache"
+					},
+					{
+						"key": "Connection",
+						"value": "keep-alive"
+					},
+					{
+						"key": "Pragma",
+						"value": "no-cache"
+					},
+					{
+						"key": "Referer",
+						"value": "http://localhost:4000/passenger-declaration/payment/F88-20250715CABY"
+					},
+					{
+						"key": "Sec-Fetch-Dest",
+						"value": "empty"
+					},
+					{
+						"key": "Sec-Fetch-Mode",
+						"value": "cors"
+					},
+					{
+						"key": "Sec-Fetch-Site",
+						"value": "same-origin"
+					},
+					{
+						"key": "Sec-GPC",
+						"value": "1"
+					},
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"macOS\""
+					},
+					{
+						"key": "Cookie",
+						"value": "sidebar_state=true; appearance=system; _kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYUzFTNno1ZzI3MEVjYlVHWUFJZmtyRmZi.v9B2i_6z-VysinIM1h7ulgcw5NFIZfN2D19mou2Pooc"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/customs/passenger-declaration/F88-20251118XRIB/download-form",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"customs",
+						"passenger-declaration",
+						"F88-20251118XRIB",
+						"download-form"
+					]
+				},
+				"description": "Generated from cURL: curl 'http://localhost:4000/api/customs/passenger-declaration/F88-20250715CABY/download-form' \\\n  -H 'Accept: Application/json' \\\n  -H 'Accept-Language: en-GB,en;q=0.8' \\\n  -H 'Access-Control-Allow-Origin: *' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -b 'sidebar_state=true; appearance=system; _kra_ecitizen_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYUzFTNno1ZzI3MEVjYlVHWUFJZmtyRmZi.v9B2i_6z-VysinIM1h7ulgcw5NFIZfN2D19mou2Pooc' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:4000/passenger-declaration/payment/F88-20250715CABY' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-origin' \\\n  -H 'Sec-GPC: 1' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Brave\";v=\"138\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"'"
+			},
+			"response": []
+		},
+		{
+			"name": "send otp",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"pin\": \"A123456789B\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/customs/passenger-declaration/send-otp",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"customs",
+						"passenger-declaration",
+						"send-otp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "verify otp",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"otp\": \"123456\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/customs/passenger-declaration/verify-otp ",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"customs",
+						"passenger-declaration",
+						"verify-otp "
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "entry points",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/entry_points",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"entry_points"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "",
+			"type": "default"
+		}
+	]
+}

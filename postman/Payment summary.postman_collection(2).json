@@ -1,0 +1,98 @@
+{
+	"info": {
+		"_postman_id": "ab4fdf5c-02e9-4cbd-ad5f-58d0970771c9",
+		"name": "Payment summary",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26799658"
+	},
+	"item": [
+		{
+			"name": "Obligation Liabilities",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-forwarded-for",
+						"value": "triple_2_ussd",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://kratest.pesaflow.com/api/ussd/tax-payer-liabilities?obligation_id=8&tax_payer_pin=A003032441Y",
+					"protocol": "https",
+					"host": [
+						"kratest",
+						"pesaflow",
+						"com"
+					],
+					"path": [
+						"api",
+						"ussd",
+						"tax-payer-liabilities"
+					],
+					"query": [
+						{
+							"key": "obligation_id",
+							"value": "8",
+							"description": "8 for MRI and 33 for TOT"
+						},
+						{
+							"key": "tax_payer_pin",
+							"value": "A003032441Y"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "generate payment from liabilities",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-forwarded-for",
+						"value": "triple_2_ussd",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tax_payer_pin\": \"A003032441Y\",\n    \"obligation_id\": \"8\", /* 8 for MRI and 33 for TOT*/\n    \"tax_period_from\": \"01-06-2025\", /* this is gotten from fetching obligation liabilities*/\n    \"tax_period_to\": \"30-06-2025\",\n    \"amount\": \"4\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://kratest.pesaflow.com/api/ussd/generate-prn",
+					"protocol": "https",
+					"host": [
+						"kratest",
+						"pesaflow",
+						"com"
+					],
+					"path": [
+						"api",
+						"ussd",
+						"generate-prn"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

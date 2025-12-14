@@ -1,6 +1,20 @@
 'use server';
 
 import axios from 'axios';
+import {
+  CustomerLookupResult,
+  InvoiceSubmissionRequest,
+  InvoiceSubmissionResult,
+  FetchInvoicesResult,
+  SearchCreditNoteResult,
+  CreditNoteInvoice,
+  SubmitCreditNoteRequest,
+  SubmitCreditNoteResult,
+  CREDIT_NOTE_REASONS
+} from '../etims/_lib/definitions';
+
+// Export types so they can be imported from here if needed (re-exporting types is fine in use server? No, re-exporting types is fine, but re-exporting VALUES is not)
+// Actually, it's better to NOT re-export them to avoid confusion and errors. Consumers should import from definitions.
 
 const BASE_URL = 'https://kratest.pesaflow.com/api/ussd';
 
@@ -13,46 +27,6 @@ const handleApiError = (error: any) => {
     'An error occurred while communicating with the server'
   );
 };
-
-// Customer lookup response type
-export interface CustomerLookupResult {
-  success: boolean;
-  customer?: {
-    name: string;
-    pin: string;
-    msisdn: string;
-  };
-  error?: string;
-}
-
-// Invoice item type
-export interface InvoiceItem {
-  item_name: string;
-  description?: string;
-  taxable_amount: number;
-  quantity: number;
-  item_total: number;
-}
-
-// Invoice submission request
-export interface InvoiceSubmissionRequest {
-  msisdn: string;
-  total_amount: number;
-  items: {
-    item_name: string;
-    taxable_amount: number;
-    quantity: number;
-  }[];
-}
-
-// Invoice submission response
-export interface InvoiceSubmissionResult {
-  success: boolean;
-  invoice_id?: string;
-  message?: string;
-  transaction_reference?: string;
-  error?: string;
-}
 
 /**
  * Lookup customer by PIN or ID
@@ -83,13 +57,37 @@ export async function lookupCustomer(pinOrId: string): Promise<CustomerLookupRes
       }
     );
 
-    return response.data;
+    console.log('Lookup response:', JSON.stringify(response.data, null, 2));
+
+    // The API returns { code: 3, message: "Valid ID Number", name: "...", pin: "..." } on success
+    // It does not return a standard success: boolean flag.
+    if (response.data && (response.data.pin || response.data.code === 3)) {
+      return {
+        success: true,
+        customer: {
+          name: response.data.name,
+          pin: response.data.pin,
+          msisdn: response.data.msisdn || '' // msisdn might not be returned in lookup
+        }
+      };
+    } else {
+        return {
+            success: false,
+            error: response.data.message || 'Customer not found'
+        };
+    }
   } catch (error: any) {
     if (error.response?.status === 404) {
-      throw new Error('Customer not found. Please verify the PIN/ID and try again');
+      return {
+          success: false,
+          error: 'Customer not found. Please verify the PIN/ID and try again'
+      };
     }
-    handleApiError(error);
-    throw error;
+    console.error('Customer lookup error', error);
+    return {
+        success: false,
+        error: error.message || 'An error occurred during lookup'
+    };
   }
 }
 
@@ -144,30 +142,6 @@ export async function submitInvoice(
     handleApiError(error);
     throw error;
   }
-}
-
-// Invoice from API response
-export interface FetchedInvoice {
-  invoice_id: string;
-  reference: string;
-  total_amount: number;
-  status: 'pending' | 'completed' | 'rejected';
-  buyer_name: string;
-  seller_name: string;
-  created_at: string;
-  rejection_reason?: string;
-  items: {
-    item_name: string;
-    quantity: number;
-    unit_price: number;
-  }[];
-}
-
-// Fetch invoices response
-export interface FetchInvoicesResult {
-  success: boolean;
-  invoices?: FetchedInvoice[];
-  error?: string;
 }
 
 /**
@@ -241,73 +215,6 @@ export async function fetchInvoices(phoneNumber: string): Promise<FetchInvoicesR
       'Failed to fetch invoices'
     );
   }
-}
-
-// Credit Note Types
-export type CreditNoteType = 'partial' | 'full';
-
-export type CreditNoteReason = 
-  | 'missing_data'
-  | 'damaged_goods'
-  | 'wrong_items'
-  | 'pricing_error'
-  | 'customer_return'
-  | 'other';
-
-export const CREDIT_NOTE_REASONS: { value: CreditNoteReason; label: string }[] = [
-  { value: 'missing_data', label: 'Missing Data' },
-  { value: 'damaged_goods', label: 'Damaged Goods' },
-  { value: 'wrong_items', label: 'Wrong Items Delivered' },
-  { value: 'pricing_error', label: 'Pricing Error' },
-  { value: 'customer_return', label: 'Customer Return' },
-  { value: 'other', label: 'Other' }
-];
-
-// Credit Note Invoice Item
-export interface CreditNoteItem {
-  item_id: string;
-  item_name: string;
-  unit_price: number;
-  quantity: number;
-  currency?: string;
-}
-
-// Credit Note Invoice
-export interface CreditNoteInvoice {
-  invoice_no: string;
-  invoice_id?: string;
-  total_amount: number;
-  currency?: string;
-  seller_name?: string;
-  buyer_name?: string;
-  items?: CreditNoteItem[];
-}
-
-// Search Credit Note Response
-export interface SearchCreditNoteResult {
-  success: boolean;
-  invoice?: CreditNoteInvoice;
-  error?: string;
-}
-
-// Submit Credit Note Request
-export interface SubmitCreditNoteRequest {
-  msisdn: string;
-  invoice_no: string;
-  credit_note_type: CreditNoteType;
-  reason: CreditNoteReason;
-  items: {
-    item_id: string;
-    return_quantity: number;
-  }[];
-}
-
-// Submit Credit Note Response
-export interface SubmitCreditNoteResult {
-  success: boolean;
-  credit_note_id?: string;
-  message?: string;
-  error?: string;
 }
 
 /**
@@ -480,3 +387,50 @@ export async function submitPartialCreditNote(
   }
 }
 
+/**
+ * Process buyer initiated invoice (accept/reject)
+ */
+export async function processBuyerInvoice(
+  msisdn: string,
+  invoiceRef: string,
+  action: 'accept' | 'reject'
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  if (!msisdn) throw new Error('Phone number is required');
+  if (!invoiceRef) throw new Error('Invoice reference is required');
+
+  let cleanNumber = msisdn.trim().replace(/[^\d]/g, '');
+  if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
+  else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
+
+  console.log(`Processing invoice ${invoiceRef} for ${cleanNumber}: ${action}`);
+
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/buyer-initiated/action/submit`,
+      {
+        action,
+        msisdn: cleanNumber,
+        invoice: invoiceRef
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': 'triple_2_ussd'
+        },
+        timeout: 30000
+      }
+    );
+
+    return {
+      success: true,
+      message: response.data.message || 'Action submitted successfully'
+    };
+  } catch (error: any) {
+    console.error('Process invoice error:', error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || 
+      error.response?.data?.error || 
+      'Failed to process invoice'
+    );
+  }
+}

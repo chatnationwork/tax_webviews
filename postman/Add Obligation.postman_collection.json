@@ -1,0 +1,208 @@
+{
+	"info": {
+		"_postman_id": "1fd04837-05c6-402d-8542-e53708d78145",
+		"name": "Add Obligation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26799658"
+	},
+	"item": [
+		{
+			"name": "addObligation",
+			"item": [
+				{
+					"name": "addObligationTOT",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlUml0c2VDaXRpemVuVG9rZW5Mb2dpbiIsImlhdCI6MTc2NDg2MTQyNCwiZXhwIjoxNzY0OTQ3ODI0fQ.jfrR_0lrMGydT51EzmE6_t_zcAeivw6CsoH-LhyxkWY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n         \"taxpayerPIN\": \"P000000000R\",\r\n         \"obligationID\": \"8\",\r\n         \"effectivePeriod\": \"01/05/2022\",\r\n         \"estimatedMonthlyTurnover\": \"30000\"\r\n   }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://itaxuat.kra.go.ke/Eservices/KRA/kra/v1/add-obligation",
+							"protocol": "https",
+							"host": [
+								"itaxuat",
+								"kra",
+								"go",
+								"ke"
+							],
+							"path": [
+								"Eservices",
+								"KRA",
+								"kra",
+								"v1",
+								"add-obligation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addObligationMRI",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlUml0c2VDaXRpemVuVG9rZW5Mb2dpbiIsImlhdCI6MTc2NDg2MTQyNCwiZXhwIjoxNzY0OTQ3ODI0fQ.jfrR_0lrMGydT51EzmE6_t_zcAeivw6CsoH-LhyxkWY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n         \"taxpayerPIN\": \"P000000000R\",\r\n         \"obligationID\": \"33\",\r\n         \"effectivePeriod\": \"01/05/2015\"\r\n   }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://itaxuat.kra.go.ke/Eservices/KRA/kra/v1/add-obligation",
+							"protocol": "https",
+							"host": [
+								"itaxuat",
+								"kra",
+								"go",
+								"ke"
+							],
+							"path": [
+								"Eservices",
+								"KRA",
+								"kra",
+								"v1",
+								"add-obligation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addObligationPAYE",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlUml0c2VDaXRpemVuVG9rZW5Mb2dpbiIsImlhdCI6MTc2NDg2MTQyNCwiZXhwIjoxNzY0OTQ3ODI0fQ.jfrR_0lrMGydT51EzmE6_t_zcAeivw6CsoH-LhyxkWY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n         \"taxpayerPIN\": \"P000000000R\",\r\n         \"obligationID\": \"7\",\r\n         \"effectivePeriod\": \"01/05/2022\",\r\n         \"noOfEmployees\": \"10\",\r\n         \"estimatedMonthlyPAYE\": \"300450\"\r\n   }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://itaxuat.kra.go.ke/Eservices/KRA/kra/v1/add-obligation",
+							"protocol": "https",
+							"host": [
+								"itaxuat",
+								"kra",
+								"go",
+								"ke"
+							],
+							"path": [
+								"Eservices",
+								"KRA",
+								"kra",
+								"v1",
+								"add-obligation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Authenticate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"username\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://itaxuat.kra.go.ke/Eservices/KRA/auth/v1/Authenticate",
+							"protocol": "https",
+							"host": [
+								"itaxuat",
+								"kra",
+								"go",
+								"ke"
+							],
+							"path": [
+								"Eservices",
+								"KRA",
+								"auth",
+								"v1",
+								"Authenticate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

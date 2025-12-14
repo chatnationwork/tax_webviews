@@ -1,0 +1,172 @@
+{
+    "info": {
+        "_postman_id": "consolidated-kra-itax",
+        "name": "KRA iTax Services (Consolidated)",
+        "description": "Consolidated collection for KRA iTax UAT services, including obligation management.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "description": "Authenticate with KRA iTax to get a bearer token",
+            "item": [
+                {
+                    "name": "Authenticate",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"your_username\",\n    \"password\": \"your_password\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/v1/Authenticate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "v1",
+                                "Authenticate"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Add Obligation",
+            "description": "Add tax obligations to taxpayer accounts",
+            "item": [
+                {
+                    "name": "Add TOT (Turnover Tax) Obligation",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{bearer_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"taxpayerPIN\": \"P000000000R\",\n    \"obligationID\": \"8\",\n    \"effectivePeriod\": \"01/05/2022\",\n    \"estimatedMonthlyTurnover\": \"30000\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/kra/v1/add-obligation",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "kra",
+                                "v1",
+                                "add-obligation"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add MRI (Monthly Rental Income) Obligation",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{bearer_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"taxpayerPIN\": \"P000000000R\",\n    \"obligationID\": \"33\",\n    \"effectivePeriod\": \"01/05/2015\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/kra/v1/add-obligation",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "kra",
+                                "v1",
+                                "add-obligation"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add PAYE Obligation",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{bearer_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"taxpayerPIN\": \"P000000000R\",\n    \"obligationID\": \"7\",\n    \"effectivePeriod\": \"01/05/2022\",\n    \"noOfEmployees\": \"10\",\n    \"estimatedMonthlyPAYE\": \"300450\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/kra/v1/add-obligation",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "kra",
+                                "v1",
+                                "add-obligation"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "https://itaxuat.kra.go.ke/Eservices/KRA",
+            "type": "default"
+        },
+        {
+            "key": "bearer_token",
+            "value": "",
+            "type": "default"
+        }
+    ]
+}

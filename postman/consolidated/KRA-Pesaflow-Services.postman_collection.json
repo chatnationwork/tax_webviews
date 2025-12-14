@@ -1,0 +1,1085 @@
+{
+    "info": {
+        "_postman_id": "consolidated-pesaflow-services",
+        "name": "KRA Pesaflow Services (Consolidated)",
+        "description": "Consolidated collection of all KRA services on the Pesaflow platform, including USSD, WhatsApp integration, payments, and tax filing.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "description": "OTP generation and validation for USSD & WhatsApp",
+            "item": [
+                {
+                    "name": "Generate OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"msisdn\": \"254712345678\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/otp",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "otp"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Validate OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"msisdn\": \"254712345678\",\n    \"otp\": \"ABC123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/validate-otp",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "validate-otp"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PIN Registration",
+            "description": "KRA PIN registration for citizens and residents",
+            "item": [
+                {
+                    "name": "Register PIN - Citizen",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"type\": \"citizen\",\n    \"email\": \"your_email@example.com\",\n    \"msisdn\": \"254712345678\",\n    \"id_number\": \"12345678\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/pin-registration",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "pin-registration"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Register PIN - Resident",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"type\": \"resident\",\n    \"email\": \"your_email@example.com\",\n    \"msisdn\": \"254712345678\",\n    \"id_number\": \"123456789\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/pin-registration",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "pin-registration"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Taxpayer Validation",
+            "description": "USSD service initialization and taxpayer lookup",
+            "item": [
+                {
+                    "name": "GUI Lookup (Primary - Recommended)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-source-for",
+                                "value": "whatsapp"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://kratest.pesaflow.com/api/itax/gui-lookup?gui=37998670&tax_payer_type=KE",
+                            "protocol": "https",
+                            "host": [
+                                "kratest",
+                                "pesaflow",
+                                "com"
+                            ],
+                            "path": [
+                                "api",
+                                "itax",
+                                "gui-lookup"
+                            ],
+                            "query": [
+                                {
+                                    "key": "gui",
+                                    "value": "37998670",
+                                    "description": "ID Number"
+                                },
+                                {
+                                    "key": "tax_payer_type",
+                                    "value": "KE",
+                                    "description": "Always KE for Kenya"
+                                }
+                            ]
+                        },
+                        "description": "Primary taxpayer lookup by ID number. Returns actual KRA PIN and taxpayer name. ResponseCode 30000 = Valid ID."
+                    }
+                },
+                {
+                    "name": "Buyer Lookup (Fallback)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"pin\": \"37998670\",\n    \"waba\": \"\",\n    \"yob\": \"2000\"\n}"
+                        },
+                        "url": {
+                            "raw": "https://etims.1automations.com/buyer_lookup",
+                            "protocol": "https",
+                            "host": [
+                                "etims",
+                                "1automations",
+                                "com"
+                            ],
+                            "path": [
+                                "buyer_lookup"
+                            ]
+                        },
+                        "description": "Fallback taxpayer lookup. NOTE: The 'pin' field confusingly takes the ID NUMBER, not the actual KRA PIN. Requires YOB."
+                    }
+                },
+                {
+                    "name": "Service Initialization",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"msisdn\": \"254712345678\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/init",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "init"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "ID Lookup (Legacy)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id_number\": \"12345678\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/id-lookup",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "id-lookup"
+                            ]
+                        },
+                        "description": "Legacy ID lookup. Use GUI Lookup for better results."
+                    }
+                },
+                {
+                    "name": "Register Taxpayer for USSD",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id_number\": \"12345678\",\n    \"msisdn\": \"254712345678\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/register-tax-payer",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "register-tax-payer"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "eTIMS Invoicing",
+            "description": "Create and manage eTIMS invoices",
+            "item": [
+                {
+                    "name": "Create Sale Invoice",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"msisdn\": \"254712345678\",\n    \"total_amount\": 1000,\n    \"items\": [\n        {\n            \"item_name\": \"Product Name\",\n            \"taxable_amount\": 100,\n            \"quantity\": 10\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/post-sale",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "post-sale"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Search Invoice for Credit Note",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"msisdn\": \"254712345678\",\n    \"invoice_no\": \"1004\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/search/credit-note",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "search",
+                                "credit-note"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Submit Credit Note",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"msisdn\": \"254712345678\",\n    \"invoice_no\": \"1004\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/submit/credit-note",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "submit",
+                                "credit-note"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Buyer-Initiated Invoices",
+            "description": "Create and manage buyer-initiated eTIMS invoices",
+            "item": [
+                {
+                    "name": "Lookup Seller",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"pin_or_id\": \"A012345678Z\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/buyer-initiated/lookup",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "buyer-initiated",
+                                "lookup"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Buyer Invoice",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"seller_pin\": \"A001159936V\",\n    \"seller_msisdn\": \"254718471455\",\n    \"msisdn\": \"254712345678\",\n    \"total_amount\": 1000,\n    \"items\": [\n        {\n            \"item_name\": \"Product Name\",\n            \"taxable_amount\": 100,\n            \"quantity\": 10\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/buyer-initiated/submit/invoice",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "buyer-initiated",
+                                "submit",
+                                "invoice"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Fetch Pending Invoices",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/buyer-initiated/fetch/254712345678",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "buyer-initiated",
+                                "fetch",
+                                "254712345678"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Accept Invoice",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"action\": \"accept\",\n    \"msisdn\": \"254712345678\",\n    \"invoice\": \"BI-KWFQOH; KES 1000; SELLER NAME\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/buyer-initiated/action/submit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "buyer-initiated",
+                                "action",
+                                "submit"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Reject Invoice",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"action\": \"reject\",\n    \"msisdn\": \"254712345678\",\n    \"invoice\": \"BI-KWFQOH; KES 1000; SELLER NAME\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/buyer-initiated/action/submit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "buyer-initiated",
+                                "action",
+                                "submit"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Tax Filing",
+            "description": "File tax returns (NIL, TOT, MRI)",
+            "item": [
+                {
+                    "name": "File NIL Return",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"kra_obligation_id\": \"8\",\n    \"returnPeriod\": \"01/09/2024 - 30/09/2024\",\n    \"returnType\": \"nil_return\",\n    \"tax_payer_pin\": \"A005456284F\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/file-return",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "file-return"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Fetch Filing Period",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"branch_id\": \"\",\n    \"from_date\": \"\",\n    \"from_itms_or_prtl\": \"PRTL\",\n    \"is_amended\": \"N\",\n    \"obligation_id\": \"8\",\n    \"pin\": \"A005456284F\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/obligation-filling-period",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "obligation-filling-period"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Payments",
+            "description": "View liabilities, generate PRN, and make payments",
+            "item": [
+                {
+                    "name": "Get Taxpayer Liabilities",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/tax-payer-liabilities?obligation_id=8&tax_payer_pin=A003032441Y",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "tax-payer-liabilities"
+                            ],
+                            "query": [
+                                {
+                                    "key": "obligation_id",
+                                    "value": "8",
+                                    "description": "8=MRI, 33=TOT"
+                                },
+                                {
+                                    "key": "tax_payer_pin",
+                                    "value": "A003032441Y"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Generate PRN",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"tax_payer_pin\": \"A003032441Y\",\n    \"obligation_id\": \"8\",\n    \"tax_period_from\": \"01-06-2025\",\n    \"tax_period_to\": \"30-06-2025\",\n    \"amount\": \"1000\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/generate-prn",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "generate-prn"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Make Payment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"msisdn\": \"254712345678\",\n    \"prn\": \"PRN123456\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/make-payment",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "make-payment"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Verification Checkers",
+            "description": "Various KRA verification services",
+            "item": [
+                {
+                    "name": "PIN Checker",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/taxpayer/pin-checker?pin_number=A012345678Z",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "taxpayer",
+                                "pin-checker"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pin_number",
+                                    "value": "A012345678Z"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "TCC Checker",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/itax/validate-tcc?kra_pin=A012345678Z&tcc_number=TCC123456",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "itax",
+                                "validate-tcc"
+                            ],
+                            "query": [
+                                {
+                                    "key": "kra_pin",
+                                    "value": "A012345678Z"
+                                },
+                                {
+                                    "key": "tcc_number",
+                                    "value": "TCC123456"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Staff Checker",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/taxpayer/staff-checker?national_id=12345678",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "taxpayer",
+                                "staff-checker"
+                            ],
+                            "query": [
+                                {
+                                    "key": "national_id",
+                                    "value": "12345678"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Excise License Checker",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/taxpayer/excise-license-checker?pin_number=A012345678Z",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "taxpayer",
+                                "excise-license-checker"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pin_number",
+                                    "value": "A012345678Z"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "VAT Exemption Certificate",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/taxpayer/vat-exemption-certificate?ec_number=EC123456",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "taxpayer",
+                                "vat-exemption-certificate"
+                            ],
+                            "query": [
+                                {
+                                    "key": "ec_number",
+                                    "value": "EC123456"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Import Certificate",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/taxpayer/import-certificate?pin_number=A012345678Z",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "taxpayer",
+                                "import-certificate"
+                            ],
+                            "query": [
+                                {
+                                    "key": "pin_number",
+                                    "value": "A012345678Z"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Declaration Checker",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/taxpayer/declaration-checker?declaration_no=DEC123456&consignee_pin=A012345678Z",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "taxpayer",
+                                "declaration-checker"
+                            ],
+                            "query": [
+                                {
+                                    "key": "declaration_no",
+                                    "value": "DEC123456"
+                                },
+                                {
+                                    "key": "consignee_pin",
+                                    "value": "A012345678Z"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Application Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/taxpayer/application-status?task_no=TASK123456",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "taxpayer",
+                                "application-status"
+                            ],
+                            "query": [
+                                {
+                                    "key": "task_no",
+                                    "value": "TASK123456"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Control Unit Checker",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/control-unit-checker?serial_no=CU123456",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "control-unit-checker"
+                            ],
+                            "query": [
+                                {
+                                    "key": "serial_no",
+                                    "value": "CU123456"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Invoice Number Checker",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/invoice-number-checker?invoice_number=INV123456",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "invoice-number-checker"
+                            ],
+                            "query": [
+                                {
+                                    "key": "invoice_number",
+                                    "value": "INV123456"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "WHT Agent Checker (VAT)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/witholding-tax-agent-checker/vat?tax_payer_pin=A012345678Z",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "witholding-tax-agent-checker",
+                                "vat"
+                            ],
+                            "query": [
+                                {
+                                    "key": "tax_payer_pin",
+                                    "value": "A012345678Z"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "https://kratest.pesaflow.com",
+            "type": "default"
+        }
+    ]
+}
