@@ -43,11 +43,17 @@ function CreditNoteSearchContent() {
         const invoice: Invoice = {
           id: result.invoice.invoice_id || invoiceNumber,
           invoiceNumber: result.invoice.invoice_no || invoiceNumber,
-          items: result.invoice.items?.map((item, i) => ({
-            id: String(i), name: item.item_name, type: 'product' as const,
-            unitPrice: item.unit_price, quantity: item.quantity
+          items: result.invoice.items?.map((item: any, i: number) => ({
+            id: item.id || String(i), 
+            name: item.item_name, 
+            type: 'product' as const,
+            unitPrice: parseFloat(item.item_price || item.unit_price || 0), 
+            quantity: parseFloat(item.quantity || 1)
           })) || [],
-          subtotal: result.invoice.total_amount, tax: 0, total: result.invoice.total_amount, date: new Date().toISOString()
+          subtotal: Number(result.invoice.total_amount) || 0, 
+          tax: 0, 
+          total: Number(result.invoice.total_amount) || 0, 
+          date: new Date().toISOString()
         };
         saveCreditNote({ invoice, msisdn: session.msisdn, type: creditNoteType, reason });
         

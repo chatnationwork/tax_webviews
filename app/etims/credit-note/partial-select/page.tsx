@@ -55,21 +55,25 @@ export default function CreditNotePartialSelect() {
               <tr className="border-b">
                 <th className="w-8 py-1.5"></th>
                 <th className="text-left py-1.5 px-1 font-medium text-gray-600">Item</th>
-                <th className="text-right py-1.5 px-1 font-medium text-gray-600">Qty × Price</th>
+                <th className="text-right py-1.5 px-1 font-medium text-gray-600">Price</th>
+                <th className="text-center py-1.5 px-1 font-medium text-gray-600">Qty</th>
                 <th className="text-right py-1.5 px-1 font-medium text-gray-600">Total</th>
               </tr>
             </thead>
             <tbody>
               {invoice.items.map(item => {
                 const isSelected = selectedItems.has(item.id);
+                const price = item.unitPrice || 0;
+                const qty = item.quantity || 0;
                 return (
                   <tr key={item.id} onClick={() => toggleItem(item.id)} className={`border-b last:border-0 cursor-pointer ${isSelected ? 'bg-red-50' : 'hover:bg-gray-50'}`}>
                     <td className="py-2 px-1">
                       {isSelected ? <CheckSquare className="w-4 h-4 text-[var(--kra-red)]" /> : <Square className="w-4 h-4 text-gray-400" />}
                     </td>
                     <td className="py-2 px-1 text-gray-800">{item.name}</td>
-                    <td className="py-2 px-1 text-right text-gray-600">{item.quantity} × {item.unitPrice.toLocaleString()}</td>
-                    <td className="py-2 px-1 text-right font-medium">{(item.unitPrice * item.quantity).toLocaleString()}</td>
+                    <td className="py-2 px-1 text-right text-gray-600">{price.toLocaleString()}</td>
+                    <td className="py-2 px-1 text-center text-gray-600">{qty}</td>
+                    <td className="py-2 px-1 text-right font-medium">{(price * qty).toLocaleString()}</td>
                   </tr>
                 );
               })}
@@ -82,7 +86,7 @@ export default function CreditNotePartialSelect() {
           <div className="bg-[var(--kra-black)] rounded-lg px-3 py-2 flex justify-between items-center text-white text-sm">
             <span>{selectedItems.size} item(s) selected</span>
             <span className="font-bold">
-              KES {invoice.items.filter(i => selectedItems.has(i.id)).reduce((sum, i) => sum + i.unitPrice * i.quantity, 0).toLocaleString()}
+              KES {invoice.items.filter(i => selectedItems.has(i.id)).reduce((sum, i) => sum + (i.unitPrice || 0) * (i.quantity || 0), 0).toLocaleString()}
             </span>
           </div>
         )}
