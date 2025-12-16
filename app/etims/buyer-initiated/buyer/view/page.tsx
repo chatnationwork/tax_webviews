@@ -5,95 +5,74 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { fetchInvoices } from '../../../../actions/etims';
 import { FetchedInvoice } from '../../../_lib/definitions';
-import { Loader2, Download, ArrowLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Download, ArrowLeft } from 'lucide-react';
 
 function BuyerViewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const phone = searchParams.get('phone');
-  const status = searchParams.get('status') || 'pending';
+  const fromStatus = searchParams.get('status') || 'pending';
   
   const [invoice, setInvoice] = useState<FetchedInvoice | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!id || !phone) {
-      setIsLoading(false);
-      setError(!phone ? 'Phone number missing' : 'Invoice ID missing');
-      return;
-    }
-
+    if (!id || !phone) { setIsLoading(false); setError('Missing data'); return; }
     const loadInvoice = async () => {
       try {
         const result = await fetchInvoices(phone);
         if (result.success && result.invoices) {
-          const found = result.invoices.find(inv => 
-            inv.reference === id || inv.invoice_id === id
-          );
+          const found = result.invoices.find(inv => inv.reference === id || inv.invoice_id === id);
           if (found) setInvoice(found);
           else setError('Invoice not found');
-        } else {
-          setError(result.error || 'Failed to load');
-        }
-      } catch (err: any) {
-        setError(err.message || 'Error');
-      } finally {
-        setIsLoading(false);
-      }
+        } else setError(result.error || 'Failed to load');
+      } catch (err: any) { setError(err.message || 'Error'); }
+      finally { setIsLoading(false); }
     };
-
     loadInvoice();
   }, [id, phone]);
 
-  if (isLoading) {
-    return (
-      <Layout title="Invoice" onBack={() => router.back()}>
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin" />
-        </div>
-      </Layout>
-    );
-  }
+  const getStatusColor = (status?: string) => {
+    if (!status || status === 'pending') return 'bg-yellow-100 text-yellow-800';
+    if (status === 'approved' || status === 'accepted') return 'bg-green-100 text-green-800';
+    if (status === 'rejected') return 'bg-red-100 text-red-800';
+    return 'bg-gray-100 text-gray-800';
+  };
 
-  if (error || !invoice) {
-    return (
-      <Layout title="Error" onBack={() => router.back()}>
-        <Card className="text-center py-6">
-          <p className="text-red-600 text-sm mb-3">{error || 'Invoice not found'}</p>
-          <Button onClick={() => router.back()}>Back</Button>
-        </Card>
-      </Layout>
-    );
-  }
+  const backUrl = `/etims/buyer-initiated/buyer/invoices?status=${fromStatus}`;
 
-  const statusDisplay = invoice.status?.toUpperCase() || 'PENDING';
+  if (isLoading) return <Layout title="Invoice" onBack={() => router.push(backUrl)}><div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin" /></div></Layout>;
+  if (error || !invoice) return <Layout title="Error" onBack={() => router.push(backUrl)}><Card className="text-center py-6"><p className="text-red-600 text-sm mb-3">{error}</p><Button onClick={() => router.push(backUrl)}>Back</Button></Card></Layout>;
+
+  const isPending = !invoice.status || invoice.status === 'pending';
 
   return (
-    <Layout 
-      title="Invoice Details" 
-      showHeader={false}
-      onBack={() => router.push(`/etims/buyer-initiated/buyer/invoices?status=${status}`)}
-    >
+    <Layout title="Invoice Details" showHeader={false} onBack={() => router.push(backUrl)}>
       <div className="space-y-3">
         {/* Header */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
           <h1 className="text-base font-semibold">Invoice Details</h1>
-          <p className="text-gray-400 text-xs">Status: {statusDisplay}</p>
+          <p className="text-gray-400 text-xs">{isPending ? 'Awaiting seller approval' : `Status: ${invoice.status?.toUpperCase()}`}</p>
           <p className="text-xs text-gray-500 mt-1">ID: {invoice.reference || invoice.invoice_id}</p>
         </div>
 
-        {/* Seller/Buyer */}
+        {/* Buyer/Seller */}
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-gray-100 rounded-lg px-3 py-2">
-            <p className="text-[10px] text-gray-500">SELLER</p>
-            <p className="text-sm font-medium truncate">{invoice.seller_name || 'N/A'}</p>
-          </div>
           <div className="bg-gray-100 rounded-lg px-3 py-2">
             <p className="text-[10px] text-gray-500">BUYER</p>
             <p className="text-sm font-medium truncate">{invoice.buyer_name || 'You'}</p>
           </div>
+          <div className="bg-blue-50 rounded-lg px-3 py-2">
+            <p className="text-[10px] text-blue-600">SELLER</p>
+            <p className="text-sm font-medium truncate text-blue-800">{invoice.seller_name || 'N/A'}</p>
+          </div>
+        </div>
+
+        {/* Status Badge */}
+        <div className={`p-2 rounded-lg text-center text-xs font-medium ${getStatusColor(invoice.status)}`}>
+          Status: {invoice.status?.toUpperCase() || 'PENDING'}
         </div>
 
         {/* Items Table */}
@@ -124,38 +103,13 @@ function BuyerViewContent() {
           </table>
         </Card>
 
-        {/* Status Display */}
-        <div className={`p-3 rounded-lg text-center text-sm font-medium ${
-          invoice.status === 'approved' || invoice.status === 'accepted' 
-            ? 'bg-green-100 text-green-800' 
-            : invoice.status === 'rejected' 
-              ? 'bg-red-100 text-red-800'
-              : 'bg-amber-100 text-amber-800'
-        }`}>
-          Status: {statusDisplay}
-        </div>
+        {/* Download PDF */}
+        <button onClick={() => alert('PDF coming soon')} className="w-full py-2 border border-dashed border-gray-300 rounded-lg text-gray-600 text-xs font-medium flex items-center justify-center gap-1">
+          <Download className="w-3.5 h-3.5" />Download PDF
+        </button>
 
-        {/* Actions */}
-        <div className="grid grid-cols-2 gap-2">
-          <button 
-            onClick={() => alert('PDF download coming soon')} 
-            className="py-2 border border-dashed border-gray-300 rounded-lg text-gray-600 text-xs font-medium flex items-center justify-center gap-1"
-          >
-            <Download className="w-3.5 h-3.5" />Download
-          </button>
-          <button 
-            onClick={() => alert('View more details coming soon')} 
-            className="py-2 border border-gray-300 rounded-lg text-gray-600 text-xs font-medium flex items-center justify-center gap-1"
-          >
-            View More<ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Back Button */}
-        <button 
-          onClick={() => router.push(`/etims/buyer-initiated/buyer/invoices?status=${status}`)} 
-          className="w-full text-center text-[var(--kra-red)] text-xs font-medium py-2 flex items-center justify-center gap-1"
-        >
+        {/* Back to Invoices */}
+        <button onClick={() => router.push(backUrl)} className="w-full text-center text-[var(--kra-red)] text-xs font-medium py-2 flex items-center justify-center gap-1">
           <ArrowLeft className="w-3.5 h-3.5" />Back to Invoices
         </button>
       </div>
@@ -163,10 +117,6 @@ function BuyerViewContent() {
   );
 }
 
-export default function BuyerInitiatedBuyerView() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-sm">Loading...</div>}>
-      <BuyerViewContent />
-    </Suspense>
-  );
+export default function BuyerView() {
+  return <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-sm">Loading...</div>}><BuyerViewContent /></Suspense>;
 }

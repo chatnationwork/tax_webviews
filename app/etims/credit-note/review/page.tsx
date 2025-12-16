@@ -9,10 +9,12 @@ import { submitPartialCreditNote } from '../../../actions/etims';
 import { CreditNoteReason } from '../../_lib/definitions';
 
 const reasonLabels: Record<string, string> = {
-  pricing_error: 'Pricing error',
-  duplicate: 'Duplicate invoice',
-  returned_goods: 'Returned goods',
-  other: 'Other',
+  missing_quantity: 'Missing Quantity',
+  missing_data: 'Missing Data',
+  damaged: 'Damaged',
+  wasted: 'Wasted',
+  raw_material_shortage: 'Raw Material Shortage',
+  refund: 'Refund',
 };
 
 export default function CreditNoteReview() {

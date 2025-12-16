@@ -67,20 +67,20 @@ export interface FetchInvoicesResult {
 export type CreditNoteType = 'partial' | 'full';
 
 export type CreditNoteReason = 
+  | 'missing_quantity'
   | 'missing_data'
-  | 'damaged_goods'
-  | 'wrong_items'
-  | 'pricing_error'
-  | 'customer_return'
-  | 'other';
+  | 'damaged'
+  | 'wasted'
+  | 'raw_material_shortage'
+  | 'refund';
 
 export const CREDIT_NOTE_REASONS: { value: CreditNoteReason; label: string }[] = [
+  { value: 'missing_quantity', label: 'Missing Quantity' },
   { value: 'missing_data', label: 'Missing Data' },
-  { value: 'damaged_goods', label: 'Damaged Goods' },
-  { value: 'wrong_items', label: 'Wrong Items Delivered' },
-  { value: 'pricing_error', label: 'Pricing Error' },
-  { value: 'customer_return', label: 'Customer Return' },
-  { value: 'other', label: 'Other' }
+  { value: 'damaged', label: 'Damaged' },
+  { value: 'wasted', label: 'Wasted' },
+  { value: 'raw_material_shortage', label: 'Raw Material Shortage' },
+  { value: 'refund', label: 'Refund' }
 ];
 
 // Credit Note Invoice Item

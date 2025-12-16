@@ -17,11 +17,12 @@ function CreditNoteSearchContent() {
   const [mounted, setMounted] = useState(false);
 
   const reasons = [
-    { value: 'goods_returned', label: 'Goods Returned' },
-    { value: 'pricing_error', label: 'Pricing Error' },
-    { value: 'quality_issue', label: 'Quality Issue' },
-    { value: 'partial_delivery', label: 'Partial Delivery' },
-    { value: 'other', label: 'Other' },
+    { value: 'missing_quantity', label: 'Missing Quantity' },
+    { value: 'missing_data', label: 'Missing Data' },
+    { value: 'damaged', label: 'Damaged' },
+    { value: 'wasted', label: 'Wasted' },
+    { value: 'raw_material_shortage', label: 'Raw Material Shortage' },
+    { value: 'refund', label: 'Refund' },
   ];
 
   useEffect(() => { setMounted(true); }, []);

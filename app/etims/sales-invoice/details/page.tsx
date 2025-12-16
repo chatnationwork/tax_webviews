@@ -277,11 +277,23 @@ export default function SalesInvoiceDetails() {
                 </tbody>
                 <tfoot className="bg-[var(--kra-black)] text-white">
                   <tr>
-                    <td colSpan={3} className="py-2 px-1 font-medium">Total</td>
-                    <td colSpan={2} className="py-2 px-1 text-right font-bold">KES {totals.total.toLocaleString()}</td>
+                    <td colSpan={3} className="py-2 px-1 font-medium text-sm">Total</td>
+                    <td colSpan={2} className="py-2 px-1 text-right font-bold text-sm">KES {items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0).toLocaleString()}</td>
                   </tr>
                 </tfoot>
               </table>
+            </div>
+          </Card>
+        )}
+
+        {/* Total */}
+        {items.length > 0 && (
+          <Card>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-700 font-medium">Total</span>
+              <span className="text-lg font-bold text-gray-900">
+                KES {totals.total.toLocaleString()}
+              </span>
             </div>
           </Card>
         )}

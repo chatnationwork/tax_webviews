@@ -137,21 +137,15 @@ export default function SalesInvoiceReview() {
                   </tr>
                 ))}
               </tbody>
+              <tfoot className="bg-[var(--kra-black)] text-white">
+                <tr>
+                  <td colSpan={2} className="py-2.5 px-1 font-medium">Total</td>
+                  <td colSpan={2} className="py-2.5 px-1 text-right font-bold">KES {invoice.total?.toLocaleString()}</td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         </Card>
-
-        {/* Total */}
-        {invoice.total !== undefined && (
-          <Card>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-700 font-medium">Total</span>
-              <span className="text-lg font-bold text-gray-900">
-                KES {invoice.total.toLocaleString()}
-              </span>
-            </div>
-          </Card>
-        )}
 
         {/* Error Message */}
         {error && (

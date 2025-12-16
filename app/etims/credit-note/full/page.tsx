@@ -6,10 +6,12 @@ import { Layout, Card, Select, Button } from '../../_components/Layout';
 import { getCreditNote, saveCreditNote, CreditNoteData } from '../../_lib/store';
 
 const reasonOptions = [
-  { value: 'pricing_error', label: 'Pricing error' },
-  { value: 'duplicate', label: 'Duplicate invoice' },
-  { value: 'returned_goods', label: 'Returned goods' },
-  { value: 'other', label: 'Other' },
+  { value: 'missing_quantity', label: 'Missing Quantity' },
+  { value: 'missing_data', label: 'Missing Data' },
+  { value: 'damaged', label: 'Damaged' },
+  { value: 'wasted', label: 'Wasted' },
+  { value: 'raw_material_shortage', label: 'Raw Material Shortage' },
+  { value: 'refund', label: 'Refund' },
 ];
 
 export default function CreditNoteFull() {
