@@ -10,14 +10,10 @@ import {
   CreditNoteInvoice,
   SubmitCreditNoteRequest,
   SubmitCreditNoteResult,
-  CREDIT_NOTE_REASONS,
   FetchedInvoice,
   SubmitBuyerInitiatedInvoiceRequest,
   SubmitBuyerInitiatedInvoiceResult
 } from '../etims/_lib/definitions';
-
-// Export types so they can be imported from here if needed (re-exporting types is fine in use server? No, re-exporting types is fine, but re-exporting VALUES is not)
-// Actually, it's better to NOT re-export them to avoid confusion and errors. Consumers should import from definitions.
 
 const BASE_URL = 'https://kratest.pesaflow.com/api/ussd';
 
@@ -172,7 +168,10 @@ export async function submitInvoice(
       `${BASE_URL}/post-sale`,
       request,
       {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': 'triple_2_ussd'
+        },
         timeout: 60000, // 60 second timeout for invoice submission
       }
     );

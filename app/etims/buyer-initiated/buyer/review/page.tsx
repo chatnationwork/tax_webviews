@@ -43,6 +43,12 @@ export default function BuyerInitiatedReview() {
 
       if (result.success) {
         // Send invoice PDF to user via WhatsApp
+
+//         Dear [Full Name],
+ 
+// Your Sales Invoice KRASRN000006245/464 for KES 39,000 was issued on 17 Dec 2025. 
+
+// The Sales Invoice  PDF is attached for your records.
         if (result.invoice_pdf_url && session.msisdn) {
           const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
           await sendWhatsAppDocument({
