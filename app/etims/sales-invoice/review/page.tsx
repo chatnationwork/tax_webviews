@@ -66,12 +66,18 @@ export default function SalesInvoiceReview() {
   
       if (result.success) {
         // Send invoice PDF to user via WhatsApp
+
+//         Dear [Full Name],
+ 
+// Your Sales Invoice KRASRN000006245/464 for KES 39,000 was issued on 17 Dec 2025. 
+
+// The Sales Invoice  PDF is attached for your records.
         if (result.invoice_pdf_url && session.msisdn) {
           const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
           await sendWhatsAppDocument({
             recipientPhone: session.msisdn,
             documentUrl: result.invoice_pdf_url,
-            caption: `Dear ${session.name || 'Valued Customer'},\n\nYour eTIMS sales invoice (${result.invoice_id}) of KES ${calculatedTotal.toLocaleString()} has been successfully created on ${today}.\n\nPlease find the attached invoice document for your records.\n\nThank you for using KRA eTIMS services.`,
+            caption: `Dear ${session.name || 'Valued Customer'},\n\nYour sales invoice (${result.invoice_id}) of KES ${calculatedTotal.toLocaleString()} was issued on ${today}.\n\nThe Sales Invoice PDF is attached for your records.`,
             filename: `eTIMS_Invoice_${result.invoice_id || today}.pdf`
           });
         }

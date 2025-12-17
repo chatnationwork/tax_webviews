@@ -61,10 +61,16 @@ export default function CreditNoteReview() {
            const creditAmount = isFull 
              ? creditNote.invoice.total 
              : (creditNote.items || []).reduce((acc, { item, quantity }) => acc + (item.unitPrice * quantity), 0);
+
+
+//              Dear [Full Name],
+ 
+// Your credit note KRASRN000006245/464 for KES 39,000 was issued on 17 Dec 2025. 
+// The credit note PDF is attached for your records.
            await sendWhatsAppDocument({
              recipientPhone: creditNote.msisdn,
              documentUrl: result.credit_note_pdf_url,
-             caption: `Dear ${session?.name || 'Valued Customer'},\n\nYour eTIMS credit note (${result.credit_note_ref || result.credit_note_id}) of KES ${creditAmount.toLocaleString()} has been successfully issued on ${today}.\n\nPlease find the attached credit note document for your records.\n\nThank you for using KRA eTIMS services.`,
+             caption: `Dear ${session?.name || 'Valued Customer'},\n\nYour credit note (${result.credit_note_ref || result.credit_note_id}) of KES ${creditAmount.toLocaleString()} was issued on ${today}.\n\nThe credit note PDF is attached for your records.`,
              filename: `eTIMS_Credit_Note_${result.credit_note_ref || today}.pdf`
            });
          }

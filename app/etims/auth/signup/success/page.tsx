@@ -24,7 +24,7 @@ function SignupSuccessContent() {
         const userName = name || session?.name || 'User';
         
         if (userPhone && !messageSent) {
-          const message = `*Registration Successful!*\n\nHello ${userName},\n\nYour eTIMS account has been created successfully. You can now access eTIMS services to create invoices, credit notes, and manage your tax compliance.\n\n_Kenya Revenue Authority_`;
+          const message = `Dear ${userName},\n\nYou have successfully registered for eTIMS.`;
           
           const result = await sendWhatsAppMessage({
             recipientPhone: userPhone,
