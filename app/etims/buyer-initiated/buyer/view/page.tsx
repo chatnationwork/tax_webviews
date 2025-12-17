@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
-import { fetchInvoices } from '../../../../actions/etims';
+import { fetchInvoices, sendWhatsAppDocument } from '../../../../actions/etims';
 import { FetchedInvoice } from '../../../_lib/definitions';
 import { getUserSession } from '../../../_lib/store';
 import { Loader2, Download, ArrowLeft } from 'lucide-react';
@@ -19,6 +19,7 @@ function BuyerViewContent() {
   const [buyerName, setBuyerName] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [sendingPdf, setSendingPdf] = useState(false);
 
   useEffect(() => {
     // Get buyer name from session
@@ -115,8 +116,35 @@ function BuyerViewContent() {
         </Card>
 
         {/* Download PDF */}
-        <button onClick={() => alert('PDF coming soon')} className="w-full py-2 border border-dashed border-gray-300 rounded-lg text-gray-600 text-xs font-medium flex items-center justify-center gap-1">
-          <Download className="w-3.5 h-3.5" />Download PDF
+        <button 
+          onClick={async () => {
+            if (!invoice.invoice_pdf_url) {
+              alert('Invoice PDF not available');
+              return;
+            }
+            setSendingPdf(true);
+            try {
+              const result = await sendWhatsAppDocument({
+                recipientPhone: phone || '',
+                documentUrl: invoice.invoice_pdf_url,
+                caption: `Invoice ${invoice.reference || invoice.invoice_id}\nAmount: KES ${(invoice.total_amount || 0).toLocaleString()}\nSeller: ${invoice.seller_name || 'N/A'}`,
+                filename: `Invoice_${invoice.reference || invoice.invoice_id || 'document'}.pdf`
+              });
+              if (result.success) {
+                alert('Invoice PDF sent to your WhatsApp!');
+              } else {
+                alert('Failed to send: ' + (result.error || 'Unknown error'));
+              }
+            } catch (err: any) {
+              alert('Error: ' + err.message);
+            } finally {
+              setSendingPdf(false);
+            }
+          }} 
+          disabled={sendingPdf}
+          className="w-full py-2 border border-dashed border-gray-300 rounded-lg text-gray-600 text-xs font-medium flex items-center justify-center gap-1 disabled:opacity-50"
+        >
+          {sendingPdf ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Sending...</> : <><Download className="w-3.5 h-3.5" />Send PDF to WhatsApp</>}
         </button>
 
         {/* Back to Invoices */}
