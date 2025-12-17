@@ -1277,7 +1277,7 @@ const TaxComputation = () => {
               if (payNow) {
                   window.location.href = response.checkout_url;
               } else {
-                  alert("Invoice sent to your WhatsApp!");
+                  alert(`Invoice ${response.invoice_number} sent to your whatsapp`);
               }
           } else {
               alert("Payment initiated successfully!");

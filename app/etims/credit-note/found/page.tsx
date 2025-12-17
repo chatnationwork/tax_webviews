@@ -81,65 +81,7 @@ export default function CreditNoteFound() {
           total={invoice.total} 
         />
 
-        {/* Credit Note Type */}
-        <Card>
-          <h3 className="text-gray-900 font-medium mb-3">Credit Note Type</h3>
-          <div className="space-y-3">
-            <button
-              onClick={() => setSelectedType('full')}
-              className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
-                selectedType === 'full'
-                  ? 'border-blue-600 bg-blue-50'
-                  : 'border-gray-300 bg-white hover:border-gray-400'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  selectedType === 'full' ? 'border-blue-600' : 'border-gray-400'
-                }`}>
-                  {selectedType === 'full' && (
-                    <div className="w-3 h-3 rounded-full bg-blue-600" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className="text-gray-900 font-medium">Full Credit Note</p>
-                  <p className="text-sm text-gray-600">Credit the entire invoice amount</p>
-                </div>
-              </div>
-            </button>
-
-            <button
-              onClick={() => !isPartialDisabled && setSelectedType('partial')}
-              disabled={isPartialDisabled}
-              className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
-                isPartialDisabled
-                  ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
-                  : selectedType === 'partial'
-                  ? 'border-blue-600 bg-blue-50'
-                  : 'border-gray-300 bg-white hover:border-gray-400'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  selectedType === 'partial' ? 'border-blue-600' : 'border-gray-400'
-                }`}>
-                  {selectedType === 'partial' && (
-                    <div className="w-3 h-3 rounded-full bg-blue-600" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className="text-gray-900 font-medium">Partial Credit Note</p>
-                  <p className="text-sm text-gray-600">
-                    {isPartialDisabled 
-                      ? 'Already used for this invoice'
-                      : 'Credit specific items or quantities'}
-                  </p>
-                </div>
-              </div>
-            </button>
-          </div>
-        </Card>
-
+        
         <Button onClick={handleContinue} disabled={!selectedType}>
           Continue
         </Button>

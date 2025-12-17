@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { clearBuyerInitiated } from '../../../_lib/store';
 import { CheckCircle } from 'lucide-react';
+import { QuickMenu } from '@/app/etims/_components/QuickMenu';
 
 export default function BuyerInitiatedSellerSuccess() {
   const router = useRouter();
@@ -39,10 +40,13 @@ export default function BuyerInitiatedSellerSuccess() {
           <Button onClick={handleCreateAnother}>
             Create Another Invoice
           </Button>
-          <Button variant="secondary" onClick={handleGoHome}>
-            Go to Buyer Initiated Menu
-          </Button>
+         
         </div>
+        {/* Quick Menu */}
+                <div className="pt-2">
+                  <p className="text-xs text-gray-500 mb-2 text-center">Quick Actions</p>
+                  <QuickMenu />
+                </div>
       </div>
     </Layout>
   );

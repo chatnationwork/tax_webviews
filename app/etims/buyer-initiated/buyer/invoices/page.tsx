@@ -70,7 +70,8 @@ function BuyerInvoicesContent() {
   const handleFetchInvoices = () => { if (phoneNumber) { setIsPhoneSet(true); fetchInvoicesData(phoneNumber); }};
   
   const handleViewInvoice = (invoice: FetchedInvoice) => {
-    const invoiceId = invoice.invoice_id || invoice.reference;
+    // Use uuid as primary identifier, fallback to invoice_number
+    const invoiceId = invoice.uuid || invoice.invoice_number || invoice.invoice_id || invoice.reference;
     router.push(`/etims/buyer-initiated/buyer/view?id=${invoiceId}&phone=${encodeURIComponent(phoneNumber)}&status=${statusFilter}`);
   };
 

@@ -43,20 +43,30 @@ export interface InvoiceSubmissionResult {
 
 // Invoice from API response
 export interface FetchedInvoice {
-  invoice_id: string;
-  reference: string;
+  // Legacy fields (for backwards compatibility)
+  invoice_id?: string;
+  reference?: string;
+  
+  // Actual API fields
+  uuid?: string;
+  invoice_number?: string;
   total_amount: number;
-  status: 'pending' | 'completed' | 'rejected' | 'approved' | 'accepted';
-  buyer_name: string;
-  seller_name: string;
-  created_at: string;
+  status?: 'pending' | 'completed' | 'rejected' | 'approved' | 'accepted' | 'awaiting_approval';
+  buyer_name?: string;
+  buyer_msisdn?: string;
+  seller_name?: string;
+  supplier_msisdn?: string;
+  supplier_pin?: string;
+  created_at?: string;
   rejection_reason?: string;
   invoice_pdf_url?: string;
   invoice_preview_url?: string;
-  items: {
+  items?: {
     item_name: string;
-    quantity: number;
-    unit_price: number;
+    quantity: number | string;
+    unit_price: number | string;
+    total?: number | string;
+    type_of_item?: string;
   }[];
 }
 

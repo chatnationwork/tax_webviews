@@ -34,7 +34,13 @@ function BuyerViewContent() {
       try {
         const result = await fetchInvoices(phone, session?.name);
         if (result.success && result.invoices) {
-          const found = result.invoices.find(inv => inv.reference === id || inv.invoice_id === id);
+          // Match against uuid, invoice_number, or legacy fields
+          const found = result.invoices.find(inv => 
+            inv.uuid === id || 
+            inv.invoice_number === id || 
+            inv.reference === id || 
+            inv.invoice_id === id
+          );
           if (found) setInvoice(found);
           else setError('Invoice not found');
         } else setError(result.error || 'Failed to load');
@@ -65,7 +71,7 @@ function BuyerViewContent() {
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
           <h1 className="text-base font-semibold">Invoice Details</h1>
           <p className="text-gray-400 text-xs">{isPending ? 'Awaiting seller approval' : `Status: ${invoice.status?.toUpperCase()}`}</p>
-          <p className="text-xs text-gray-500 mt-1">ID: {invoice.reference || invoice.invoice_id}</p>
+          <p className="text-xs text-gray-500 mt-1">ID: {invoice.invoice_number || invoice.reference || invoice.invoice_id}</p>
         </div>
 
         {/* Buyer/Seller */}
@@ -97,14 +103,18 @@ function BuyerViewContent() {
               </tr>
             </thead>
             <tbody>
-              {invoice.items?.map((item, i) => (
-                <tr key={i} className="border-b last:border-0">
-                  <td className="py-1.5 px-1 text-gray-800">{item.item_name}</td>
-                  <td className="py-1.5 px-1 text-right text-gray-600">{item.unit_price.toLocaleString()}</td>
-                  <td className="py-1.5 px-1 text-center text-gray-600">{item.quantity}</td>
-                  <td className="py-1.5 px-1 text-right font-medium">{(item.unit_price * item.quantity).toLocaleString()}</td>
-                </tr>
-              ))}
+              {invoice.items?.map((item, i) => {
+                const price = Number(item.unit_price) || 0;
+                const qty = Number(item.quantity) || 0;
+                return (
+                  <tr key={i} className="border-b last:border-0">
+                    <td className="py-1.5 px-1 text-gray-800">{item.item_name}</td>
+                    <td className="py-1.5 px-1 text-right text-gray-600">{price.toLocaleString()}</td>
+                    <td className="py-1.5 px-1 text-center text-gray-600">{qty}</td>
+                    <td className="py-1.5 px-1 text-right font-medium">{(price * qty).toLocaleString()}</td>
+                  </tr>
+                );
+              })}
             </tbody>
             <tfoot className="bg-[var(--kra-black)] text-white">
               <tr>
