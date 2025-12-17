@@ -426,7 +426,7 @@ export async function searchCreditNoteInvoice(
  * Submit partial credit note
  * Note: Using mock response until backend is updated with full payload support
  */
-export async function submitPartialCreditNote(
+export async function submitCreditNote(
   request: SubmitCreditNoteRequest
 ): Promise<SubmitCreditNoteResult> {
   // Validate request
@@ -463,10 +463,9 @@ export async function submitPartialCreditNote(
   }, null, 2));
 
   try {
+    const endpoint=`${BASE_URL}/submit/credit-note`
     // Use different endpoints for full vs partial credit notes
-    const endpoint = request.credit_note_type === 'full' 
-      ? `${BASE_URL}/submit/credit-note`
-      : `${BASE_URL}/submit/partial-credit-note`;
+   
 
     console.log('Using endpoint:', endpoint);
 
@@ -475,7 +474,7 @@ export async function submitPartialCreditNote(
       {
         msisdn: cleanNumber,
         invoice_no: request.invoice_no,
-        credit_note_type: request.credit_note_type,
+        full: request.credit_note_type === 'full',
         reason: request.reason,
         items: request.items
       },

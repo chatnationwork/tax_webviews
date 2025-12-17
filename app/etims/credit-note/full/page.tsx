@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Layout, Card, Button } from '../../_components/Layout';
 import { getCreditNote, CreditNoteData, getUserSession } from '../../_lib/store';
 import { Loader2 } from 'lucide-react';
-import { submitPartialCreditNote, sendWhatsAppDocument } from '../../../actions/etims';
+import { submitCreditNote, sendWhatsAppDocument } from '../../../actions/etims';
 import { CreditNoteReason } from '../../_lib/definitions';
 
 const reasonLabels: Record<string, string> = {
@@ -46,7 +46,7 @@ export default function CreditNoteFull() {
         return_quantity: item.quantity 
       }));
 
-      const result = await submitPartialCreditNote({
+      const result = await submitCreditNote({
         msisdn: creditNote.msisdn,
         invoice_no: creditNote.invoice.invoiceNumber,
         credit_note_type: 'full',
