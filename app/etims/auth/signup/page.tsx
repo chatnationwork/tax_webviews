@@ -48,8 +48,13 @@ function SignupContent() {
 
   const handleRegister = () => {
     if (!termsAccepted) { setError('Please accept terms & conditions'); return; }
-    // Go to login page
-    router.push(`/etims/auth/login?number=${encodeURIComponent(phoneNumber)}&name=${encodeURIComponent(userDetails?.name || '')}&pin=${encodeURIComponent(userDetails?.pin || '')}`)
+    // Go to success page, which will then redirect to login
+    const params = new URLSearchParams({
+      phone: phoneNumber,
+      name: userDetails?.name || '',
+      pin: userDetails?.pin || ''
+    });
+    router.push(`/etims/auth/signup/success?${params.toString()}`);
   };
 
   if (!phoneNumber) {
@@ -83,12 +88,8 @@ function SignupContent() {
 
         {step === 1 ? (
           <>
-            {/* Phone Display */}
-            <div className="bg-gray-100 rounded-lg px-3 py-2 flex items-center gap-2">
-              <span className="text-xs text-gray-500">Phone:</span>
-              <span className="text-sm font-medium text-gray-800">{phoneNumber}</span>
-            </div>
-
+           
+         
             {/* ID Input */}
             <Card>
               <div className="space-y-3">
@@ -129,7 +130,7 @@ function SignupContent() {
               <div className="space-y-1 text-sm">
                 <p><span className="text-gray-500">ID:</span> <span className="font-medium">{userDetails.idNumber}</span></p>
                 <p><span className="text-gray-500">Name:</span> <span className="font-medium">{userDetails.name}</span></p>
-                <p><span className="text-gray-500">Phone:</span> <span className="font-medium">{phoneNumber}</span></p>
+                
               </div>
             </Card>
 

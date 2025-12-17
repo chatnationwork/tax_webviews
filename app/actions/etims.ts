@@ -814,6 +814,89 @@ export async function verifyOTP(msisdn: string, otp: string): Promise<VerifyOTPR
   }
 }
 
+// ==================== WHATSAPP TEXT MESSAGE SENDING ====================
+
+export interface SendWhatsAppMessageParams {
+  recipientPhone: string; // The phone number to send to
+  message: string;        // The text message to send
+}
+
+export interface SendWhatsAppMessageResult {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+}
+
+/**
+ * Send a text message via WhatsApp to a user
+ * Used for sending notifications, confirmations, etc.
+ */
+export async function sendWhatsAppMessage(
+  params: SendWhatsAppMessageParams
+): Promise<SendWhatsAppMessageResult> {
+  const { recipientPhone, message } = params;
+
+  // Validate required params
+  if (!recipientPhone || !message) {
+    return { success: false, error: 'Recipient phone and message are required' };
+  }
+
+  // Clean phone number - ensure format is 2547XXXXXXXX (no + symbol)
+  let cleanNumber = recipientPhone.trim().replace(/[^\d]/g, '');
+  if (cleanNumber.startsWith('0')) {
+    cleanNumber = '254' + cleanNumber.substring(1);
+  } else if (cleanNumber.startsWith('+')) {
+    cleanNumber = cleanNumber.substring(1);
+  }
+
+  // WhatsApp API configuration from environment variables
+  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  
+  if (!token || !phoneNumberId) {
+    console.error('WhatsApp API credentials not configured');
+    return { success: false, error: 'WhatsApp sending not configured' };
+  }
+
+  const url = `https://crm.chatnation.co.ke/api/meta/v21.0/${phoneNumberId}/messages`;
+
+  const payload = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: cleanNumber,
+    type: "text",
+    text: {
+      preview_url: false,
+      body: message
+    }
+  };
+
+  console.log('Sending WhatsApp message:', { to: cleanNumber, messageLength: message.length });
+
+  try {
+    const response = await axios.post(url, payload, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 30000
+    });
+
+    console.log('WhatsApp message sent successfully:', response.data);
+
+    return {
+      success: true,
+      messageId: response.data.messages?.[0]?.id
+    };
+  } catch (error: any) {
+    console.error('Error sending WhatsApp message:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.error?.message || 'Failed to send message via WhatsApp'
+    };
+  }
+}
+
 // ==================== WHATSAPP DOCUMENT SENDING ====================
 
 export interface SendWhatsAppDocumentParams {

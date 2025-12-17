@@ -218,7 +218,7 @@ interface PINOrIDInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
 }
 
 export const PINOrIDInput = forwardRef<HTMLInputElement, PINOrIDInputProps>(
-  ({ label, helperText, error, required = true, onChange, onValidationChange, className = '', value, ...props }, ref) => {
+  ({ label, helperText, error, required = true, onChange, onValidationChange, className = '',placeholder='A012345678Z or 12345678', value, ...props }, ref) => {
     const [internalError, setInternalError] = useState('');
     const [detectedType, setDetectedType] = useState<'pin' | 'id' | 'invalid' | 'empty'>('empty');
 
@@ -292,7 +292,7 @@ export const PINOrIDInput = forwardRef<HTMLInputElement, PINOrIDInputProps>(
           type="text"
           value={value}
           onChange={handleChange}
-          placeholder="A012345678Z or 12345678"
+          placeholder={placeholder}
           className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase ${
             displayError ? 'border-red-500' : 'border-gray-300'
           } ${className}`}
