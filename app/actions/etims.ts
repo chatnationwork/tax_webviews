@@ -518,9 +518,9 @@ export async function submitCreditNote(
     if (error.response?.status === 400 || error.response?.status === 422) {
       console.log('API may not support full payload, returning mock success');
       return {
-        success: true,
-        credit_note_id: `CN-${Date.now()}`,
-        message: 'Credit note submitted successfully (mock)'
+        success: false,
+   
+        message: 'Credit note submission failed '
       };
     }
     
