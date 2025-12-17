@@ -27,9 +27,9 @@ export default function BuyerInitiatedSellerSuccess() {
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
             <div>
-              <h2 className="text-green-900 text-xl font-medium mb-2">Invoice Sent to Buyer!</h2>
+              <h2 className="text-green-900 text-xl font-medium mb-2">Invoice Sent to Buyer</h2>
               <p className="text-sm text-green-700">
-                The buyer will receive a notification to review and accept the invoice
+                Your invoice has been created and sent to the buyer.
               </p>
             </div>
           </div>
