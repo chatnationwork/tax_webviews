@@ -14,7 +14,7 @@ export default function BuyerInitiatedDetails() {
   const [itemName, setItemName] = useState('');
   const [description, setDescription] = useState('');
   const [unitPrice, setUnitPrice] = useState('');
-  const [quantity, setQuantity] = useState('0');
+  const [quantity, setQuantity] = useState('');
   const [items, setItems] = useState<InvoiceItem[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
