@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { FileText, FileMinus, UserCheck } from 'lucide-react';
+import { FileText, FileMinus, UserCheck, HelpCircle } from 'lucide-react';
 import { Layout, Card } from './_components/Layout';
 import { clearSalesInvoice, clearCreditNote, clearBuyerInitiated } from './_lib/store';
 
@@ -21,7 +21,7 @@ export default function EtimsHome() {
     },
     {
       title: 'Credit Note',
-      description: 'Full or partial credit notes',
+      description: 'Create full or partial credit notes',
       icon: FileMinus,
       color: 'green' as const,
       onClick: () => {
@@ -37,6 +37,16 @@ export default function EtimsHome() {
       onClick: () => {
         clearBuyerInitiated();
         router.push('/etims/buyer-initiated');
+      },
+    },
+    {
+      title: 'Guides & Help',
+      description: 'View user guides for Sales Invoices, Credit Notes, and Buyer-Initiated transactions',
+      icon: HelpCircle,
+      color: 'amber' as const,
+      onClick: () => {
+        // Could navigate to a help page or open a modal
+        router.push('/etims/help');
       },
     },
   ];
@@ -56,6 +66,11 @@ export default function EtimsHome() {
       card: 'bg-purple-50 border-purple-200',
       icon: 'bg-purple-100',
       text: 'text-purple-600',
+    },
+    amber: {
+      card: 'bg-amber-50 border-amber-200',
+      icon: 'bg-amber-100',
+      text: 'text-amber-600',
     },
   };
 
@@ -94,16 +109,6 @@ export default function EtimsHome() {
             );
           })}
         </div>
-
-        {/* Guides & Help */}
-        <Card className="bg-gray-50 border-gray-300 !p-3">
-          <h3 className="text-sm text-gray-900 font-medium mb-1">Guides & Help</h3>
-          <p className="text-xs text-gray-600">
-            Need assistance? Contact support for help with eTIMS features.
-          </p>
-        </Card>
-
-       
       </div>
     </Layout>
   );
