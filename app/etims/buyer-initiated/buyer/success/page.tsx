@@ -9,11 +9,6 @@ import { QuickMenu } from '@/app/etims/_components/QuickMenu';
 export default function BuyerInitiatedSellerSuccess() {
   const router = useRouter();
 
-  const handleGoHome = () => {
-    clearBuyerInitiated();
-    router.push('/etims/buyer-initiated');
-  };
-
   const handleCreateAnother = () => {
     clearBuyerInitiated();
     router.push('/etims/buyer-initiated/buyer/create');
