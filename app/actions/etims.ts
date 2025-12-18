@@ -476,21 +476,29 @@ export async function submitCreditNote(
   }, null, 2));
 
   try {
-    const endpoint=`${BASE_URL}/submit/credit-note`
-    // Use different endpoints for full vs partial credit notes
-   
+    let endpoint = '';
+    let payload: any = {
+      msisdn: cleanNumber,
+      invoice_no: request.invoice_no,
+      reason: request.reason
+    };
 
-    console.log('Using endpoint:', endpoint);
+    if (request.credit_note_type === 'full') {
+      endpoint = `${BASE_URL}/submit/credit-note`;
+      payload.full = true;
+      // No items needed for full credit note
+    } else {
+      endpoint = `${BASE_URL}/submit/partial-credit-note`;
+      payload.items = request.items;
+      // No full flag needed for partial
+    }
+
+    console.log(`Submitting ${request.credit_note_type} credit note to:`, endpoint);
+    console.log('Payload:', JSON.stringify(payload, null, 2));
 
     const response = await axios.post(
       endpoint,
-      {
-        msisdn: cleanNumber,
-        invoice_no: request.invoice_no,
-        full: request.credit_note_type === 'full',
-        reason: request.reason,
-        items: request.items
-      },
+      payload,
       {
         headers: {
           'Content-Type': 'application/json',
