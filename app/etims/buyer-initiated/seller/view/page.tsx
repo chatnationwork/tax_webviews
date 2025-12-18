@@ -141,37 +141,40 @@ function SellerViewContent() {
         </Card>
 
         {/* Download PDF */}
-        <button 
-        onClick={
-          async () => {
-                    if (!invoice.invoice_pdf_url) {
-                      alert('Invoice PDF not available');
-                      return;
-                    }
-                    setSendingPdf(true);
-                    try {
-                      const result = await sendWhatsAppDocument({
-                        recipientPhone: phone || '',
-                        documentUrl: invoice.invoice_pdf_url,
-                        caption: `Invoice ${invoice.reference || invoice.invoice_id}\nAmount: KES ${(invoice.total_amount || 0).toLocaleString()}\nSeller: ${invoice.seller_name || 'N/A'}`,
-                        filename: `Invoice_${invoice.reference || invoice.invoice_id || 'document'}.pdf`
-                      });
-                      if (result.success) {
-                        alert(`Invoice ${invoice.reference || invoice.invoice_id} sent to WhatsApp`);
-                      } else {
-                        alert('Failed to send: ' + (result.error || 'Unknown error'));
+        {/* Download PDF */}
+        {invoice.status !== 'rejected' && (
+          <button 
+          onClick={
+            async () => {
+                      if (!invoice.invoice_pdf_url) {
+                        alert('Invoice PDF not available');
+                        return;
                       }
-                    } catch (err: any) {
-                      alert('Error: ' + err.message);
-                    } finally {
-                      setSendingPdf(false);
-                    }
-                  }} 
-                  disabled={sendingPdf}
-                  className="w-full py-2 border border-dashed border-gray-300 rounded-lg text-gray-600 text-xs font-medium flex items-center justify-center gap-1"
-                  >
-          <Download className="w-3.5 h-3.5" />Download PDF
-        </button>
+                      setSendingPdf(true);
+                      try {
+                        const result = await sendWhatsAppDocument({
+                          recipientPhone: phone || '',
+                          documentUrl: invoice.invoice_pdf_url,
+                          caption: `Invoice ${invoice.reference || invoice.invoice_id}\nAmount: KES ${(invoice.total_amount || 0).toLocaleString()}\nSeller: ${invoice.seller_name || 'N/A'}`,
+                          filename: `Invoice_${invoice.reference || invoice.invoice_id || 'document'}.pdf`
+                        });
+                        if (result.success) {
+                          alert(`Invoice ${invoice.reference || invoice.invoice_id} sent to WhatsApp`);
+                        } else {
+                          alert('Failed to send: ' + (result.error || 'Unknown error'));
+                        }
+                      } catch (err: any) {
+                        alert('Error: ' + err.message);
+                      } finally {
+                        setSendingPdf(false);
+                      }
+                    }} 
+                    disabled={sendingPdf}
+                    className="w-full py-2 border border-dashed border-gray-300 rounded-lg text-gray-600 text-xs font-medium flex items-center justify-center gap-1"
+                    >
+            <Download className="w-3.5 h-3.5" />Download PDF
+          </button>
+        )}
 
         {/* Decision (pending only) */}
         {isPending && (

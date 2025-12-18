@@ -4,35 +4,59 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Layout, Card, Button } from '../../_components/Layout';
 import { getCreditNote, saveCreditNote, calculateTotals, InvoiceItem } from '../../_lib/store';
-import { Minus, Plus, Send, ArrowLeft } from 'lucide-react';
+import { Send, ArrowLeft } from 'lucide-react';
 
 export default function CreditNotePartialAdjust() {
   const router = useRouter();
-  const [items, setItems] = useState<Array<{ item: InvoiceItem; quantity: number; maxQty: number }>>([]);
+  // Store displayQty (string) separately to allow typing "1." without it becoming "1"
+  const [items, setItems] = useState<Array<{ item: InvoiceItem; quantity: number; displayQty: string; maxQty: number }>>([]);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const data = getCreditNote();
     if (!data?.items || data.items.length === 0) { router.push('/etims/credit-note/partial-select'); return; }
-    setItems(data.items.map(i => ({ item: i.item, quantity: i.quantity, maxQty: i.item.quantity })));
+    setItems(data.items.map(i => ({ 
+      item: i.item, 
+      quantity: i.quantity, 
+      displayQty: i.quantity.toString(),
+      maxQty: i.item.quantity 
+    })));
   }, [router]);
 
-  const updateQuantity = (id: string, delta: number) => {
+  const handleQtyChange = (id: string, val: string) => {
     setItems(items.map(i => {
       if (i.item.id !== id) return i;
-      let newQty = i.quantity + delta;
-      newQty = Math.round(newQty * 100) / 100; // Round to 2dp
-      newQty = Math.max(0.01, Math.min(i.maxQty, newQty));
-      return { ...i, quantity: newQty };
+      
+      // Update displayQty immediately to show what user types
+      const newItem = { ...i, displayQty: val };
+      
+      // Try to parse for live total calculation (if valid number)
+      const parsed = parseFloat(val);
+      if (!isNaN(parsed)) {
+        newItem.quantity = parsed; // Don't clamp yet while typing
+      }
+      return newItem;
     }));
   };
 
-  const setQuantity = (id: string, value: string) => {
-    let qty = parseFloat(value);
-    if (isNaN(qty)) qty = 0;
-    qty = Math.round(qty * 100) / 100; // Round to 2dp
-    setItems(items.map(i => i.item.id === id ? { ...i, quantity: Math.max(0.01, Math.min(i.maxQty, qty)) } : i));
+  const handleQtyBlur = (id: string) => {
+    setItems(items.map(i => {
+      if (i.item.id !== id) return i;
+
+      let val = parseFloat(i.displayQty);
+      if (isNaN(val)) val = 0;
+      
+      // Clamp and Round on blur
+      val = Math.round(val * 100) / 100;
+      val = Math.max(0.01, Math.min(i.maxQty, val));
+
+      return {
+        ...i,
+        quantity: val,
+        displayQty: val.toString() // Sync back display
+      };
+    }));
   };
 
   const handleSubmit = () => {
@@ -54,29 +78,37 @@ export default function CreditNotePartialAdjust() {
         </div>
 
         {/* Items */}
-        {items.map(({ item, quantity, maxQty }) => (
+        {items.map(({ item, quantity, displayQty, maxQty }) => (
           <Card key={item.id}>
-            <div className="flex justify-between items-start mb-2">
+            <div className="flex justify-between items-start mb-3">
               <div>
-                <p className="text-sm font-medium text-gray-800">{item.name}</p>
-                <p className="text-xs text-gray-500">KES {item.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} × {quantity}</p>
+                <p className="text-sm font-medium text-gray-800 mb-1">{item.name}</p>
+                <div className="flex gap-2">
+                   <div className="bg-gray-100 px-2 py-1 rounded text-[10px] text-gray-500 font-medium">
+                     Max: {maxQty}
+                   </div>
+                   <div className="bg-blue-50 px-2 py-1 rounded text-[10px] text-blue-600 font-medium">
+                     @{item.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                   </div>
+                </div>
               </div>
-              <p className="text-sm font-bold text-[var(--kra-red)]">KES {(item.unitPrice * quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <div className="text-right">
+                <p className="text-sm font-bold text-[var(--kra-red)]">KES {(item.unitPrice * quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-gray-400">Max: {maxQty}</span>
-              <div className="flex items-center gap-2">
-                <button onClick={() => updateQuantity(item.id, -1)} disabled={quantity <= 0.01}
-                  className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg disabled:opacity-50">
-                  <Minus className="w-4 h-4" />
-                </button>
-                <input type="number" step="0.01" value={quantity} onChange={(e) => setQuantity(item.id, e.target.value)} min={0.01} max={maxQty}
-                  className="w-12 h-8 text-center text-sm border border-gray-300 rounded-lg" />
-                <button onClick={() => updateQuantity(item.id, 1)} disabled={quantity >= maxQty}
-                  className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg disabled:opacity-50">
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
+            
+            <div>
+              <label className="block text-[10px] text-gray-500 uppercase font-bold mb-1.5">Quantity to Credit</label>
+              <input 
+                type="number" 
+                inputMode="decimal"
+                step="0.01" 
+                value={displayQty} 
+                onChange={(e) => handleQtyChange(item.id, e.target.value)} 
+                onBlur={() => handleQtyBlur(item.id)}
+                className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--kra-red)] focus:border-transparent outline-none transition-all"
+                placeholder={`Max ${maxQty}`}
+              />
             </div>
           </Card>
         ))}
