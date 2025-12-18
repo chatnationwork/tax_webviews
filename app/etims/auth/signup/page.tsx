@@ -33,7 +33,7 @@ function SignupContent() {
 
     setLoading(true);
     try {
-      const result = await lookupById(idNumber.trim());
+      const result = await lookupById(idNumber.trim(), phoneNumber, yearOfBirth);
       if (result.success && result.name) {
         setUserDetails({ idNumber: result.idNumber!, name: result.name, pin: result.pin });
         setStep(2);

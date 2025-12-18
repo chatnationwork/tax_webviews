@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
-import { fetchInvoices, processBuyerInvoice } from '../../../../actions/etims';
+import { fetchInvoices, processBuyerInvoice, sendWhatsAppDocument } from '../../../../actions/etims';
 import { FetchedInvoice } from '../../../_lib/definitions';
 import { getUserSession } from '../../../_lib/store';
 import { Loader2, Download, ArrowLeft, Store } from 'lucide-react';
@@ -22,6 +22,7 @@ function SellerViewContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedAction, setSelectedAction] = useState<'approve' | 'reject' | ''>('');
+  const [sendingPdf, setSendingPdf] = useState(false);
 
   useEffect(() => {
     // Get seller name from session
@@ -82,6 +83,10 @@ function SellerViewContent() {
   return (
     <Layout title="Invoice Details" showHeader={false} onBack={() => router.push(backUrl)}>
       <div className="space-y-3">
+        {/* Back Button (Moved to top) */}
+        <button onClick={() => router.push(backUrl)} className="text-[var(--kra-red)] text-xs font-medium flex items-center gap-1 mb-2">
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to Invoices
+        </button>
         {/* Header */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
           <h1 className="text-base font-semibold">Invoice Details</h1>
@@ -136,7 +141,35 @@ function SellerViewContent() {
         </Card>
 
         {/* Download PDF */}
-        <button onClick={() => alert('PDF coming soon')} className="w-full py-2 border border-dashed border-gray-300 rounded-lg text-gray-600 text-xs font-medium flex items-center justify-center gap-1">
+        <button 
+        onClick={
+          async () => {
+                    if (!invoice.invoice_pdf_url) {
+                      alert('Invoice PDF not available');
+                      return;
+                    }
+                    setSendingPdf(true);
+                    try {
+                      const result = await sendWhatsAppDocument({
+                        recipientPhone: phone || '',
+                        documentUrl: invoice.invoice_pdf_url,
+                        caption: `Invoice ${invoice.reference || invoice.invoice_id}\nAmount: KES ${(invoice.total_amount || 0).toLocaleString()}\nSeller: ${invoice.seller_name || 'N/A'}`,
+                        filename: `Invoice_${invoice.reference || invoice.invoice_id || 'document'}.pdf`
+                      });
+                      if (result.success) {
+                        alert(`Invoice ${invoice.reference || invoice.invoice_id} sent to WhatsApp`);
+                      } else {
+                        alert('Failed to send: ' + (result.error || 'Unknown error'));
+                      }
+                    } catch (err: any) {
+                      alert('Error: ' + err.message);
+                    } finally {
+                      setSendingPdf(false);
+                    }
+                  }} 
+                  disabled={sendingPdf}
+                  className="w-full py-2 border border-dashed border-gray-300 rounded-lg text-gray-600 text-xs font-medium flex items-center justify-center gap-1"
+                  >
           <Download className="w-3.5 h-3.5" />Download PDF
         </button>
 
@@ -172,9 +205,7 @@ function SellerViewContent() {
           </div>
         )}
 
-        <button onClick={() => router.push(backUrl)} className="w-full text-center text-[var(--kra-red)] text-xs font-medium py-2 flex items-center justify-center gap-1">
-          <ArrowLeft className="w-3.5 h-3.5" />Back to Invoices
-        </button>
+
         {/* Quick Menu */}
         <div className="pt-2">
           <p className="text-xs text-gray-500 mb-2 text-center">Quick Actions</p>

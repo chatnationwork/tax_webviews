@@ -68,6 +68,10 @@ function BuyerViewContent() {
   return (
     <Layout title="Invoice Details" showHeader={false} onBack={() => router.push(backUrl)}>
       <div className="space-y-3">
+        {/* Back Button (Moved to top) */}
+        <button onClick={() => router.push(backUrl)} className="text-[var(--kra-red)] text-xs font-medium flex items-center gap-1 mb-2">
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to Invoices
+        </button>
         {/* Header */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
           <h1 className="text-base font-semibold">Invoice Details</h1>
@@ -159,9 +163,7 @@ function BuyerViewContent() {
         </button>
 
         {/* Back to Invoices */}
-        <button onClick={() => router.push(backUrl)} className="w-full text-center text-[var(--kra-red)] text-xs font-medium py-2 flex items-center justify-center gap-1">
-          <ArrowLeft className="w-3.5 h-3.5" />Back to Invoices
-        </button>
+
         {/* Quick Menu */}
         <div className="pt-2">
           <p className="text-xs text-gray-500 mb-2 text-center">Quick Actions</p>

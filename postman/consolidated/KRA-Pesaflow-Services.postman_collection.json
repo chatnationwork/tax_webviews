@@ -197,7 +197,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"pin\": \"37998670\",\n    \"waba\": \"\",\n    \"yob\": \"2000\"\n}"
+                            "raw": "{\n    \"pin\": \"37998670\",\n    \"waba\": \"254745050238\",\n    \"yob\": \"2000\"\n}"
                         },
                         "url": {
                             "raw": "https://etims.1automations.com/buyer_lookup",

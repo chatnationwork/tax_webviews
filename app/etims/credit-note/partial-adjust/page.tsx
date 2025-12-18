@@ -21,14 +21,18 @@ export default function CreditNotePartialAdjust() {
   const updateQuantity = (id: string, delta: number) => {
     setItems(items.map(i => {
       if (i.item.id !== id) return i;
-      const newQty = Math.max(1, Math.min(i.maxQty, i.quantity + delta));
+      let newQty = i.quantity + delta;
+      newQty = Math.round(newQty * 100) / 100; // Round to 2dp
+      newQty = Math.max(0.01, Math.min(i.maxQty, newQty));
       return { ...i, quantity: newQty };
     }));
   };
 
   const setQuantity = (id: string, value: string) => {
-    const qty = parseInt(value) || 1;
-    setItems(items.map(i => i.item.id === id ? { ...i, quantity: Math.max(1, Math.min(i.maxQty, qty)) } : i));
+    let qty = parseFloat(value);
+    if (isNaN(qty)) qty = 0;
+    qty = Math.round(qty * 100) / 100; // Round to 2dp
+    setItems(items.map(i => i.item.id === id ? { ...i, quantity: Math.max(0.01, Math.min(i.maxQty, qty)) } : i));
   };
 
   const handleSubmit = () => {
@@ -62,11 +66,11 @@ export default function CreditNotePartialAdjust() {
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-gray-400">Max: {maxQty}</span>
               <div className="flex items-center gap-2">
-                <button onClick={() => updateQuantity(item.id, -1)} disabled={quantity <= 1}
+                <button onClick={() => updateQuantity(item.id, -1)} disabled={quantity <= 0.01}
                   className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg disabled:opacity-50">
                   <Minus className="w-4 h-4" />
                 </button>
-                <input type="number" value={quantity} onChange={(e) => setQuantity(item.id, e.target.value)} min={1} max={maxQty}
+                <input type="number" step="0.01" value={quantity} onChange={(e) => setQuantity(item.id, e.target.value)} min={0.01} max={maxQty}
                   className="w-12 h-8 text-center text-sm border border-gray-300 rounded-lg" />
                 <button onClick={() => updateQuantity(item.id, 1)} disabled={quantity >= maxQty}
                   className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg disabled:opacity-50">

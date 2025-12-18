@@ -490,7 +490,7 @@ export async function submitCreditNote(
     } else {
       endpoint = `${BASE_URL}/submit/partial-credit-note`;
       // Partial credit note expects etims_invoice_no and source
-      payload.etims_invoice_no = request.invoice_no;
+      payload.etims_invoice_no = "43"
       payload.items = request.items;
       payload.source = 'whatsapp';
       // No full flag needed for partial
@@ -735,37 +735,57 @@ export interface LookupByIdResult {
 /**
  * Lookup user details by ID number (using PIN or ID lookup API)
  */
-export async function lookupById(idNumber: string): Promise<LookupByIdResult> {
+/**
+ * Lookup user details by ID number (using 1automations API)
+ */
+export async function lookupById(idNumber: string, phoneNumber: string, yearOfBirth: string): Promise<LookupByIdResult> {
   if (!idNumber || idNumber.trim().length < 6) {
     return { success: false, error: 'ID number must be at least 6 characters' };
   }
+  if (!phoneNumber) {
+    return { success: false, error: 'Phone number is required' };
+  }
+  if (!yearOfBirth) {
+    return { success: false, error: 'Year of birth is required' };
+  }
 
-  console.log('Looking up ID:', idNumber);
+  // Clean phone number
+  let cleanNumber = phoneNumber.trim().replace(/[^\d]/g, '');
+  if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
+  else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
+
+  console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB:', yearOfBirth);
 
   try {
-    // Using the buyer-initiated/lookup API which works with both PIN and ID
     const response = await axios.post(
-      `${BASE_URL}/buyer-initiated/lookup`,
-      { pin_or_id: idNumber.trim() },
+      'https://etims.1automations.com/buyer_lookup',
+      { 
+        pin: idNumber.trim(), // API expects ID in 'pin' field
+        waba: cleanNumber,
+        yob: yearOfBirth
+      },
       { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
     );
 
     console.log('ID lookup response:', JSON.stringify(response.data, null, 2));
 
-    // API returns { code: 3, name: "...", pin: "..." } on success
-    if (response.data && (response.data.pin || response.data.code === 3 || response.data.name)) {
+    // API returns { success: true, data: { name: "...", id_number: "...", yob: "..." } }
+    if (response.data.success && response.data.data) {
       return {
         success: true,
-        idNumber: idNumber.trim(),
-        name: response.data.name,
-        pin: response.data.pin,
+        idNumber: response.data.data.id_number || idNumber.trim(),
+        name: response.data.data.name,
+        pin: response.data.data.pin, // May or may not be present/needed depending on next steps
       };
     } else {
-      return { success: false, error: response.data.message || 'ID not found' };
+      return { 
+        success: false, 
+        error: response.data.messsage || response.data.data?.message || 'Information Mismatch' 
+      };
     }
   } catch (error: any) {
     console.error('ID lookup error:', error.response?.data || error.message);
-    return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
+    return { success: false, error: error.response?.data?.data?.message || error.response?.data?.message || 'ID lookup failed' };
   }
 }
 
