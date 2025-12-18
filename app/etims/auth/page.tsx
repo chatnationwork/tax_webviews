@@ -101,7 +101,7 @@ function AuthContent() {
                 {loading ? (
                   <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Checking...</>
                 ) : (
-                  'Log in'
+                  'Continue'
                 )}
               </Button>
             </form>
@@ -109,7 +109,7 @@ function AuthContent() {
 
           {/* Login Info Text */}
           <p className="text-center text-sm text-gray-600 font-medium">
-            Log in to continue accessing eTIMS services
+            Secure access to your eTIMS services
           </p>
 
           {/* KRA Image */}

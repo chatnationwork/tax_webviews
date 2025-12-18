@@ -70,7 +70,7 @@ function SellerPendingContent() {
   const handleFetchInvoices = () => { if (phoneNumber) { setIsPhoneSet(true); fetchInvoicesData(phoneNumber); }};
   
   const handleViewInvoice = (invoice: FetchedInvoice) => {
-    const invoiceId = invoice.invoice_id || invoice.reference;
+    const invoiceId = invoice.uuid || invoice.invoice_number || invoice.invoice_id || invoice.reference;
     router.push(`/etims/buyer-initiated/seller/view?id=${invoiceId}&phone=${encodeURIComponent(phoneNumber)}&status=${statusFilter}`);
   };
 
@@ -96,7 +96,7 @@ function SellerPendingContent() {
       setSelectedInvoices(new Set());
     } else {
       // Select all
-      const allIds = invoices.map((inv, idx) => inv.invoice_id || inv.reference || String(idx));
+      const allIds = invoices.map((inv, idx) => inv.uuid || inv.invoice_number || inv.invoice_id || inv.reference || String(idx));
       setSelectedInvoices(new Set(allIds));
     }
   };
@@ -161,7 +161,7 @@ function SellerPendingContent() {
                     </thead>
                     <tbody>
                       {invoices.map((invoice, idx) => {
-                        const invoiceId = invoice.invoice_id || invoice.reference || String(idx);
+                        const invoiceId = invoice.uuid || invoice.invoice_number || invoice.invoice_id || invoice.reference || String(idx);
                         const isSelected = selectedInvoices.has(invoiceId);
                         return (
                           <tr key={invoiceId} className="border-b last:border-0 hover:bg-gray-50">
@@ -171,7 +171,7 @@ function SellerPendingContent() {
                               </td>
                             )}
                             <td className="py-2 px-1">
-                              <span className="font-medium text-gray-800">{invoice.reference || invoice.invoice_id || 'N/A'}</span>
+                              <span className="font-medium text-gray-800">{invoice.invoice_number || invoice.reference || 'N/A'}</span>
                               <span className="block text-[10px] text-gray-400">{invoice.buyer_name || 'Unknown'}</span>
                             </td>
                             <td className="py-2 px-1 text-right font-medium">{(invoice.total_amount || 0).toLocaleString()}</td>
