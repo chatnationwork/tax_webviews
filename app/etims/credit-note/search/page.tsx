@@ -6,6 +6,7 @@ import { Layout, Card, Button } from '../../_components/Layout';
 import { searchCreditNoteInvoice } from '../../../actions/etims';
 import { saveCreditNote, getUserSession, Invoice } from '../../_lib/store';
 import { FileText, Search, Loader2 } from 'lucide-react';
+import { QuickMenu } from '../../_components/QuickMenu';
 
 function CreditNoteSearchContent() {
   const router = useRouter();
@@ -149,6 +150,12 @@ function CreditNoteSearchContent() {
         <Button onClick={handleSearch} disabled={loading}>
           {loading ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Searching...</> : 'Search Invoice'}
         </Button>
+
+         {/* Quick Menu */}
+                <div className="pt-2">
+                  <p className="text-xs text-gray-500 mb-2 text-center">Quick Actions</p>
+                  <QuickMenu />
+                </div>
       </div>
     </Layout>
   );
