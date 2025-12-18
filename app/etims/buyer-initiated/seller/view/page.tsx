@@ -33,7 +33,8 @@ function SellerViewContent() {
     if (!id || !phone) { setIsLoading(false); setError('Missing data'); return; }
     const loadInvoice = async () => {
       try {
-        const result = await fetchInvoices(phone, session?.name);
+        // Fetch invoices where user is supplier, and verify we find the specific one
+        const result = await fetchInvoices(phone, session?.name, undefined, 'supplier');
         if (result.success && result.invoices) {
           // Match against uuid, invoice_number, or legacy fields
           const found = result.invoices.find(inv => 
@@ -55,8 +56,15 @@ function SellerViewContent() {
     if (!selectedAction || !invoice || !phone || !id) return;
     setIsProcessing(true);
     try {
-      await processBuyerInvoice(phone, id, selectedAction === 'approve' ? 'accept' : 'reject');
-      router.push(`/etims/buyer-initiated/seller/success?action=${selectedAction}`);
+      const invoiceRef = invoice.invoice_number || id;
+      const result = await processBuyerInvoice(phone, invoiceRef, selectedAction === 'approve' ? 'accept' : 'reject');
+      
+      if (result.success) {
+        router.push(`/etims/buyer-initiated/seller/success?action=${selectedAction}`);
+      } else {
+        alert(`Failed: ${result.error || 'Unknown error'}`);
+        setIsProcessing(false);
+      }
     } catch (err: any) {
       alert(`Failed: ${err.message}`);
       setIsProcessing(false);
@@ -68,7 +76,7 @@ function SellerViewContent() {
   if (isLoading) return <Layout title="Invoice" onBack={() => router.push(backUrl)}><div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin" /></div></Layout>;
   if (error || !invoice) return <Layout title="Error" onBack={() => router.push(backUrl)}><Card className="text-center py-6"><p className="text-red-600 text-sm mb-3">{error}</p><Button onClick={() => router.push(backUrl)}>Back</Button></Card></Layout>;
 
-  const isPending = !invoice.status || invoice.status === 'pending';
+  const isPending = !invoice.status || invoice.status === 'pending' || invoice.status === 'awaiting_approval';
 
   return (
     <Layout title="Invoice Details" showHeader={false} onBack={() => router.push(backUrl)}>
