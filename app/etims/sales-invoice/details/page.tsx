@@ -289,7 +289,11 @@ export default function SalesInvoiceDetails() {
      
 
         {/* Review Button */}
-        <Button onClick={handleReview} disabled={items.length === 0}>
+        <Button 
+          onClick={handleReview} 
+          disabled={items.length === 0}
+          className={items.length === 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : ''}
+        >
           Continue
         </Button>
       </div>
