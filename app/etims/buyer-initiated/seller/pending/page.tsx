@@ -94,7 +94,7 @@ function SellerPendingContent() {
       });
 
       if (result.success) {
-        alert(`Invoice Order ${invoice.invoice_number || invoice.reference || invoice.invoice_id} sent to WhatsApp (${phoneNumber})`);
+        alert(`Invoice Order ${invoice.invoice_number || invoice.reference || invoice.invoice_id} sent to WhatsApp number ${phoneNumber}`);
       } else {
         alert('Failed to send: ' + (result.error || 'Unknown error'));
       }
