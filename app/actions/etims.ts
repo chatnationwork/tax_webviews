@@ -560,7 +560,8 @@ export async function submitCreditNote(
 export async function processBuyerInvoice(
   msisdn: string,
   invoiceRef: string,
-  action: 'accept' | 'reject'
+  action: 'accept' | 'reject',
+  sellerName: string = 'Valued Partner' // Default for backward compatibility if missed
 ): Promise<{ success: boolean; message?: string; error?: string }> {
   if (!msisdn) return { success: false, error: 'Phone number is required' };
   if (!invoiceRef) return { success: false, error: 'Invoice reference is required' };
@@ -589,6 +590,77 @@ export async function processBuyerInvoice(
     );
 
     console.log('Process invoice response:', JSON.stringify(response.data, null, 2));
+
+    // If accepted, poll for the approved invoice to get the PDF URL
+    if (action === 'accept' && (response.data.success !== false)) {
+      // Don't await the polling to avoid blocking the UI response? 
+      // User said "then when we get it", implying it's a background or subsequent action.
+      // However, server actions usually complete before returning. The user might experience a delay.
+      // But user said "so user seletc approve,we approce ,then we try and fetch...".
+      // If we await here, the UI spinner will spin for 2-6 seconds. This is probably acceptable for "Processing...".
+      // Let's await it.
+
+      (async () => {
+        try {
+          console.log(`Starting polling for approved invoice ${invoiceRef} PDF...`);
+          // Try 3 times with delay
+          for (let i = 0; i < 3; i++) {
+            const delay = (i + 1) * 2000; // 2s, 4s, 6s - wait, user said 1 or 3 seconds. Let's do 2s delay.
+            console.log(`Polling attempt ${i + 1}/3... waiting 2s`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            const fetchResult = await fetchInvoices(cleanNumber, undefined, 'accepted', 'supplier');
+            
+            if (fetchResult.success && fetchResult.invoices) {
+              console.log(`Fetched ${fetchResult.invoices.length} accepted invoices.`);
+              // Log some invoice refs for debugging
+              // console.log('Invoice refs found:', fetchResult.invoices.map(inv => inv.invoice_number || inv.reference || inv.invoice_id).join(', '));
+              
+              const approvedInvoice = fetchResult.invoices.find(inv => 
+                (inv.invoice_number === invoiceRef) || 
+                (inv.reference === invoiceRef) ||
+                (inv.invoice_id === invoiceRef) ||
+                (inv.total_amount && inv.buyer_name && `${inv.reference}`.includes(invoiceRef)) // Loose match if needed
+              );
+
+              if (approvedInvoice) {
+                console.log('Approved invoice found:', JSON.stringify(approvedInvoice, null, 2));
+                
+                if (approvedInvoice.invoice_pdf_url) {
+                  console.log('PDF URL found, sending WhatsApp...');
+                  await sendWhatsAppDocument({
+                    recipientPhone: cleanNumber,
+                    documentUrl: approvedInvoice.invoice_pdf_url,
+                    caption: `Dear *${sellerName}*,\n\nInvoice *${approvedInvoice.invoice_number || invoiceRef}* Amount: ${approvedInvoice.total_amount} has been approved.\n\nAttached is the invoice PDF.`,
+                    filename: `Invoice_${approvedInvoice.invoice_number || invoiceRef}.pdf`
+                  });
+
+                  if (approvedInvoice.buyer_msisdn) {
+                    console.log(`Sending PDF to buyer (${approvedInvoice.buyer_msisdn})...`);
+                    await sendWhatsAppDocument({
+                      recipientPhone: approvedInvoice.buyer_msisdn,
+                      documentUrl: approvedInvoice.invoice_pdf_url,
+                      caption: `Dear *${approvedInvoice.buyer_name || 'Customer'}*,\n\nYour invoice *${approvedInvoice.invoice_number || invoiceRef}* Amount: ${approvedInvoice.total_amount} has been approved by *${sellerName}* .\n\nAttached is the invoice PDF.`,
+                      filename: `Invoice_${approvedInvoice.invoice_number || invoiceRef}.pdf`
+                    });
+                  }
+                  
+                  break; // Found and sent
+                } else {
+                  console.log('Invoice found but PDF URL missing yet.');
+                }
+              } else {
+                console.log(`Invoice ${invoiceRef} not found in fetch results yet.`);
+              }
+            } else {
+              console.log('Fetch invoices failed or empty:', fetchResult.error);
+            }
+          }
+        } catch (pollError) {
+          console.error('Error polling for invoice PDF:', pollError);
+        }
+      })();
+    }
 
     return {
       success: true,

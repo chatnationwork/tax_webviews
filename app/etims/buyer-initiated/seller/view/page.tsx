@@ -59,7 +59,7 @@ function SellerViewContent() {
     setIsProcessing(true);
     try {
       const invoiceRef = invoice.invoice_number || id;
-      const result = await processBuyerInvoice(phone, invoiceRef, selectedAction === 'approve' ? 'accept' : 'reject');
+      const result = await processBuyerInvoice(phone, invoiceRef, selectedAction === 'approve' ? 'accept' : 'reject', sellerName);
       
       if (result.success) {
         // Send WhatsApp alert to buyer
