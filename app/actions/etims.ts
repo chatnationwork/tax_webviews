@@ -639,9 +639,14 @@ export async function processBuyerInvoiceBulk(
   // Send summary notification to Seller
   if (processed > 0) {
     const statusText = action === 'accept' ? 'approved' : 'rejected';
+    
+    // Get list of successful invoices
+    const successfulItems = invoices.filter((_, index) => results[index].success);
+    const invoiceList = successfulItems.map((inv, i) => `${i + 1}. ${inv.ref} - ${inv.buyerName}`).join('\n');
+    
     await sendWhatsAppMessage({
       recipientPhone: msisdn,
-      message: `Dear ${sellerName || 'Seller'}, you have successfully ${statusText} ${processed} invoice(s) in bulk.`
+      message: `Dear ${sellerName || 'Seller'}, the following invoices have been ${statusText}:\n\n${invoiceList}`
     });
   }
 
