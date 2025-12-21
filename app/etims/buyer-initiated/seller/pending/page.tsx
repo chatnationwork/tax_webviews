@@ -21,6 +21,7 @@ function SellerPendingContent() {
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState('');
   const [selectedInvoices, setSelectedInvoices] = useState<Set<string>>(new Set());
+  const [confirmingBulkAction, setConfirmingBulkAction] = useState<'accept' | 'reject' | null>(null);
   const [sendingPdf, setSendingPdf] = useState<string | null>(null);
 
   const getPageTitle = () => {
@@ -126,9 +127,14 @@ function SellerPendingContent() {
     }
   };
 
-  const handleBulkAction = async (action: 'accept' | 'reject') => {
+  const initiateBulkAction = (action: 'accept' | 'reject') => {
     if (!phoneNumber || selectedInvoices.size === 0) return;
-    if (!confirm(`Are you sure you want to ${action === 'accept' ? 'approve' : 'reject'} ${selectedInvoices.size} invoice(s)?`)) return;
+    setConfirmingBulkAction(action);
+  };
+
+  const executeBulkAction = async () => {
+    if (!confirmingBulkAction) return;
+    const action = confirmingBulkAction;
     
     setLoading(true);
     try {
@@ -159,17 +165,20 @@ function SellerPendingContent() {
           // Success message
           // alert(`Successfully processed ${result.processed} invoices.`);
           setSelectedInvoices(new Set()); // Clear selection
+          setConfirmingBulkAction(null);
           fetchInvoicesData(phoneNumber, userName); // Refresh list
       } else {
           // Partial success or failure
           alert(`Processed: ${result.processed}, Failed: ${result.failed}\nErrors: ${result.errors.slice(0, 3).join(', ')}${result.errors.length > 3 ? '...' : ''}`);
           setSelectedInvoices(new Set()); 
+          setConfirmingBulkAction(null);
           fetchInvoicesData(phoneNumber, userName);
       }
     } catch (err: any) {
       alert(`Bulk action failed: ${err.message}`);
     } finally {
       setLoading(false);
+      setConfirmingBulkAction(null);
     }
   };
 
@@ -214,8 +223,19 @@ function SellerPendingContent() {
                   <div className="bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 flex items-center justify-between">
                     <span className="text-xs font-medium text-gray-700">{selectedInvoices.size} selected</span>
                     <div className="flex gap-2">
-                      <button onClick={() => handleBulkAction('reject')} disabled={loading} className="px-2 py-1 bg-red-600 text-white text-xs rounded font-medium disabled:opacity-50">Reject</button>
-                      <button onClick={() => handleBulkAction('accept')} disabled={loading} className="px-2 py-1 bg-[var(--kra-green)] text-white text-xs rounded font-medium disabled:opacity-50">Approve</button>
+                      {confirmingBulkAction ? (
+                        <div className="flex items-center gap-2 animate-in slide-in-from-right-5 duration-200">
+                           <span className="text-xs text-gray-600 font-medium hidden sm:inline">Confirm {confirmingBulkAction === 'accept' ? 'Approve' : 'Reject'}?</span>
+                           <span className="text-xs text-gray-600 font-medium sm:hidden">Confirm?</span>
+                           <button onClick={executeBulkAction} disabled={loading} className={`px-3 py-1.5 text-white text-xs rounded font-medium disabled:opacity-50 ${confirmingBulkAction === 'accept' ? 'bg-[var(--kra-green)]' : 'bg-red-600'}`}>Yes</button>
+                           <button onClick={() => setConfirmingBulkAction(null)} disabled={loading} className="px-3 py-1.5 bg-gray-200 text-gray-700 text-xs rounded font-medium disabled:opacity-50">No</button>
+                        </div>
+                      ) : (
+                        <>
+                          <button onClick={() => initiateBulkAction('reject')} disabled={loading} className="px-2 py-1 bg-red-600 text-white text-xs rounded font-medium disabled:opacity-50">Reject</button>
+                          <button onClick={() => initiateBulkAction('accept')} disabled={loading} className="px-2 py-1 bg-[var(--kra-green)] text-white text-xs rounded font-medium disabled:opacity-50">Approve</button>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
