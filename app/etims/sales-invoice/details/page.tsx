@@ -17,6 +17,7 @@ export default function SalesInvoiceDetails() {
   const [quantity, setQuantity] = useState('');
   const [items, setItems] = useState<InvoiceItem[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteConfirmationId, setDeleteConfirmationId] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -96,15 +97,20 @@ export default function SalesInvoiceDetails() {
   };
 
   const handleRemoveItem = (id: string) => {
-    if (window.confirm('Are you sure you want to remove this item?')) {
-      setItems(items.filter(item => item.id !== id));
-      if (editingId === id) {
+    setDeleteConfirmationId(id);
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmationId) {
+      setItems(items.filter(item => item.id !== deleteConfirmationId));
+      if (editingId === deleteConfirmationId) {
         setEditingId(null);
         setItemName('');
         setDescription('');
         setUnitPrice('');
         setQuantity('0');
       }
+      setDeleteConfirmationId(null);
     }
   };
 
@@ -297,6 +303,39 @@ export default function SalesInvoiceDetails() {
           Continue
         </Button>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmationId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-5 text-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-1">Delete Item?</h3>
+              <p className="text-gray-500 text-sm">
+                Are you sure you want to remove this item from the invoice? This action cannot be undone.
+              </p>
+            </div>
+            <div className="bg-gray-50 px-5 py-3 flex gap-3">
+              <Button 
+                variant="secondary" 
+                onClick={() => setDeleteConfirmationId(null)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="danger" 
+                onClick={confirmDelete}
+                className="flex-1"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
