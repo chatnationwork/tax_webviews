@@ -642,7 +642,7 @@ export async function processBuyerInvoiceBulk(
     
     // Get list of successful invoices
     const successfulItems = invoices.filter((_, index) => results[index].success);
-    const invoiceList = successfulItems.map((inv, i) => `${i + 1}. ${inv.ref} - ${inv.buyerName} ${inv.totalAmount}`).join('\n');
+    const invoiceList = successfulItems.map((inv, i) => `${i + 1}. ${inv.ref} - ${inv.buyerName} - Total: ${inv.totalAmount}`).join('\n');
     
     await sendWhatsAppMessage({
       recipientPhone: msisdn,
