@@ -823,7 +823,10 @@ export async function checkUserStatus(msisdn: string): Promise<CheckUserStatusRe
       `${BASE_URL}/init`,
       { msisdn: cleanNumber },
       {
-        headers: await getAuthHeaders(),
+        headers: {
+          "Content-Type": "application/json",
+         
+        },
         timeout: 30000
       }
     );
@@ -893,8 +896,8 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       },
       { 
         headers: { 
-          ...(await getAuthHeaders()),
-          'x-source-for': 'whatsapp'
+          "Content-Type": "application/json",
+         
         }, 
         timeout: 30000 
       }
@@ -1006,7 +1009,10 @@ export async function generateOTP(msisdn: string): Promise<GenerateOTPResult> {
       `${BASE_URL}/otp`,
       { msisdn: cleanNumber },
       {
-        headers: await getAuthHeaders(),
+        headers: {
+          "Content-Type": "application/json",
+         
+        },
         timeout: 30000
       }
     );
