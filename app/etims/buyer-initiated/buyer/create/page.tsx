@@ -143,12 +143,12 @@ export default function BuyerInitiatedCreate() {
             {/* Seller PIN/ID */}
             <Card>
               <PINOrIDInput
-                label="Seller PIN/ID"
+                label="Seller PIN"
                 value={sellerPinOrId}
-                placeholder={transactionType === 'b2b' ? 'A012345678Z' : 'A012345678Z or 12345678'}
+                placeholder={transactionType === 'b2b' ? 'A012345678Z' : 'A012345678Z'}
                 onChange={setSellerPinOrId}
                 onValidationChange={() => {}}
-                helperText={transactionType === 'b2b' ? 'Enter valid PIN' : 'Enter valid PIN or ID'}
+                helperText={transactionType === 'b2b' ? 'Enter valid PIN' : 'Enter valid PIN'}
               />
             </Card>
 
