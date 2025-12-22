@@ -57,6 +57,7 @@ export default function SalesInvoiceReview() {
       const result = await submitInvoice({
         msisdn: session.msisdn,
         customer_pin: invoice.buyer?.pin,
+        pin: invoice.buyer?.pin,
         customer_name: invoice.buyer?.name,
         customer_phone: invoice.buyer?.msisdn,
         total_amount: calculatedTotal,

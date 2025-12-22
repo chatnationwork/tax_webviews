@@ -23,6 +23,7 @@ export interface InvoiceItem {
 export interface InvoiceSubmissionRequest {
   msisdn: string;
   customer_pin?: string;
+  pin?: string;
   customer_name?: string;
   customer_phone?: string;
   total_amount: number;
