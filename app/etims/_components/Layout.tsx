@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Menu, Home, LogOut, Headphones } from 'lucide-react';
 import { useSessionManager } from '../_lib/useSession';
@@ -16,11 +16,20 @@ interface LayoutProps {
   showFooter?: boolean;
 }
 
+
+
 export function Layout({ children, title, step, onBack, showMenu = false, showHeader = true, showFooter = true }: LayoutProps) {
   const router = useRouter();
+    const [phone, setPhone] = useState<string | null>(null);
+
+  useEffect(() => {
+   setPhone(getKnownPhone());
+  }, []);
   
   // Session management - auto-refresh and timeout handling
   useSessionManager();
+
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
 
   const handleMenuClick = () => {
     const action = window.confirm('Menu:\n1. Go to Main Menu\n2. Log Out\n\nClick OK for Main Menu, Cancel to close');
@@ -33,14 +42,14 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
     if (confirm('Are you sure you want to logout?')) {
       // Get msisdn before clearing so user can easily re-login
       const session = typeof window !== 'undefined' ? sessionStorage.getItem('etims_user_session') : null;
-      const msisdn = (session ? JSON.parse(session)?.msisdn : null) || getKnownPhone();
+      const msisdn = (session ? JSON.parse(session)?.msisdn : null) || phone;
       
       clearUserSession();
       sessionStorage.clear();
       
      
-      const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
-      const message = encodeURIComponent('Connect to agent');
+     
+      const message = encodeURIComponent('Main menu');
       // Open WhatsApp with pre-filled message
       window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
     }
@@ -48,18 +57,16 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
 
   const handleConnectAgent = () => {
     // WhatsApp number for eTIMS support (without + symbol)
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
     const message = encodeURIComponent('Connect to agent');
     // Open WhatsApp with pre-filled message
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
   };
 
   const handleMainMenu = () => {
-    // WhatsApp number for eTIMS support (without + symbol)
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+    //  window.location.href = `https://webviewmenu.vercel.app?phone=${phone}`;
     const message = encodeURIComponent('Main menu');
-    // Open WhatsApp with pre-filled message
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+      // Open WhatsApp with pre-filled message
+      window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
   };
 
   return (
