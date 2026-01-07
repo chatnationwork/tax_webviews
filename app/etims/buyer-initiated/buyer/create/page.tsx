@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Card, Button } from '../../../_components/Layout';
+import { Layout, Card, Button } from '../../../../_components/Layout';
 import { saveBuyerInitiated } from '../../../_lib/store';
 import { CheckCircle, Building2, User, Loader2, ArrowLeft } from 'lucide-react';
 import { lookupCustomer } from '../../../../actions/etims';

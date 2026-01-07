@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { FileText, FileMinus, UserCheck, HelpCircle } from 'lucide-react';
-import { Layout, Card } from './_components/Layout';
+import { Layout, Card } from '../_components/Layout';
 import { clearSalesInvoice, clearCreditNote, clearBuyerInitiated } from './_lib/store';
 
 export default function EtimsHome() {

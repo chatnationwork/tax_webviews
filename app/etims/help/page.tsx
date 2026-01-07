@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Card } from '../_components/Layout';
+import { Layout, Card } from '../../_components/Layout';
 import { ChevronDown, ChevronUp, FileText, FileMinus, UserCheck, Phone } from 'lucide-react';
 
 type Section = {

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { FileText, FileMinus, UserCheck } from 'lucide-react';
-import { clearSalesInvoice, clearCreditNote, clearBuyerInitiated } from '../_lib/store';
+import { clearSalesInvoice, clearCreditNote, clearBuyerInitiated } from '../etims/_lib/store';
 
 /**
  * Shows the 3 main eTIMS actions in a horizontal layout

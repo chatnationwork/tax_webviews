@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Layout, Card } from '../../_components/Layout';
+import { Layout, Card } from '../../../_components/Layout';
 import { ArrowLeft, Mail, Phone, Globe } from 'lucide-react';
 
 export default function TermsAndConditions() {

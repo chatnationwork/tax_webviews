@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Layout, Card, Button } from '../../../_components/Layout';
+import { Layout, Card, Button } from '../../../../_components/Layout';
 import { fetchInvoices, processBuyerInvoiceBulk, sendDownloadInvoiceTemplate } from '../../../../actions/etims';
 import { FetchedInvoice } from '../../../_lib/definitions';
 import { Download, Eye, Loader2, Phone, FileText, Square, CheckSquare, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';

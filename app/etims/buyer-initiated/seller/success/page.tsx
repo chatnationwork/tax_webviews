@@ -2,9 +2,9 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { Layout, Card, Button } from '../../../_components/Layout';
+import { Layout, Card, Button } from '../../../../_components/Layout';
 import { CheckCircle, XCircle } from 'lucide-react';
-import { QuickMenu, WhatsAppButton } from '@/app/etims/_components/QuickMenu';
+import { QuickMenu, WhatsAppButton } from '@/app/_components/QuickMenu';
 
 function BuyerSuccessContent() {
   const router = useRouter();

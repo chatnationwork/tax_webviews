@@ -5,7 +5,22 @@ import { useRouter, usePathname } from 'next/navigation';
 import { getUserSession, isSessionValid, refreshSession, clearUserSession, getKnownPhone } from './store';
 
 // Pages that don't require authentication
-const PUBLIC_PATHS = ['/etims/auth', '/etims/auth/login', '/etims/auth/signup', '/etims/auth/otp'];
+const PUBLIC_PATHS = ['*/auth', '*/auth/login', '*/auth/signup', '*/auth/otp','*/otp','/'];
+
+const isPathPublic = (pathname: string | null) => {
+  if (!pathname) return false;
+  
+  return PUBLIC_PATHS.some(pattern => {
+    // Escape special regex chars except *
+    const regexPattern = pattern
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&') 
+      .replace(/\*/g, '.*');
+      
+    // Use strict start and end anchors to match exactly 
+    // (e.g. so '/' doesn't match '/dashboard')
+    return new RegExp(`^${regexPattern}$`).test(pathname);
+  });
+};
 
 export function useSessionManager() {
   const router = useRouter();
@@ -13,7 +28,7 @@ export function useSessionManager() {
 
   const checkSession = useCallback(() => {
     // Skip check for public pages
-    if (PUBLIC_PATHS.some(path => pathname?.startsWith(path))) {
+    if (isPathPublic(pathname)) {
       return true;
     }
 
@@ -38,7 +53,7 @@ export function useSessionManager() {
 
   useEffect(() => {
     // Skip for public pages
-    if (PUBLIC_PATHS.some(path => pathname?.startsWith(path))) {
+    if (isPathPublic(pathname)) {
       return;
     }
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Card, Button, Input } from '../../_components/Layout';
+import { Layout, Card, Button, Input } from '../../../_components/Layout';
 import { PINOrIDInput } from '@/app/_components/KRAInputs';
 import { saveSalesInvoice, getSalesInvoice } from '../../_lib/store';
 import { Loader2, CheckCircle, Edit2 } from 'lucide-react';

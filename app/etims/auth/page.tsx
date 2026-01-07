@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Layout, Card, Button } from '../_components/Layout';
+import { Layout, Card, Button } from '../../_components/Layout';
 import { checkUserStatus } from '../../actions/etims';
 import { saveUserSession } from '../_lib/store';
 import { Loader2, Phone } from 'lucide-react';

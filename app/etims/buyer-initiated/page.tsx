@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Layout } from '../_components/Layout';
+import { Layout } from '../../_components/Layout';
 import { Clock, CheckCircle, XCircle, FilePlus } from 'lucide-react';
 
 export default function BuyerInitiatedHome() {

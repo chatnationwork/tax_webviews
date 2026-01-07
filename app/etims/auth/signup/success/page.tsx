@@ -2,7 +2,7 @@
 
 import { useEffect, Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Layout, Card, Button } from '../../../_components/Layout';
+import { Layout, Card, Button } from '../../../../_components/Layout';
 import { CheckCircle } from 'lucide-react';
 import { sendWhatsAppMessage } from '../../../../actions/etims';
 import { getUserSession } from '../../../_lib/store';

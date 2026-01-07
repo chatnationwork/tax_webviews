@@ -1,188 +1,189 @@
-'use client';
+"use client";
 
-import { 
-  ShieldCheck, 
-  Globe, 
-  FileText, 
-  Calculator, 
-  CreditCard, 
-  Plane,
-} from 'lucide-react';
+import React, { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
-export default function LandingPage() {
+// Service URL mappings - maps service names to their external URLs
+// {{phone}} will be replaced with the actual phone number
+const SERVICE_URLS: Record<string, string> = {
+  // eTIMS Invoicing
+  "Sales Invoice": "/etims/auth?number={{phone}}",
+  "Credit Note": "/etims/auth?number={{phone}}",
+  "Buyer-Initiated Invoices": "/etims/auth?number={{phone}}",
+  
+  // Return Filing
+  "NIL Filing": "/nil-mri-tot/nil/validation?phone={{phone}}",
+  "MRI": "/nil-mri-tot/mri/validation?phone={{phone}}",
+  "TOT": "/nil-mri-tot/tot/validation?phone={{phone}}",
+  
+  // PIN Services
+  "PIN Registration": "https://pin-registration.vercel.app?phone={{phone}}",
+  
+  // Customs Services
+  "F88 Declaration": "https://f88-web.vercel.app?phone={{phone}}",
+  "eSlip": "https://payments-rho-seven.vercel.app/eslip/payment?phone={{phone}}",
+  "NITA": "https://payments-rho-seven.vercel.app/nita/payment?phone={{phone}}",
+  "AHL": "https://payments-rho-seven.vercel.app/ahl/payment?phone={{phone}}",
+  "TCC Application": "https://tcc-seven-psi.vercel.app?phone={{phone}}",
+  "PIN Check": "https://verification-lilac.vercel.app/pin-checker?phone={{phone}}",
+  "Invoice Check": "https://verification-lilac.vercel.app/invoice-checker?phone={{phone}}",
+  "TCC Check": "https://verification-lilac.vercel.app/tcc-checker?phone={{phone}}",
+  "Staff Check": "https://verification-lilac.vercel.app/staff-checker?phone={{phone}}",
+  "Station": "https://verification-lilac.vercel.app/know-your-station?phone={{phone}}",
+  "Import Check": "https://verification-lilac.vercel.app/import-certificate?phone={{phone}}",
+};
+
+// Service categories with clearer labels
+const SERVICE_CATEGORIES = [
+  {
+    title: "PIN Services",
+    items: [
+      { label: "Register PIN", key: "PIN Registration" },
+      { label: "Retrieve PIN", key: "PIN Retrieve" },
+      { label: "Change Details", key: "PIN Change" },
+      { label: "Update iTax", key: "PIN Update" },
+      { label: "Reactivate", key: "PIN Reactivate" },
+      { label: "Obligations", key: "PIN Obligations" },
+    ],
+  },
+  {
+    title: "Return Filing",
+    items: [
+      { label: "NIL Returns", key: "NIL Filing" },
+      { label: "Rental Income", key: "MRI" },
+      { label: "Turnover Tax", key: "TOT" },
+      { label: "PAYE", key: "PAYE" },
+      { label: "VAT", key: "VAT" },
+      { label: "Partnership", key: "Partnership" },
+      { label: "Excise", key: "Excise" },
+    ],
+  },
+  {
+    title: "eTIMS Invoicing",
+    items: [
+      { label: "Sales Invoice", key: "Sales Invoice" },
+      { label: "Credit Note", key: "Credit Note" },
+      { label: "Buyer Invoice", key: "Buyer-Initiated Invoices" },
+    ],
+  },
+  {
+    title: "Tax Compliance",
+    items: [
+      { label: "Apply for TCC", key: "TCC Application" },
+      { label: "Reprint TCC", key: "TCC Reprint" },
+    ],
+  },
+  {
+    title: "Customs",
+    items: [
+      { label: "F88 Declaration", key: "F88 Declaration" },
+      { label: "TIMV Cert", key: "TIMV" },
+      { label: "TEMV Cert", key: "TEMV" },
+      { label: "Extend TIMV", key: "Extend TIMV" },
+      { label: "Forms", key: "Forms" },
+      { label: "Track Status", key: "Status" },
+    ],
+  },
+  {
+    title: "Payments",
+    items: [
+      { label: "eSlip Payment", key: "eSlip" },
+      { label: "NITA Levy", key: "NITA" },
+      { label: "Housing Levy", key: "AHL" },
+    ],
+  },
+  {
+    title: "Verification",
+    items: [
+      { label: "Check PIN", key: "PIN Check" },
+      { label: "Check Invoice", key: "Invoice Check" },
+      { label: "Check TCC", key: "TCC Check" },
+      { label: "Check Staff", key: "Staff Check" },
+      { label: "Find Station", key: "Station" },
+      { label: "Import Cert", key: "Import Check" },
+    ],
+  },
+  {
+    title: "Other Services",
+    items: [
+      { label: "Refund Application", key: "Refund" },
+      { label: "Report Fraud", key: "Report Fraud" },
+      { label: "View All", key: "More" },
+    ],
+  },
+];
+
+import { Layout } from "@/app/_components/Layout";
+
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const phone = searchParams.get("phone") || "";
+  const [toast, setToast] = useState<string | null>(null);
+
+  const handleServiceClick = (serviceKey: string) => {
+    const urlTemplate = SERVICE_URLS[serviceKey];
+    
+    if (urlTemplate) {
+      const url = urlTemplate.replace("{{phone}}", phone);
+      window.location.href = url;
+    } else {
+      setToast(`${serviceKey} - Coming Soon`);
+      setTimeout(() => setToast(null), 2000);
+    }
+  };
+
+  const isAvailable = (key: string) => key in SERVICE_URLS;
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-blue-500/30">
-      {/* Background Gradients */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl -translate-y-1/2"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-600/20 rounded-full blur-3xl translate-y-1/2"></div>
-      </div>
+    <Layout title="KRA Services" showMenu={true}>
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+          {toast}
+        </div>
+      )}
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12 lg:py-20">
-        
-        {/* Header/Nav (Visual only) */}
-        <header className="flex justify-between items-center mb-20 lg:mb-32">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <ShieldCheck className="text-white w-6 h-6" />
-            </div>
-            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-              ChatNation
-            </span>
-          </div>
-          {/* No links as requested */}
-        </header>
-
-        {/* Hero Section */}
-        <main className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-32">
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+      {/* Service grid */}
+      <div className="space-y-2.5">
+        {SERVICE_CATEGORIES.map((category, index) => (
+          <div
+            key={index}
+            className="bg-white rounded-lg border border-gray-100 p-2.5"
+          >
+            {/* Category header */}
+            <div className="flex items-start gap-3">
+              <span className="text-[10px] font-semibold text-gray-700 min-w-[90px] pt-1">
+                {category.title}
               </span>
-              Next-Gen Compliance Platform
-            </div>
-            
-            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-white leading-tight">
-              Simplifying <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-violet-400 to-purple-400">
-                Statutory Compliance
-              </span>
-            </h1>
-            
-            <p className="text-lg text-slate-400 leading-relaxed max-w-xl">
-              A unified ecosystem for seamless KRA tax filing, international travel declarations, and business invoicing. Experience the future of financial governance.
-            </p>
-
-            <div className="flex flex-wrap gap-4 pt-4">
-              <button className="px-8 py-4 bg-white text-slate-900 font-semibold rounded-lg hover:bg-slate-50 transition-colors shadow-xl shadow-white/5 active:scale-95 transform duration-150">
-                Get Started
-              </button>
-              <button className="px-8 py-4 bg-slate-800/50 border border-slate-700 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors backdrop-blur-sm active:scale-95 transform duration-150">
-                Learn More
-              </button>
+              
+              {/* Service items */}
+              <div className="flex flex-wrap gap-1.5 flex-1">
+                {category.items.map((item, itemIndex) => (
+                  <button
+                    key={itemIndex}
+                    onClick={() => handleServiceClick(item.key)}
+                    className={`px-2.5 py-0.8 text-[10px] font-medium rounded-md transition-colors ${
+                      isAvailable(item.key)
+                        ? "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100"
+                        : "bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-
-          <div className="relative">
-             {/* Abstract UI Representation */}
-             <div className="relative z-10 bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
-                <div className="flex items-center justify-between mb-8 border-b border-slate-700/50 pb-4">
-                  <div className="flex gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
-                  </div>
-                  <div className="h-2 w-20 bg-slate-700/50 rounded-full"></div>
-                </div>
-                
-                <div className="space-y-4">
-                   {/* Mock Data Row */}
-                   <div className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700/30">
-                      <div className="p-3 bg-green-500/10 rounded-lg text-green-400">
-                         <Plane className="w-6 h-6" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="h-2 w-24 bg-slate-600 rounded-full mb-2"></div>
-                        <div className="h-1.5 w-16 bg-slate-700 rounded-full"></div>
-                      </div>
-                      <div className="text-right">
-                         <div className="h-6 w-16 bg-green-500/20 text-green-400 text-xs flex items-center justify-center rounded-full font-medium">Cleared</div>
-                      </div>
-                   </div>
-
-                   <div className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700/30">
-                      <div className="p-3 bg-blue-500/10 rounded-lg text-blue-400">
-                         <FileText className="w-6 h-6" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="h-2 w-32 bg-slate-600 rounded-full mb-2"></div>
-                        <div className="h-1.5 w-20 bg-slate-700 rounded-full"></div>
-                      </div>
-                      <div className="text-right">
-                         <div className="h-6 w-16 bg-blue-500/20 text-blue-400 text-xs flex items-center justify-center rounded-full font-medium">Filed</div>
-                      </div>
-                   </div>
-
-                   <div className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700/30">
-                      <div className="p-3 bg-violet-500/10 rounded-lg text-violet-400">
-                         <CreditCard className="w-6 h-6" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="h-2 w-28 bg-slate-600 rounded-full mb-2"></div>
-                        <div className="h-1.5 w-12 bg-slate-700 rounded-full"></div>
-                      </div>
-                      <div className="text-right">
-                         <div className="h-6 w-16 bg-violet-500/20 text-violet-400 text-xs flex items-center justify-center rounded-full font-medium">Active</div>
-                      </div>
-                   </div>
-                </div>
-             </div>
-             
-             {/* Decorative Blobs */}
-             <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/30 rounded-full blur-2xl"></div>
-             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-violet-500/30 rounded-full blur-2xl"></div>
-          </div>
-        </main>
-
-        {/* Features Grid */}
-        <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          
-          <FeatureCard 
-            icon={Globe}
-            title="F88 Customs Declaration"
-            description="Simplified passenger declaration for international travel. Manage currency, restricted items, and luggage details with ease."
-            color="blue"
-          />
-
-          <FeatureCard 
-            icon={Calculator}
-            title="eTIMS Management"
-            description="Complete Electronic Tax Invoice Management. Handle sales invoices, credit notes, and buyer approvals in one secure place."
-            color="violet"
-          />
-
-          <FeatureCard 
-            icon={FileText}
-            title="Tax Filing Automation"
-            description="Effortless filing for NIL returns, Monthly Rental Income (MRI), and Turnover Tax (TOT). Compliance made instant."
-            color="emerald"
-          />
-
-        </section>
-
-        {/* Footer */}
-        <footer className="mt-32 border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center text-slate-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} ChatNation. All rights reserved.</p>
-          <div className="flex gap-6 mt-4 md:mt-0">
-             <span>Terms</span>
-             <span>Privacy</span>
-             <span>Support</span>
-          </div>
-        </footer>
-
+        ))}
       </div>
-    </div>
+    </Layout>
   );
 }
 
-function FeatureCard({ icon: Icon, title, description, color }: any) {
-  const colorClasses: any = {
-    blue: "text-blue-400 group-hover:text-blue-300 bg-blue-500/10 group-hover:bg-blue-500/20 border-blue-500/20",
-    violet: "text-violet-400 group-hover:text-violet-300 bg-violet-500/10 group-hover:bg-violet-500/20 border-violet-500/20",
-    emerald: "text-emerald-400 group-hover:text-emerald-300 bg-emerald-500/10 group-hover:bg-emerald-500/20 border-emerald-500/20",
-  };
-
+export default function Home() {
   return (
-    <div className="group p-6 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all duration-300 hover:shadow-2xl hover:shadow-black/50 hover:-translate-y-1">
-      <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors border ${colorClasses[color]}`}>
-        <Icon className="w-6 h-6" />
-      </div>
-      <h3 className="text-xl font-bold text-slate-100 mb-2 group-hover:text-white transition-colors">{title}</h3>
-      <p className="text-slate-400 group-hover:text-slate-300 transition-colors leading-relaxed">
-        {description}
-      </p>
-    </div>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-sm">Loading...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }

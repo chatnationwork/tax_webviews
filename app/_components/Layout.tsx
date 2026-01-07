@@ -3,8 +3,8 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Menu, Home, LogOut, Headphones } from 'lucide-react';
-import { useSessionManager } from '../_lib/useSession';
-import { clearUserSession, getKnownPhone } from '../_lib/store';
+import { useSessionManager } from '../etims/_lib/useSession';
+import { clearUserSession, getKnownPhone } from '../etims/_lib/store';
 
 interface LayoutProps {
   children: ReactNode;
@@ -63,10 +63,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
   };
 
   const handleMainMenu = () => {
-    //  window.location.href = `https://webviewmenu.vercel.app?phone=${phone}`;
-    const message = encodeURIComponent('Main menu');
-      // Open WhatsApp with pre-filled message
-      window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+   window.location.href = `/`;
   };
 
   return (
@@ -231,23 +228,28 @@ export function Select({
   onChange,
   options,
   required = false,
+  disabled = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
   required?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <div>
-      <label className="block text-xs text-gray-600 mb-1 font-medium">
-        {label} {required && <span className="text-[var(--kra-red)]">*</span>}
-      </label>
+      {label && (
+        <label className="block text-xs text-gray-600 mb-1 font-medium">
+          {label} {required && <span className="text-[var(--kra-red)]">*</span>}
+        </label>
+      )}
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--kra-red)] focus:border-transparent"
+        disabled={disabled}
+        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--kra-red)] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
       >
         <option value="">Select an option</option>
         {options.map((option) => (
@@ -259,6 +261,7 @@ export function Select({
     </div>
   );
 }
+
 
 export function TotalsCard({ subtotal, tax, total }: { subtotal: number; tax: number; total: number }) {
   const formatCurrency = (amount: number) => `KES ${amount.toLocaleString()}`;

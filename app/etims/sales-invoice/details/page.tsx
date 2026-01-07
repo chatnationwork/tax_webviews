@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Card, Input, Button } from '../../_components/Layout';
+import { Layout, Card, Input, Button } from '../../../_components/Layout';
 import { saveSalesInvoice, getSalesInvoice, calculateTotals, InvoiceItem } from '../../_lib/store';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 

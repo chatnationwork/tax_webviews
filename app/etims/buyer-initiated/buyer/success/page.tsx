@@ -2,10 +2,10 @@
 
 import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Layout, Card, Button } from '../../../_components/Layout';
+import { Layout, Card, Button } from '../../../../_components/Layout';
 import { clearBuyerInitiated } from '../../../_lib/store';
 import { CheckCircle } from 'lucide-react';
-import { QuickMenu, WhatsAppButton } from '@/app/etims/_components/QuickMenu';
+import { QuickMenu, WhatsAppButton } from '@/app/_components/QuickMenu';
 
 function BuyerInitiatedSuccessContent() {
   const router = useRouter();
