@@ -87,7 +87,6 @@ export const YearOfBirthInput = forwardRef<HTMLInputElement, YearOfBirthInputPro
 
 YearOfBirthInput.displayName = 'YearOfBirthInput';
 
-// ============= Validation Helpers =============
 
 export const isValidYearOfBirth = (year: string): boolean => {
   if (!year || year.length !== 4) return false;
