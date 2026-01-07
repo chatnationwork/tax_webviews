@@ -38,13 +38,11 @@ const getApiErrorMessage = (error: any, context: string = 'API'): string => {
     url: error.config?.url,
   });
   
-  // Try to extract specific error message from API response
   const apiMessage = error.response?.data?.message || error.response?.data?.error;
   if (apiMessage && typeof apiMessage === 'string') {
     return apiMessage;
   }
   
-  // Return user-friendly error message based on status
   const status = error.response?.status;
   
   if (status === 401 || status === 403) {
@@ -101,7 +99,7 @@ export async function lookupCustomer(pinOrId: string): Promise<CustomerLookupRes
         customer: {
           name: response.data.name,
           pin: response.data.pin,
-          msisdn: response.data.msisdn || '' // msisdn might not be returned in lookup
+          msisdn: response.data.msisdn || '' 
         }
       };
     } else {
@@ -111,15 +109,13 @@ export async function lookupCustomer(pinOrId: string): Promise<CustomerLookupRes
         };
     }
   } catch (error: any) {
-    // Log detailed error on server
     console.error('[Customer Lookup] Error:', {
       status: error.response?.status,
       data: error.response?.data,
       message: error.message,
     });
     
-    // Return friendly error message
-    if (error.response?.status === 404) {
+      if (error.response?.status === 404) {
       return {
         success: false,
         error: 'Buyer not found. Please check the PIN/ID and try again.'
@@ -144,7 +140,6 @@ export async function lookupCustomer(pinOrId: string): Promise<CustomerLookupRes
 export async function submitInvoice(
   request: InvoiceSubmissionRequest
 ): Promise<InvoiceSubmissionResult> {
-  // Validate request
   if (!request.msisdn) {
     return { success: false, error: 'Customer phone number is required' };
   }
@@ -157,7 +152,6 @@ export async function submitInvoice(
     return { success: false, error: 'Total amount must be greater than 0' };
   }
 
-  // Validate each item
   for (const item of request.items) {
     if (!item.item_name || item.item_name.trim() === '') {
       return { success: false, error: 'Item name is required for all items' };
@@ -190,7 +184,7 @@ export async function submitInvoice(
     console.log('Invoice API Response:', JSON.stringify(response.data, null, 2));
 
     // API returns code 8 for success
-    // Transform to match our InvoiceSubmissionResult interface
+    // Transform to InvoiceSubmissionResult interface
     return {
       success: response.data.code === 8,
       invoice_id: response.data.invoice_no,
@@ -234,7 +228,6 @@ export async function fetchInvoices(
   console.log('Fetching invoices for:', cleanNumber, 'status:', status || 'all', 'actor:', actor || 'all');
 
   try {
-    // Build URL with query params
     const params = new URLSearchParams();
     params.append('page', '1');
     params.append('page_size', '50');
@@ -262,7 +255,7 @@ export async function fetchInvoices(
     if (Array.isArray(response.data)) {
       invoices = response.data;
     } else if (response.data.invoices?.entries) {
-      // New paginated format: { invoices: { entries: [...], total_entries: N } }
+      // Paginated format: { invoices: { entries: [...], total_entries: N } }
       invoices = response.data.invoices.entries;
     } else if (response.data.invoices && Array.isArray(response.data.invoices)) {
       invoices = response.data.invoices;
@@ -308,7 +301,7 @@ export async function fetchInvoices(
           ]
         };
       }
-      return inv; // Return as is if already object
+      return inv;
     });
 
     return {
@@ -1202,7 +1195,6 @@ export async function sendWhatsAppDocument(
     cleanNumber = cleanNumber.substring(1);
   }
 
-  // WhatsApp API configuration from environment variables
   const token = process.env.WHATSAPP_ACCESS_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   
