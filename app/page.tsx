@@ -4,7 +4,7 @@ import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 // Service URL mappings - maps service names to their external URLs
-// {{phone}} will be replaced with the actual phone number
+// {{phone}} will be replaced with the actual phone number of the user
 const SERVICE_URLS: Record<string, string> = {
   // eTIMS Invoicing
   "Sales Invoice": "/etims/auth?phone={{phone}}",
