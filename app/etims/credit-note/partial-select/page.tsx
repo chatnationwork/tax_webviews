@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Card, Button } from '../../_components/Layout';
+import { Layout, Card, Button } from '../../../_components/Layout';
 import { getCreditNote, saveCreditNote, InvoiceItem } from '../../_lib/store';
 import { ArrowLeft, CheckSquare, Square } from 'lucide-react';
 import { useFlowTracking } from '@/app/_components/PostHogProvider';

@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Layout, Card, Button } from '../../_components/Layout';
+import { Layout, Card, Button } from '../../../_components/Layout';
 import { IDInput } from '../../../_components/KRAInputs';
 import { YearOfBirthInput } from '../../../_components/YearOfBirthInput';
 import { lookupById, registerTaxpayer, checkUserStatus, generateOTP, verifyOTP } from '../../../actions/etims';

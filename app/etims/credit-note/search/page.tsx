@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Layout, Card, Button } from '../../_components/Layout';
+import { Layout, Card, Button } from '../../../_components/Layout';
 import { searchCreditNoteInvoice } from '../../../actions/etims';
 import { saveCreditNote, getUserSession, Invoice } from '../../_lib/store';
 import { FileText, Search, Loader2, ArrowLeft } from 'lucide-react';

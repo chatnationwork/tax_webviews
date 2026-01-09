@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Card } from '../_components/Layout';
+import { Layout, Card } from '../../_components/Layout';
 import { ChevronDown, ChevronUp, FileText, FileMinus, UserCheck, Phone } from 'lucide-react';
 import { useFlowTracking } from '@/app/_components/PostHogProvider';
 
@@ -13,7 +13,7 @@ type Section = {
   content: React.ReactNode;
 };
 
-export default function HelpPage() {
+function HelpPageContent() {
   const router = useRouter();
   const [openSection, setOpenSection] = useState<string | null>(null);
   
@@ -158,3 +158,12 @@ export default function HelpPage() {
     </Layout>
   );
 }
+
+export default function HelpPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <HelpPageContent />
+    </Suspense>
+  );
+}
+

@@ -2,6 +2,19 @@
 
 import axios from 'axios';
 import { cookies } from 'next/headers';
+import { 
+  getAuthHeaders, 
+  generateOTP as sharedGenerateOTP, 
+  validateOTP as sharedValidateOTP,
+  sendWhatsAppMessage as sharedSendWhatsAppMessage,
+  sendWhatsAppDocument as sharedSendWhatsAppDocument,
+  OTPResult,
+  SendWhatsAppMessageParams,
+  SendWhatsAppMessageResult,
+  SendWhatsAppDocumentParams,
+  SendWhatsAppDocumentResult
+} from './auth';
+
 import {
   CustomerLookupResult,
   InvoiceSubmissionRequest,
@@ -18,14 +31,8 @@ import {
 
 const BASE_URL = 'https://kratest.pesaflow.com/api/ussd';
 
-const getAuthHeaders = async () => {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('etims_auth_token')?.value;
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-  };
-};
+// getAuthHeaders is imported from ./auth
+
 
 /**
  * Logs detailed error on server, returns friendly message string
@@ -987,40 +994,20 @@ export interface GenerateOTPResult {
 /**
  * Generate and send OTP to user's phone
  */
+/**
+ * Generate and send OTP to user's phone
+ * (Delegates to shared auth action)
+ */
 export async function generateOTP(msisdn: string): Promise<GenerateOTPResult> {
-  let cleanNumber = msisdn.trim().replace(/[^\d]/g, '');
-  if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
-  else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
-
-  console.log('Generating OTP for:', cleanNumber);
-
-  try {
-    const response = await axios.post(
-      `${BASE_URL}/otp`,
-      { msisdn: cleanNumber },
-      {
-        headers: {
-          "Content-Type": "application/json",
-         
-        },
-        timeout: 30000
-      }
-    );
-
-    console.log('Generate OTP response:', JSON.stringify(response.data, null, 2));
-
-    return {
-      success: true,
-      message: response.data.message || 'OTP sent successfully'
-    };
-  } catch (error: any) {
-    console.error('Generate OTP error:', error.response?.data || error.message);
-    return { 
-      success: false, 
-      error: error.response?.data?.message || 'Failed to send OTP' 
-    };
-  }
+  const result = await sharedGenerateOTP(msisdn);
+  // Map shared result to local interface if needed (they are compatible)
+  return {
+    success: result.success,
+    message: result.message,
+    error: result.error
+  };
 }
+
 
 export interface VerifyOTPResult {
   success: boolean;
@@ -1031,217 +1018,63 @@ export interface VerifyOTPResult {
 /**
  * Verify OTP entered by user
  */
+/**
+ * Verify OTP entered by user
+ * (Delegates to shared auth action)
+ */
 export async function verifyOTP(msisdn: string, otp: string): Promise<VerifyOTPResult> {
-  let cleanNumber = msisdn.trim().replace(/[^\d]/g, '');
-  if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
-  else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
-
-  console.log('Verifying OTP for:', cleanNumber);
-
-  try {
-    const response = await axios.post(
-      `${BASE_URL}/validate-otp`,
-      { msisdn: cleanNumber, otp: otp.trim().toUpperCase() },
-      { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
-    );
-
-    console.log('Verify OTP response:', JSON.stringify(response.data, null, 2));
-
-    // Check for success (varies by API)
-    if (response.data.code === 0 || response.data.success === false) {
-      return { success: false, error: response.data.message || 'Invalid OTP' };
-    }
-
-    // Store token in HTTP-only cookie
-    if (response.data.token) {
-      (await cookies()).set('etims_auth_token', response.data.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 60 * 24 * 7, 
-        path: '/'
-      });
-    }
-
-    return {
-      success: true,
-      message: response.data.message || 'OTP verified'
-    };
-  } catch (error: any) {
-    console.error('Verify OTP error:', error.response?.data || error.message);
-    return { 
-      success: false, 
-      error: error.response?.data?.message || 'OTP verification failed' 
-    };
+  const result = await sharedValidateOTP(msisdn, otp);
+  
+  if (result.success && result.token) {
+      // Shared action already sets cookies, so we don't strictly need to do it here
+      // But preserving specific cookie logic just in case differs (it seems compatible: etims_auth_token)
   }
+
+  return {
+    success: result.success,
+    message: result.message,
+    error: result.error
+  };
 }
+
 
 // WHATSAPP TEXT MESSAGE SENDING
 
-export interface SendWhatsAppMessageParams {
-  recipientPhone: string; // The phone number to send to
-  message: string;        // The text message to send
-}
+// Types imported from ./auth
 
-export interface SendWhatsAppMessageResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
-}
 
 /**
  * Send a text message via WhatsApp to a user
  * Used for sending notifications, confirmations, etc.
  */
+/**
+ * Send a text message via WhatsApp to a user
+ */
 export async function sendWhatsAppMessage(
   params: SendWhatsAppMessageParams
 ): Promise<SendWhatsAppMessageResult> {
-  const { recipientPhone, message } = params;
-
-  // Validate required params
-  if (!recipientPhone || !message) {
-    return { success: false, error: 'Recipient phone and message are required' };
-  }
-
-  // Clean phone number - ensure format is 2547XXXXXXXX (no + symbol)
-  let cleanNumber = recipientPhone.trim().replace(/[^\d]/g, '');
-  if (cleanNumber.startsWith('0')) {
-    cleanNumber = '254' + cleanNumber.substring(1);
-  } else if (cleanNumber.startsWith('+')) {
-    cleanNumber = cleanNumber.substring(1);
-  }
-
-  // WhatsApp API configuration from environment variables
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  
-  if (!token || !phoneNumberId) {
-    console.error('WhatsApp API credentials not configured');
-    return { success: false, error: 'WhatsApp sending not configured' };
-  }
-
-  const url = `https://crm.chatnation.co.ke/api/meta/v21.0/${phoneNumberId}/messages`;
-
-  const payload = {
-    messaging_product: "whatsapp",
-    recipient_type: "individual",
-    to: cleanNumber,
-    type: "text",
-    text: {
-      preview_url: false,
-      body: message
-    }
-  };
-
-  console.log('Sending WhatsApp message:', { to: cleanNumber, messageLength: message.length });
-
-  try {
-    const response = await axios.post(url, payload, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 30000
-    });
-
-    console.log('WhatsApp message sent successfully:', response.data);
-
-    return {
-      success: true,
-      messageId: response.data.messages?.[0]?.id
-    };
-  } catch (error: any) {
-    console.error('Error sending WhatsApp message:', error.response?.data || error.message);
-    return {
-      success: false,
-      error: error.response?.data?.error?.message || 'Failed to send message via WhatsApp'
-    };
-  }
+    return sharedSendWhatsAppMessage(params);
 }
+
 
 // WHATSAPP DOCUMENT SENDING
 
-export interface SendWhatsAppDocumentParams {
-  recipientPhone: string; // The phone number to send to (current user's phone)
-  documentUrl: string;    // Public URL to the PDF document
-  caption: string;        // Message to accompany the document
-  filename: string;       // Filename for the document
-}
+// Types imported from ./auth
 
-export interface SendWhatsAppDocumentResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
-}
 
 /**
  * Send a document (PDF) via WhatsApp to a user
  * Used for sending invoices, credit notes, reports, etc.
  */
+/**
+ * Send a document (PDF) via WhatsApp to a user
+ */
 export async function sendWhatsAppDocument(
   params: SendWhatsAppDocumentParams
 ): Promise<SendWhatsAppDocumentResult> {
-  const { recipientPhone, documentUrl, caption, filename } = params;
-
-  // Validate required params
-  if (!recipientPhone || !documentUrl) {
-    return { success: false, error: 'Recipient phone and document URL are required' };
-  }
-
-  // Clean phone number - ensure format is 2547XXXXXXXX (no + symbol)
-  let cleanNumber = recipientPhone.trim().replace(/[^\d]/g, '');
-  if (cleanNumber.startsWith('0')) {
-    cleanNumber = '254' + cleanNumber.substring(1);
-  } else if (cleanNumber.startsWith('+')) {
-    cleanNumber = cleanNumber.substring(1);
-  }
-
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  
-  if (!token || !phoneNumberId) {
-    console.error('WhatsApp API credentials not configured');
-    return { success: false, error: 'WhatsApp sending not configured' };
-  }
-
-  const url = `https://crm.chatnation.co.ke/api/meta/v21.0/${phoneNumberId}/messages`;
-
-  const payload = {
-    messaging_product: "whatsapp",
-    recipient_type: "individual",
-    to: cleanNumber,
-    type: "document",
-    document: {
-      link: documentUrl,
-      caption: caption,
-      filename: filename
-    }
-  };
-
-  console.log('Sending WhatsApp document:', { to: cleanNumber, filename, documentUrl });
-
-  try {
-    const response = await axios.post(url, payload, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 30000
-    });
-
-    console.log('WhatsApp document sent successfully:', response.data);
-
-    return {
-      success: true,
-      messageId: response.data.messages?.[0]?.id
-    };
-  } catch (error: any) {
-    console.error('Error sending WhatsApp document:', error.response?.data || error.message);
-    return {
-      success: false,
-      error: error.response?.data?.error?.message || 'Failed to send document via WhatsApp'
-    };
-  }
+    return sharedSendWhatsAppDocument(params);
 }
+
 
 /**
  * Send template message to buyer when invoice is approved/rejected

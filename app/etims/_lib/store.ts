@@ -123,66 +123,22 @@ export const clearBuyerInitiated = () => {
 
 // User Session Store
 // User Session Store
-const USER_SESSION_KEY = 'etims_user_session';
-const KNOWN_PHONE_KEY = 'etims_known_phone';
-const SESSION_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+// Re-export shared session store for backward compatibility
+export * from '../../_lib/session-store';
 
-export interface UserSession {
-  msisdn: string;
-  name?: string;
-  pin?: string;
-  lastActive: number; // timestamp
-}
+/* 
+ * User Session Logic moved to app/_lib/session-store.ts
+ * The following exports are now maintained via the export * above:
+ * - UserSession (interface)
+ * - saveKnownPhone
+ * - getKnownPhone
+ * - saveUserSession
+ * - refreshSession
+ * - getUserSession
+ * - isSessionValid
+ * - clearUserSession
+ */
 
-export const saveKnownPhone = (phone: string) => {
-  if (typeof window === 'undefined' || !phone) return;
-  localStorage.setItem(KNOWN_PHONE_KEY, phone);
-};
-
-export const getKnownPhone = (): string | null => {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(KNOWN_PHONE_KEY);
-};
-
-export const saveUserSession = (data: Omit<UserSession, 'lastActive'>) => {
-  if (typeof window === 'undefined') return;
-  const session: UserSession = {
-    ...data,
-    lastActive: Date.now()
-  };
-  sessionStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
-  if (data.msisdn) {
-    saveKnownPhone(data.msisdn);
-  }
-};
-
-export const refreshSession = () => {
-  if (typeof window === 'undefined') return;
-  const session = getUserSession();
-  if (session) {
-    session.lastActive = Date.now();
-    sessionStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
-  }
-};
-
-export const getUserSession = (): UserSession | null => {
-  if (typeof window === 'undefined') return null;
-  const data = sessionStorage.getItem(USER_SESSION_KEY);
-  return data ? JSON.parse(data) : null;
-};
-
-export const isSessionValid = (): boolean => {
-  const session = getUserSession();
-  if (!session) return false;
-  
-  const elapsed = Date.now() - session.lastActive;
-  return elapsed < SESSION_TIMEOUT_MS;
-};
-
-export const clearUserSession = () => {
-  if (typeof window === 'undefined') return;
-  sessionStorage.removeItem(USER_SESSION_KEY);
-};
 
 // Calculate totals
 export const calculateTotals = (items: InvoiceItem[]) => {

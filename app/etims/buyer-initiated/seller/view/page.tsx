@@ -2,12 +2,12 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Layout, Card, Button } from '../../../_components/Layout';
+import { Layout, Card, Button } from '../../../../_components/Layout';
 import { fetchInvoices, processBuyerInvoice, sendBuyerInvoiceAlert, sendWhatsAppMessage, sendDownloadInvoiceTemplate } from '../../../../actions/etims';
 import { FetchedInvoice } from '../../../_lib/definitions';
 import { getUserSession } from '../../../_lib/store';
 import { Loader2, Download, ArrowLeft} from 'lucide-react';
-import { QuickMenu } from '@/app/etims/_components/QuickMenu';
+import { QuickMenu } from '@/app/_components/QuickMenu';
 
 function SellerViewContent() {
   const router = useRouter();

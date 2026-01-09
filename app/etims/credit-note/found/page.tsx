@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Card, Button, TotalsCard } from '../../_components/Layout';
+import { Layout, Card, Button, TotalsCard } from '../../../_components/Layout';
 import { getCreditNote, saveCreditNote, CreditNoteData } from '../../_lib/store';
 import { useFlowTracking } from '@/app/_components/PostHogProvider';
 

@@ -1,11 +1,10 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect } from 'react';
-import { Layout, Card, Button } from '../../../_components/Layout';
+import { Suspense } from 'react';
+import { Layout, Card, Button } from '../../../../_components/Layout';
 import { CheckCircle, XCircle } from 'lucide-react';
-import { QuickMenu, WhatsAppButton } from '@/app/etims/_components/QuickMenu';
-import { trackFlowCompleted } from '@/app/_components/PostHogProvider';
+import { QuickMenu, WhatsAppButton } from '@/app/_components/QuickMenu';
 
 function BuyerSuccessContent() {
   const router = useRouter();
@@ -14,11 +13,6 @@ function BuyerSuccessContent() {
   const invoiceNo = searchParams.get('invoice');
   const buyerName = searchParams.get('buyer');
   const isAccepted = action === 'accepted' || action === 'approve';
-  
-  // Track flow completion on mount
-  useEffect(() => {
-    trackFlowCompleted('buyer_initiated_seller');
-  }, []);
 
   const handleGoHome = () => {
     router.push('/etims/buyer-initiated');

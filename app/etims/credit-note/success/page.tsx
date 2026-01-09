@@ -2,8 +2,8 @@
 
 import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Layout, Card, Button } from '../../_components/Layout';
-import { QuickMenu, WhatsAppButton } from '../../_components/QuickMenu';
+import { Layout, Card, Button } from '../../../_components/Layout';
+import { QuickMenu, WhatsAppButton } from '../../../_components/QuickMenu';
 import { CheckCircle } from 'lucide-react';
 import { clearCreditNote } from '../../_lib/store';
 import { trackFlowCompleted } from '@/app/_components/PostHogProvider';

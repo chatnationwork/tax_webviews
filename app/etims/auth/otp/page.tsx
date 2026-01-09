@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Layout, Card, Button } from '../../_components/Layout';
+import { Layout, Card, Button } from '../../../_components/Layout';
 import { registerTaxpayer, generateOTP, verifyOTP } from '../../../actions/etims';
 import { saveUserSession } from '../../_lib/store';
 import { Loader2, MessageSquare, CheckCircle } from 'lucide-react';
