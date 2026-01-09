@@ -5,11 +5,15 @@ import { useRouter } from 'next/navigation';
 import { Layout, Card, Input, Button } from '../../_components/Layout';
 import { saveSalesInvoice, getSalesInvoice, calculateTotals, InvoiceItem } from '../../_lib/store';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { useFlowTracking } from '@/app/_components/PostHogProvider';
 
 const MAX_DESCRIPTION_LENGTH = 600;
 
 export default function SalesInvoiceDetails() {
   const router = useRouter();
+  
+  // Track this step
+  useFlowTracking('sales_invoice', 'details', 2);
   const [itemType, setItemType] = useState<'product' | 'service'>('product');
   const [itemName, setItemName] = useState('');
   const [description, setDescription] = useState('');

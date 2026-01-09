@@ -4,9 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Layout, Card, Button, TotalsCard } from '../../_components/Layout';
 import { getCreditNote, saveCreditNote, CreditNoteData } from '../../_lib/store';
+import { useFlowTracking } from '@/app/_components/PostHogProvider';
 
 export default function CreditNoteFound() {
   const router = useRouter();
+  
+  // Track this step
+  useFlowTracking('credit_note', 'found', 2);
+  
   const [creditNote, setCreditNote] = useState<CreditNoteData | null>(null);
   const [selectedType, setSelectedType] = useState<'full' | 'partial' | ''>('');
   const [mounted, setMounted] = useState(false);

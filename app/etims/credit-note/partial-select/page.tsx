@@ -5,9 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Layout, Card, Button } from '../../_components/Layout';
 import { getCreditNote, saveCreditNote, InvoiceItem } from '../../_lib/store';
 import { ArrowLeft, CheckSquare, Square } from 'lucide-react';
+import { useFlowTracking } from '@/app/_components/PostHogProvider';
 
 export default function CreditNotePartialSelect() {
   const router = useRouter();
+  
+  // Track this step
+  useFlowTracking('credit_note', 'partial_select', 3);
   const [invoice, setInvoice] = useState<{ invoiceNumber: string; items: InvoiceItem[]; total: number } | null>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [mounted, setMounted] = useState(false);

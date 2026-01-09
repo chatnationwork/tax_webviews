@@ -7,11 +7,20 @@ import { fetchInvoices, processBuyerInvoiceBulk, sendDownloadInvoiceTemplate } f
 import { FetchedInvoice } from '../../../_lib/definitions';
 import { Download, Eye, Loader2, Phone, FileText, Square, CheckSquare, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getUserSession } from '../../../_lib/store';
+import { useFlowTracking, trackFlowStarted } from '@/app/_components/PostHogProvider';
 
 function SellerPendingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const statusFilter = searchParams.get('status') || 'pending';
+  
+  // Track this step
+  useFlowTracking('buyer_initiated_seller', 'pending', 1);
+  
+  // Track flow start on first mount
+  useEffect(() => {
+    trackFlowStarted('buyer_initiated_seller');
+  }, []);
   
   const [phoneNumber, setPhoneNumber] = useState('');
   const [userName, setUserName] = useState('');

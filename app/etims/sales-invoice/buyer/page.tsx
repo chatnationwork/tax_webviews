@@ -7,9 +7,19 @@ import { PINOrIDInput } from '@/app/_components/KRAInputs';
 import { saveSalesInvoice, getSalesInvoice } from '../../_lib/store';
 import { Loader2, CheckCircle, Edit2 } from 'lucide-react';
 import { lookupCustomer } from '../../../actions/etims';
+import { useFlowTracking, trackFlowStarted } from '@/app/_components/PostHogProvider';
 
 export default function SalesInvoiceBuyer() {
   const router = useRouter();
+  
+  // Track this step
+  useFlowTracking('sales_invoice', 'buyer', 1);
+  
+  // Track flow start on first mount
+  useEffect(() => {
+    trackFlowStarted('sales_invoice');
+  }, []);
+  
   const [buyerPinOrId, setBuyerPinOrId] = useState('');
   const [buyerName, setBuyerName] = useState('');
   const [isInputValid, setIsInputValid] = useState(false);

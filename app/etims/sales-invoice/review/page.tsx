@@ -6,9 +6,13 @@ import { Layout, Card, Button } from '../../_components/Layout';
 import { getSalesInvoice, Invoice, getUserSession } from '../../_lib/store';
 import { submitInvoice, sendInvoiceCreditDocTemplate } from '../../../actions/etims';
 import { Loader2 } from 'lucide-react';
+import { useFlowTracking } from '@/app/_components/PostHogProvider';
 
 export default function SalesInvoiceReview() {
   const router = useRouter();
+  
+  // Track this step
+  useFlowTracking('sales_invoice', 'review', 3);
   const [invoice, setInvoice] = useState<Partial<Invoice> | null>(null);
   const [sellerName, setSellerName] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);

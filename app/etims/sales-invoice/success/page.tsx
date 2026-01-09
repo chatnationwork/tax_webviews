@@ -1,16 +1,22 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../_components/Layout';
 import { QuickMenu, WhatsAppButton } from '../../_components/QuickMenu';
 import { CheckCircle } from 'lucide-react';
 import { clearSalesInvoice } from '../../_lib/store';
+import { trackFlowCompleted } from '@/app/_components/PostHogProvider';
 
 function SalesInvoiceSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const invoiceNo = searchParams.get('invoice') || '';
+  
+  // Track flow completion on mount
+  useEffect(() => {
+    trackFlowCompleted('sales_invoice');
+  }, []);
 
   const handleCreateAnother = () => {
     clearSalesInvoice();

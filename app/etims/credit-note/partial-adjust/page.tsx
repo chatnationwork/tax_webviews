@@ -5,9 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Layout, Card, Button } from '../../_components/Layout';
 import { getCreditNote, saveCreditNote, calculateTotals, InvoiceItem } from '../../_lib/store';
 import { Send, ArrowLeft, AlertCircle } from 'lucide-react';
+import { useFlowTracking } from '@/app/_components/PostHogProvider';
 
 export default function CreditNotePartialAdjust() {
   const router = useRouter();
+  
+  // Track this step
+  useFlowTracking('credit_note', 'partial_adjust', 4);
   // Store displayQty (string) separately to allow typing "1." without it becoming "1"
   const [items, setItems] = useState<Array<{ item: InvoiceItem; quantity: number; displayQty: string; maxQty: number }>>([]);
   const [mounted, setMounted] = useState(false);

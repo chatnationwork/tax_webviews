@@ -6,10 +6,19 @@ import { Layout, Card, Button } from '../../_components/Layout';
 import { searchCreditNoteInvoice } from '../../../actions/etims';
 import { saveCreditNote, getUserSession, Invoice } from '../../_lib/store';
 import { FileText, Search, Loader2, ArrowLeft } from 'lucide-react';
+import { useFlowTracking, trackFlowStarted } from '@/app/_components/PostHogProvider';
 
 
 function CreditNoteSearchContent() {
   const router = useRouter();
+  
+  // Track this step
+  useFlowTracking('credit_note', 'search', 1);
+  
+  // Track flow start on first mount
+  useEffect(() => {
+    trackFlowStarted('credit_note');
+  }, []);
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [creditNoteType, setCreditNoteType] = useState<'partial' | 'full' | ''>('');
   const [reason, setReason] = useState('');

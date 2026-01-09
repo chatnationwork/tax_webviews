@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Layout, Card } from '../_components/Layout';
 import { ChevronDown, ChevronUp, FileText, FileMinus, UserCheck, Phone } from 'lucide-react';
+import { useFlowTracking } from '@/app/_components/PostHogProvider';
 
 type Section = {
   id: string;
@@ -15,6 +16,9 @@ type Section = {
 export default function HelpPage() {
   const router = useRouter();
   const [openSection, setOpenSection] = useState<string | null>(null);
+  
+  // Track help page view
+  useFlowTracking('help', 'help_page', 1);
 
   const toggleSection = (id: string) => {
     setOpenSection(openSection === id ? null : id);

@@ -7,6 +7,7 @@ import { getCreditNote, CreditNoteData, getUserSession } from '../../_lib/store'
 import { Loader2 } from 'lucide-react';
 import { submitCreditNote,sendInvoiceCreditDocTemplate } from '../../../actions/etims';
 import { CreditNoteReason } from '../../_lib/definitions';
+import { useFlowTracking } from '@/app/_components/PostHogProvider';
 
 const reasonLabels: Record<string, string> = {
   missing_quantity: 'Missing Quantity',
@@ -19,6 +20,9 @@ const reasonLabels: Record<string, string> = {
 
 export default function CreditNoteFull() {
   const router = useRouter();
+  
+  // Track this step
+  useFlowTracking('credit_note', 'full', 3);
   const [creditNote, setCreditNote] = useState<CreditNoteData | null>(null);
   const [mounted, setMounted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
