@@ -134,6 +134,12 @@ Complete your registration to receive your PIN certificate.`;
               <MaskedDataCard label="Name" value={displayData.name} />
               <MaskedDataCard label="ID Number" value={displayData.idNumber} />
             </div>
+            <button 
+              onClick={() => router.push('/pin-registration/kenyan/identity')}
+              className="text-[var(--kra-red)] text-xs font-medium mt-3 hover:underline text-left block"
+            >
+              Not your details? Edit
+            </button>
           </Card>
 
           {sendingMessage && (
@@ -175,13 +181,19 @@ Complete your registration to receive your PIN certificate.`;
         </div>
       </Card>
 
-      <div className="space-y-3 mb-8">
+      <div className="space-y-3 mb-4">
         <MaskedDataCard label="Name" value={displayData.name} />
         <MaskedDataCard label="ID Number" value={displayData.idNumber} />
         <MaskedDataCard label="Date of Birth" value={displayData.dateOfBirth} />
-        <MaskedDataCard label="Email Address" value={displayData.email} />
         <MaskedDataCard label="Phone Number" value={displayData.phoneNumber} />
       </div>
+
+      <button 
+        onClick={() => router.push('/pin-registration/kenyan/identity')}
+        className="text-[var(--kra-red)] text-xs font-medium mb-6 hover:underline text-left block"
+      >
+        Not your details? Edit
+      </button>
 
       {sendingMessage && (
         <div className="flex items-center justify-center gap-2 text-gray-600 text-sm mb-4">

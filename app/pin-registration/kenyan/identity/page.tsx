@@ -13,7 +13,7 @@ export default function KenyanIdentityInput() {
   const [formData, setFormData] = useState({
     nationalId: '',
     yearOfBirth: '',
-    email: '',
+    firstName: '',
   });
   const [isIdValid, setIsIdValid] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -41,8 +41,8 @@ export default function KenyanIdentityInput() {
       newErrors.yearOfBirth = 'Please enter a valid year (e.g., 1990)';
     }
 
-    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+    if (!formData.firstName || formData.firstName.trim().length < 2) {
+      newErrors.firstName = 'Please enter your first name';
     }
 
     setErrors(newErrors);
@@ -70,9 +70,9 @@ export default function KenyanIdentityInput() {
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('pin_validated_data', JSON.stringify({
             idNumber: formData.nationalId,
-            name: result.name || 'User',
+            name: result.name || formData.firstName,
             pin: result.pin,
-            email: formData.email,
+            firstName: formData.firstName,
           }));
         }
         
@@ -112,6 +112,17 @@ export default function KenyanIdentityInput() {
         />
 
         <Input
+          label="First Name"
+          type="text"
+          placeholder="Enter your first name"
+          value={formData.firstName}
+          onChange={value => setFormData({ ...formData, firstName: value })}
+          error={errors.firstName}
+          disabled={isLoading}
+          required
+        />
+
+        <Input
           label="Year of Birth"
           type="text"
           inputMode="numeric"
@@ -121,17 +132,7 @@ export default function KenyanIdentityInput() {
           onChange={value => setFormData({ ...formData, yearOfBirth: value })}
           error={errors.yearOfBirth}
           disabled={isLoading}
-        />
-
-        <Input
-          label="Email Address"
-          type="email"
-          placeholder="you@example.com"
-          value={formData.email}
-          onChange={value => setFormData({ ...formData, email: value })}
-          error={errors.email}
-          helperText="We'll send your PIN certificate to this email"
-          disabled={isLoading}
+          required
         />
 
         <div className="pt-4">

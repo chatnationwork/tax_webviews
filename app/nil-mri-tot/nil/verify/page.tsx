@@ -44,7 +44,7 @@ function NilVerifyContent() {
       try {
         const result = await getTaxpayerObligations(taxpayerInfo.pin);
         if (result.success && result.obligations) {
-          // Explicitly strictly filter for NIL allowed obligations
+        
           const allowedNilObligations = ['Income Tax', 'MRI', 'VAT', 'PAYE'];
           
           const formattedObligations = result.obligations

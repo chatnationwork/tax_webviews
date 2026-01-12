@@ -29,6 +29,15 @@ function TotVerifyContent() {
   const [hasTotObligation, setHasTotObligation] = useState<boolean | null>(null);
   const [checkingObligation, setCheckingObligation] = useState(true);
 
+  // Get today's date in DD/MM/YYYY format for daily filing
+  const getTodayDate = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   // Initialize and Check Obligations
   useEffect(() => {
     const info = taxpayerStore.getTaxpayerInfo();
@@ -40,7 +49,7 @@ function TotVerifyContent() {
     }
   }, [router]);
 
-  // Check for TOT Obligation & Fetch Periods
+  // Check for TOT Obligation & Fetch Periods (only for Monthly)
   useEffect(() => {
     if (!mounted) return;
 
@@ -59,7 +68,7 @@ function TotVerifyContent() {
           );
           setHasTotObligation(hasTot);
 
-          if (hasTot) {
+          if (hasTot && filingMode === 'Monthly') {
              setLoadingPeriod(true);
              try {
                 const periodCheck = await getFilingPeriods(taxpayerInfo.pin, '8'); // 8 is TOT
@@ -84,11 +93,29 @@ function TotVerifyContent() {
     };
 
     checkObligationAndFetchPeriods();
-  }, [taxpayerInfo?.pin, mounted]);
+  }, [taxpayerInfo?.pin, mounted, filingMode]);
+
+  // Set filing period based on mode
+  useEffect(() => {
+    if (filingMode === 'Daily') {
+      const today = getTodayDate();
+      setFilingPeriod(`${today} - ${today}`);
+    }
+  }, [filingMode]);
 
   const handleFileReturn = async (action: 'file_and_pay' | 'file_only' | 'pay_only') => {
-    if (!grandTotal || !filingPeriod) {
-       setError('Please enter turnover amount and select a period');
+    if (!grandTotal) {
+       setError('Please enter the turnover amount');
+       return;
+    }
+    
+    if (Number(grandTotal) <= 0) {
+       setError('Amount must be greater than zero');
+       return;
+    }
+    
+    if (!filingPeriod) {
+       setError('Filing period not available');
        return;
     }
     
@@ -113,7 +140,7 @@ function TotVerifyContent() {
         return;
       }
 
-      // If just filing, redirect
+      // If just filing (monthly only), redirect
       if (action === 'file_only') {
           try {
              taxpayerStore.setReceiptNumber(result.receiptNumber || '');
@@ -123,8 +150,8 @@ function TotVerifyContent() {
           return;
       }
 
-      // 2. Generate PRN (File & Pay)
-      if (action === 'file_and_pay') {
+      // 2. Generate PRN (File & Pay or Pay Only)
+      if (action === 'file_and_pay' || action === 'pay_only') {
           setPaymentStatus('Generating PRN...');
           
           const [from, to] = filingPeriod.split(' - ');
@@ -148,9 +175,9 @@ function TotVerifyContent() {
           setPaymentStatus('Initiating Payment...');
 
           // 3. Make Payment
-          const phone = await getStoredPhone();
-          if (phone) {
-             const payRes = await makePayment(phone, prnRes.prn);
+          const storedPhone = await getStoredPhone();
+          if (storedPhone) {
+             const payRes = await makePayment(storedPhone, prnRes.prn);
              if (payRes.success) {
                 setPaymentStatus('Payment initiated. Check your phone.');
                 setTimeout(() => {
@@ -267,19 +294,54 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
             </div>
          </Card>
 
+         {/* Filing Mode Selection */}
+         <Card className="p-4 space-y-4">
+            <h2 className="text-sm font-semibold text-gray-800">Filing Type</h2>
+            
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="filingMode"
+                  value="Daily"
+                  checked={filingMode === 'Daily'}
+                  onChange={() => setFilingMode('Daily')}
+                  className="w-4 h-4 text-[var(--kra-red)] border-gray-300 focus:ring-[var(--kra-red)]"
+                />
+                <span className="text-sm text-gray-700">Daily</span>
+              </label>
+              
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="filingMode"
+                  value="Monthly"
+                  checked={filingMode === 'Monthly'}
+                  onChange={() => setFilingMode('Monthly')}
+                  className="w-4 h-4 text-[var(--kra-red)] border-gray-300 focus:ring-[var(--kra-red)]"
+                />
+                <span className="text-sm text-gray-700">Monthly</span>
+              </label>
+            </div>
+         </Card>
+
          {/* Filing Form */}
          <Card className="p-4 space-y-4">
             <h2 className="text-sm font-semibold text-gray-800">Return Details</h2>
             
              <div className="space-y-4">
-                {/* Filing Period Display (not a select) */}
+                {/* Filing Period/Date Display */}
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Filing Period</span>
+                      <span className="text-sm text-gray-600">
+                        {filingMode === 'Daily' ? 'Filing Date' : 'Filing Period'}
+                      </span>
                       {loadingPeriod ? (
                         <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                       ) : filingPeriod ? (
-                        <span className="text-sm font-semibold text-gray-900">{filingPeriod}</span>
+                        <span className="text-sm font-semibold text-gray-900">
+                          {filingMode === 'Daily' ? getTodayDate() : filingPeriod}
+                        </span>
                       ) : (
                         <span className="text-sm text-red-500">No period available</span>
                       )}
@@ -287,11 +349,12 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                 </div>
 
                 <Input
-                  label="Turnover Amount (KES)"
+                  label={filingMode === 'Daily' ? 'Gross Daily Sales (KES)' : 'Gross Monthly Sales (KES)'}
                   value={grandTotal}
                   onChange={setGrandTotal}
                   type="number"
-                  placeholder="Enter gross turnover"
+                  placeholder="Enter amount"
+                  required
                 />
              </div>
           </Card>
@@ -310,8 +373,20 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
              </div>
           )}
 
+          {/* Action Buttons - Conditional based on filing mode */}
           <div className="space-y-3 pt-2">
-             {filingMode === 'Monthly' ? (
+             {filingMode === 'Daily' ? (
+                // Daily: Pay Now only
+                <Button 
+                   onClick={() => handleFileReturn('pay_only')}
+                   disabled={loading || !grandTotal}
+                   className="w-full bg-[var(--kra-red)] hover:bg-red-700"
+                >
+                   {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                   Pay Now
+                </Button>
+             ) : (
+                // Monthly: File & Pay + File Only
                 <>
                   <Button 
                     onClick={() => handleFileReturn('file_and_pay')}
@@ -330,14 +405,6 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                      File Only
                   </Button>
                 </>
-             ) : (
-                <Button 
-                   onClick={() => handleFileReturn('pay_only')}
-                   disabled={loading || !grandTotal || !filingPeriod}
-                   className="w-full bg-[var(--kra-red)] hover:bg-red-700"
-                >
-                   Pay TOT
-                </Button>
              )}
           </div>
       </div>

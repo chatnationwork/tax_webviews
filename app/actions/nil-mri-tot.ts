@@ -280,12 +280,26 @@ export async function getFilingPeriods(
       }
     );
 
+    console.log('Filing periods response:', response.data);
+
     const data = response.data;
     
+    // Handle different response formats
+    let periods: string[] = [];
+    
+    if (data.periods && Array.isArray(data.periods)) {
+      // Format 1: periods array
+      periods = data.periods;
+    } else if (data.trpFromDate && data.trpToDate) {
+      // Format 2: trpFromDate and trpToDate (from API)
+      // Create a period string in expected format
+      periods = [`${data.trpFromDate} - ${data.trpToDate}`];
+    }
+    
     return {
-      success: true,
-      periods: data.periods || [],
-      message: data.message,
+      success: data.status === 'OK' || periods.length > 0,
+      periods: periods,
+      message: data.description || data.message,
     };
   } catch (error: any) {
     console.error('Filing Period Error:', error.response?.data || error.message);
