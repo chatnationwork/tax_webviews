@@ -54,7 +54,7 @@ function PinRegistrationContent() {
   }
 
   return (
-    <Layout title="PIN Registration" showMenu={false} onBack={() => router.push('/')}>
+    <Layout title="PIN Registration" onBack={() => router.push('/')}>
       <div className="space-y-4">
         {/* Logo */}
         <div className="flex justify-center">

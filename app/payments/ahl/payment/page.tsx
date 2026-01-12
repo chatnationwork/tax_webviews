@@ -196,7 +196,7 @@ function AhlPaymentContent() {
   }
 
   return (
-    <Layout title="AHL Payments" showMenu onBack={() => router.push('/payments')}>
+    <Layout title="AHL Payments" onBack={() => router.push('/payments')}>
       <div className="max-w-xl mx-auto space-y-6">
         <Card className="p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Payment Details</h2>

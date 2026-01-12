@@ -75,7 +75,7 @@ function NilMriTotContent() {
   };
 
   return (
-    <Layout title="Tax Filing Portal" showMenu={false} onBack={() => router.push('/')}>
+    <Layout title="Tax Filing Portal" onBack={() => router.push('/')}>
       <div className="space-y-4">
         {/* Logo */}
         <div className="flex justify-center">

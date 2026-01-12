@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useEffect, useState, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { ArrowLeft, Menu, Home, LogOut, Headphones, CheckCircle } from 'lucide-react';
 
 import { useSessionManager } from '../_lib/useSession';
@@ -27,7 +27,8 @@ function SessionController() {
 
 export function Layout({ children, title, step, onBack, showMenu = false, showHeader = true, showFooter = true }: LayoutProps) {
   const router = useRouter();
-    const [phone, setPhone] = useState<string | null>(null);
+  const pathname = usePathname();
+  const [phone, setPhone] = useState<string | null>(null);
 
   useEffect(() => {
    setPhone(getKnownPhone());
@@ -38,11 +39,20 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
 
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
 
+  // Get the base page for the current route
+  const getBasePage = (): string => {
+    if (pathname.startsWith('/checkers')) return '/checkers';
+    if (pathname.startsWith('/nil-mri-tot')) return '/nil-mri-tot';
+    if (pathname.startsWith('/payments')) return '/payments';
+    if (pathname.startsWith('/pin-registration')) return '/pin-registration';
+    if (pathname.startsWith('/tcc')) return '/tcc';
+    if (pathname.startsWith('/etims')) return '/etims';
+    return '/'; // Default to home
+  };
+
   const handleMenuClick = () => {
-    const action = window.confirm('Menu:\n1. Go to Main Menu\n2. Log Out\n\nClick OK for Main Menu, Cancel to close');
-    if (action) {
-      router.push('/etims');
-    }
+    const basePage = getBasePage();
+    router.push(basePage);
   };
 
   const handleLogout = () => {

@@ -20,7 +20,7 @@ function BuyerInitiatedSuccessContent() {
   };
 
   return (
-    <Layout title="Success" showMenu={false}>
+    <Layout title="Success">
       <div className="space-y-4">
         <Card className="bg-green-50 border-green-200 text-center py-6">
           <div className="flex flex-col items-center space-y-3">

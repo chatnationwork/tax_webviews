@@ -34,7 +34,7 @@ function TccContent() {
   };
 
   return (
-    <Layout title="TCC Application" showMenu={false} onBack={() => router.push('/')}>
+    <Layout title="TCC Application" onBack={() => router.push('/')}>
       <div className="space-y-4">
         {/* Logo */}
         <div className="flex justify-center">

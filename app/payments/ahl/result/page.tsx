@@ -50,7 +50,7 @@ export default function AhlResultPage() {
   };
 
   return (
-    <Layout title="AHL Payments" step="Payment Result" showMenu onBack={() => router.push('/payments')}>
+    <Layout title="AHL Payments" step="Payment Result" onBack={() => router.push('/payments')}>
       <div className="space-y-6">
         {/* Result Card */}
         <Card className={`p-6 text-center ${isSuccess ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>

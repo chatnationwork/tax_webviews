@@ -112,7 +112,7 @@ function CheckersContent() {
   };
 
   return (
-    <Layout title="Verification Services" showMenu={false} onBack={() => router.push('/')}>
+    <Layout title="Verification Services" onBack={() => router.push('/')}>
       <div className="space-y-4">
         {/* Logo */}
         <div className="flex justify-center">

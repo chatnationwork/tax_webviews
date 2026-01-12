@@ -29,7 +29,7 @@ export default function TotResultPage() {
   };
 
   return (
-    <Layout title="Success" showMenu={false} showHeader={false}>
+    <Layout title="Success" showHeader={false}>
       <div className="space-y-4">
         {/* Success Card */}
         <Card className="bg-green-50 border-green-200 text-center py-8">

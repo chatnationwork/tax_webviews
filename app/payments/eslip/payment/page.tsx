@@ -114,7 +114,7 @@ function EslipPaymentContent() {
   }
 
   return (
-    <Layout title="E-SLIP Payment" step="Enter PRN" showMenu onBack={() => router.push('/payments')}>
+    <Layout title="E-SLIP Payment" step="Enter PRN" onBack={() => router.push('/payments')}>
       <div className="max-w-xl mx-auto space-y-6">
         {/* Info Card */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">

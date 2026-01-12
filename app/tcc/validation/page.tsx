@@ -110,7 +110,7 @@ function TccValidationContent() {
   }
 
   return (
-    <Layout title="TCC Application" showMenu={true} onBack={() => router.push('/tcc')}>
+    <Layout title="TCC Application" onBack={() => router.push('/tcc')}>
       <div className="space-y-6">
         {/* Header Card */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white shadow-lg">

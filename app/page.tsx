@@ -135,7 +135,7 @@ function HomeContent() {
   const isAvailable = (key: string) => key in SERVICE_URLS;
 
   return (
-    <Layout title="KRA Services" showMenu={true}>
+    <Layout title="KRA Services">
       {/* Toast */}
       {toast && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm">

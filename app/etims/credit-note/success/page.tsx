@@ -24,7 +24,7 @@ function CreditNoteSuccessContent() {
   };
 
   return (
-    <Layout title="Success" showMenu={false}>
+    <Layout title="Success">
       <div className="space-y-4">
         {/* Success Card */}
         <Card className="bg-green-50 border-green-200 text-center py-6">

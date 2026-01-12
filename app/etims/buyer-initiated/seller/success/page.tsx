@@ -24,7 +24,7 @@ function BuyerSuccessContent() {
 
 
   return (
-    <Layout title="Success" showMenu={false}>
+    <Layout title="Success">
       <div className="space-y-6">
         <Card className={`${isAccepted ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} text-center py-8`}>
           <div className="flex flex-col items-center space-y-4">

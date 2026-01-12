@@ -50,7 +50,7 @@ export default function NitaResultPage() {
   };
 
   return (
-    <Layout title="NITA Payments" step="Payment Result" showMenu onBack={() => router.push('/payments')}>
+    <Layout title="NITA Payments" step="Payment Result" onBack={() => router.push('/payments')}>
       <div className="space-y-6">
         {/* Result Card */}
         <Card className={`p-6 text-center ${isSuccess ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>

@@ -128,7 +128,7 @@ function MriValidationContent() {
   }
 
   return (
-    <Layout title="MRI Returns" step="Step 1: Validation" showMenu onBack={() => router.push('/nil-mri-tot')}>
+    <Layout title="MRI Returns" step="Step 1: Validation" onBack={() => router.push('/nil-mri-tot')}>
       <div className="max-w-xl mx-auto space-y-6">
         <Card className="p-6">
            <h2 className="text-lg font-semibold text-gray-800 mb-4">Validate Taxpayer</h2>

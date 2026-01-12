@@ -75,7 +75,7 @@ function PaymentsContent() {
   };
 
   return (
-    <Layout title="Payment Services" showMenu={false} onBack={() => router.push('/')}>
+    <Layout title="Payment Services" onBack={() => router.push('/')}>
       <div className="space-y-4">
         {/* Logo */}
         <div className="flex justify-center">
