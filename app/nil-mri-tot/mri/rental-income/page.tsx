@@ -164,9 +164,26 @@ If you have rental income in the future, please contact *KRA* to update your tax
     return (
       <Layout title="Monthly Rental Income" onBack={handleBack} showMenu>
         <div className="space-y-6">
+          {/* Taxpayer Details */}
+          <Card className="p-4 space-y-4">
+             <div>
+               <h2 className="text-sm font-semibold text-gray-800 mb-2">Taxpayer Details</h2>
+               <div className="space-y-1">
+                 <IdentityStrip label="Name" value={taxpayerInfo?.fullName || 'Unknown'} />
+                 <IdentityStrip label="PIN" value={taxpayerInfo?.pin || 'Unknown'} />
+               </div>
+               <button 
+                 onClick={handleBack}
+                 className="text-[var(--kra-red)] text-xs font-medium mt-2 hover:underline text-left block"
+               >
+                 Not your profile? Go back to Edit your details
+               </button>
+             </div>
+          </Card>
+
           {/* Info Card */}
           <Card className="p-6 bg-blue-50 border border-blue-200">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">*No MRI Obligation*</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-4">No MRI Obligation</h2>
             
             <div className="flex items-start gap-3 bg-white/60 p-4 rounded-lg border border-blue-100">
               <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
