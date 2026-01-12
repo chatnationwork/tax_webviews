@@ -25,6 +25,7 @@ function TotVerifyContent() {
   // Filing Period State
   const [filingPeriod, setFilingPeriod] = useState<string>('');
   const [loadingPeriod, setLoadingPeriod] = useState(false);
+  const [periodError, setPeriodError] = useState<string>('');
 
   const [hasTotObligation, setHasTotObligation] = useState<boolean | null>(null);
   const [checkingObligation, setCheckingObligation] = useState(true);
@@ -74,6 +75,10 @@ function TotVerifyContent() {
                 const periodCheck = await getFilingPeriods(taxpayerInfo.pin, '8'); // 8 is TOT
                 if (periodCheck.success && periodCheck.periods && periodCheck.periods.length > 0) {
                    setFilingPeriod(periodCheck.periods[periodCheck.periods.length - 1]);
+                   setPeriodError('');
+                } else if (periodCheck.message) {
+                   const msg = periodCheck.message as any;
+                   setPeriodError(typeof msg === 'string' ? msg : msg?.message || 'No filing period available');
                 }
              } catch (e) {
                 console.error("Error fetching periods", e);
@@ -361,6 +366,8 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                         <span className="text-sm font-semibold text-gray-900">
                           {filingMode === 'Daily' ? getTodayDate() : filingPeriod}
                         </span>
+                      ) : periodError ? (
+                        <span className="text-sm text-red-500">{periodError}</span>
                       ) : (
                         <span className="text-sm text-red-500">No period available</span>
                       )}

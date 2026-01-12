@@ -20,6 +20,7 @@ function NilVerifyContent() {
   const [selectedObligation, setSelectedObligation] = useState('');
   const [filingPeriod, setFilingPeriod] = useState('');
   const [loadingPeriod, setLoadingPeriod] = useState(false);
+  const [periodError, setPeriodError] = useState<string>('');
   
   // Filing State
   const [loading, setLoading] = useState(false);
@@ -89,9 +90,15 @@ function NilVerifyContent() {
         if (result.success && result.periods && result.periods.length > 0) {
           // Take the first available period
           setFilingPeriod(result.periods[0]);
+          setPeriodError('');
         } else {
-          setFilingPeriod(''); // or handle "No periods found"
-          // Maybe show a warning if no periods found?
+          setFilingPeriod('');
+          if (result.message) {
+            const msg = result.message as any;
+            setPeriodError(typeof msg === 'string' ? msg : msg?.message || 'No filing period available');
+          } else {
+            setPeriodError('No filing period available');
+          }
         }
       } catch (err) {
         console.error("Failed to fetch period", err);
@@ -278,7 +285,7 @@ No action is required at this time.`;
                     <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="font-medium">No Filing Period Available</p>
-                      <p className="text-xs mt-1">There is no available filing period for this obligation.</p>
+                      <p className="text-xs mt-1">{periodError || 'There is no available filing period for this obligation.'}</p>
                     </div>
                   </div>
                 )}

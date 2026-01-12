@@ -37,6 +37,7 @@ function MriRentalIncomeContent() {
   // Filing Period state
   const [filingPeriod, setFilingPeriod] = useState<string>('');
   const [loadingPeriod, setLoadingPeriod] = useState(false);
+  const [periodError, setPeriodError] = useState<string>('');
 
   // Obligation Check state
   const [hasMriObligation, setHasMriObligation] = useState<boolean | null>(null);
@@ -79,6 +80,11 @@ function MriRentalIncomeContent() {
               if (res.success && res.periods && res.periods.length > 0) {
                 // Use the latest filing period
                 setFilingPeriod(res.periods[res.periods.length - 1]);
+                setPeriodError('');
+              } else if (res.message) {
+                // API returned an error message (e.g. "Return for period X can be filed after Y")
+                const msg = res.message as any;
+                setPeriodError(typeof msg === 'string' ? msg : msg?.message || 'No filing period available');
               }
             } catch (err) {
               console.error("Failed to fetch filing period", err);
@@ -340,6 +346,8 @@ If you have rental income in the future, please contact *KRA* to update your tax
                     <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                   ) : filingPeriod ? (
                     <span className="text-sm font-semibold text-gray-900">{filingPeriod}</span>
+                  ) : periodError ? (
+                    <span className="text-sm text-red-500">{periodError}</span>
                   ) : (
                     <span className="text-sm text-red-500">No period available</span>
                   )}
