@@ -289,7 +289,7 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                 onClick={handleBack}
                 className="text-[var(--kra-red)] text-xs font-medium mt-2 hover:underline text-left block"
               >
-                Not your profile? Try Again
+                Not your profile? Go back to Edit your details
               </button>
             </div>
          </Card>

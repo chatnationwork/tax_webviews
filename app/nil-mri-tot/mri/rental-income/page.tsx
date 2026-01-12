@@ -302,7 +302,7 @@ If you have rental income in the future, please contact *KRA* to update your tax
                onClick={handleBack}
                className="text-[var(--kra-red)] text-xs font-medium mt-2 hover:underline text-left block"
              >
-               Not your profile? Try Again
+               Not your profile? Go back to Edit your details
              </button>
            </div>
         </Card>

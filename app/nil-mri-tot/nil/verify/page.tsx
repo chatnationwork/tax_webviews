@@ -194,7 +194,7 @@ function NilVerifyContent() {
                 onClick={() => router.push('/nil-mri-tot/nil/validation')}
                 className="text-[var(--kra-red)] text-xs font-medium mt-3 hover:underline text-left block"
               >
-                Not your profile? Try Again
+                Not your profile? Go back to Edit your details
               </button>
             </div>
          </Card>
@@ -228,17 +228,25 @@ function NilVerifyContent() {
             )}
 
             {/* Filing Period Display */}
-            {(loadingPeriod || filingPeriod) && (
+            {selectedObligation && (
               <div className="text-sm bg-gray-50 p-3 rounded-lg border border-gray-200">
                 {loadingPeriod ? (
                   <div className="flex items-center text-gray-500 gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Fetching filing period...</span>
                   </div>
-                ) : (
+                ) : filingPeriod ? (
                   <div className="flex flex-col">
                     <span className="text-xs text-gray-500">Filing Period:</span>
                     <span className="font-medium text-gray-900">{filingPeriod}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2 text-amber-700">
+                    <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium">No Filing Period Available</p>
+                      <p className="text-xs mt-1">There is no available filing period for this obligation.</p>
+                    </div>
                   </div>
                 )}
               </div>

@@ -138,7 +138,7 @@ Complete your registration to receive your PIN certificate.`;
               onClick={() => router.push('/pin-registration/kenyan/identity')}
               className="text-[var(--kra-red)] text-xs font-medium mt-3 hover:underline text-left block"
             >
-              Not your profile? Try Again
+              Not your profile? Go back to Edit your details
             </button>
           </Card>
 
@@ -192,7 +192,7 @@ Complete your registration to receive your PIN certificate.`;
         onClick={() => router.push('/pin-registration/kenyan/identity')}
         className="text-[var(--kra-red)] text-xs font-medium mb-6 hover:underline text-left block"
       >
-        Not your profile? Try Again
+        Not your profile? Go back to Edit your details
       </button>
 
       {sendingMessage && (
