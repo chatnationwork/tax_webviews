@@ -323,15 +323,21 @@ export async function fileNilReturn(
   returnPeriod: string
 ): Promise<FileReturnResult> {
   try {
+    const payload = {
+      kra_obligation_id: obligationId,
+      obligation_code: obligationId,
+      returnPeriod: returnPeriod,
+      returnType: 'nil_return',
+      tax_payer_pin: taxPayerPin,
+    };
+
+    console.log('Filing NIL Return:', payload);
+
+
     const headers = await getApiHeaders(true);
     const response = await axios.post(
       `${BASE_URL}/file-return`,
-      {
-        kra_obligation_id: obligationId,
-        returnPeriod: returnPeriod,
-        returnType: 'nil_return',
-        tax_payer_pin: taxPayerPin,
-      },
+      payload,
       {
         headers
       }
@@ -363,20 +369,39 @@ export async function fileNilReturn(
 export async function fileMriReturn(
   taxPayerPin: string,
   returnPeriod: string,
-  rentalIncome: number
+  rentalIncome: number,
+  totalProperties: number = 1
 ): Promise<FileReturnResult> {
   try {
     const headers = await getApiHeaders(true);
+
+    // Parse return period "DD/MM/YYYY - DD/MM/YYYY"
+    let startDate = returnPeriod;
+    let endDate = returnPeriod;
+    
+    if (returnPeriod.includes('-')) {
+      const parts = returnPeriod.split('-').map(p => p.trim());
+      if (parts.length >= 2) {
+        startDate = parts[0];
+        endDate = parts[1];
+      }
+    }
+
+    const payload = {
+      tax_payer_pin: taxPayerPin,
+      kra_obligation_id: OBLIGATION_IDS.MRI,
+      obligation_code: OBLIGATION_IDS.MRI,
+      start_date: startDate,
+      end_date: endDate,
+      total_properties: `${totalProperties}`,
+      taxable_amount: `${rentalIncome}`,
+    };
+
+    console.log('Filing MRI Return:', payload);
+
     const response = await axios.post(
       `${BASE_URL}/file-return`,
-      {
-        kra_obligation_id: OBLIGATION_IDS.MRI,
-        returnPeriod: returnPeriod,
-        returnType: 'mri_return',
-        tax_payer_pin: taxPayerPin,
-        rental_income: rentalIncome,
-        tax_amount: rentalIncome * 0.1, 
-      },
+      payload,
       {
         headers
       }
@@ -425,17 +450,21 @@ export async function fileTotReturn(
       }
     }
 
+    const payload = {
+      tax_payer_pin: taxPayerPin,
+      kra_obligation_id: OBLIGATION_IDS.TOT,
+      obligation_code: OBLIGATION_IDS.TOT,
+      start_date: startDate,
+      end_date: endDate,
+      filingCycle: filingMode.toLowerCase() === 'monthly' ? 'M' : 'D',
+      taxable_amount: `${grossSales}`,
+    };
+
+    console.log('Filing TOT Return:', payload);
+
     const response = await axios.post(
       `${BASE_URL}/file-return`,
-      {
-        tax_payer_pin: taxPayerPin,
-        kra_obligation_id: OBLIGATION_IDS.TOT,
-        start_date: startDate,
-        end_date: endDate,
-        filingCycle: filingMode.toLowerCase() === 'monthly' ? 'M' : 'D',
-        taxable_amount: grossSales,
-        payment_action: paymentAction
-      },
+      payload,
       {
         headers
       }
