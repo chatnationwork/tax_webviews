@@ -75,7 +75,7 @@ export default function EtimsHome() {
   };
 
   return (
-    <Layout title="eTIMS Home" showMenu={false}>
+    <Layout title="eTIMS Home" showMenu={false} onBack={() => router.push('/')}>
       <div className="space-y-4">
         {/* Logo */}
         <div className="flex justify-center">

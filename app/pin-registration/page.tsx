@@ -1,10 +1,11 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { Layout, Button } from '../_components/Layout';
-import { savePhoneNumber, getPhoneNumber } from './_lib/store';
+import { useEffect, useState } from 'react';
 import { FileText } from 'lucide-react';
+import { Layout, Button, Card } from '../_components/Layout';
+import { savePhoneNumber, getPhoneNumber } from './_lib/store';
 
 function PinRegistrationContent() {
   const router = useRouter();
@@ -16,22 +17,17 @@ function PinRegistrationContent() {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Try to get phone from various sources if not in URL
     let currentPhone = urlPhone;
     
     if (!currentPhone) {
-      // Try localStorage
       try {
         const localPhone = localStorage.getItem('phone_Number') || getPhoneNumber();
         if (localPhone) {
           currentPhone = localPhone;
         }
-      } catch (e) {
-        console.error('Error accessing localStorage', e);
-      }
+      } catch (e) {}
     }
     
-    // If we found a phone, update state and URL if needed
     if (currentPhone) {
       setPhone(currentPhone);
       savePhoneNumber(currentPhone);
@@ -46,65 +42,57 @@ function PinRegistrationContent() {
   }, [urlPhone, pathname, router]);
 
   const handleStart = () => {
-    // If we have the phone number, go directly to type selection
     if (phone) {
       router.push(`/pin-registration/select-type?phone=${encodeURIComponent(phone)}`);
     } else {
-      // No phone - redirect to OTP with redirect back here
       router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
     }
   };
 
   if (!isReady) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">Loading...</div>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <Layout title="KRA PIN Registration">
-      <div className="flex flex-col items-center justify-center min-h-[80vh]">
-        <div className="w-20 h-20 bg-kra-light-gray rounded-full flex items-center justify-center mb-6">
-          <FileText className="w-10 h-10 text-kra-red" />
+    <Layout title="PIN Registration" showMenu={false} onBack={() => router.push('/')}>
+      <div className="space-y-4">
+        {/* Logo */}
+        <div className="flex justify-center">
+          <img src="/kra_logo.png" alt="KRA Logo" className="h-14 w-auto" />
         </div>
-        
-        <h1 className="text-2xl font-semibold mb-3 text-gray-900 text-center">PIN Registration</h1>
-        
-        <p className="text-gray-600 text-center mb-8 max-w-sm">
-          Register for a KRA PIN in 2–3 minutes.
-        </p>
 
-        {!phone && (
-          <div className="bg-kra-light-gray border border-kra-border-gray rounded-lg p-3 mb-6 text-center">
-            <p className="text-sm text-kra-black">
-             Cannot proceed without phone number
+        {/* Main Card */}
+        <Card className="bg-blue-50 border-blue-200 !p-6">
+          <div className="flex flex-col items-center text-center">
+            <div className="p-4 rounded-full bg-blue-100 mb-4">
+              <FileText className="w-8 h-8 text-blue-600" />
+            </div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">KRA PIN Registration</h2>
+            <p className="text-sm text-gray-600 mb-6">
+              Register for a KRA PIN in 2–3 minutes.
             </p>
+
+            {!phone && (
+              <div className="w-full p-3 bg-amber-50 border border-amber-200 rounded-lg mb-4">
+                <p className="text-xs text-amber-800">
+                  Cannot proceed without phone number
+                </p>
+              </div>
+            )}
+            
+            <Button onClick={handleStart} className="w-full">
+              Start Registration
+            </Button>
           </div>
-        )}
-        
-        <div className="w-full space-y-3">
-          <Button onClick={handleStart}>
-            Start Registration
-          </Button>
-        </div>
+        </Card>
       </div>
     </Layout>
   );
 }
 
-function LoadingFallback() {
+export default function PinRegistrationPage() {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="animate-pulse text-gray-500">Loading...</div>
-    </div>
-  );
-}
-
-export default function PinRegistrationStart() {
-  return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="animate-pulse text-gray-500">Loading...</div></div>}>
       <PinRegistrationContent />
     </Suspense>
   );

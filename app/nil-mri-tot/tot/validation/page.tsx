@@ -121,7 +121,7 @@ function TotValidationContent() {
   }
 
   return (
-    <Layout title="TOT Return" showMenu={true}>
+    <Layout title="TOT Return" showMenu={true} onBack={() => router.push('/nil-mri-tot')}>
       <div className="space-y-6">
         {/* Header Card */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white shadow-lg">

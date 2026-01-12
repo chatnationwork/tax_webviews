@@ -5,7 +5,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { Layout, Button, Select, Card } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { fileNilReturn, getFilingPeriods, getTaxpayerObligations, getStoredPhone } from '@/app/actions/nil-mri-tot';
+import { fileNilReturn, getFilingPeriods, getTaxpayerObligations, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
 
 function NilVerifyContent() {
   const router = useRouter();
@@ -163,6 +163,38 @@ function NilVerifyContent() {
     }
   };
 
+  const handleFinish = async (reason: 'no_obligation' | 'no_period') => {
+    // Send WhatsApp message
+    const storedPhone = await getStoredPhone();
+    if (storedPhone && taxpayerInfo) {
+      let message: string;
+      
+      if (reason === 'no_obligation') {
+        message = `Dear ${taxpayerInfo.fullName},
+
+Your PIN: ${taxpayerInfo.pin} does not currently have any tax obligations eligible for NIL filing.
+
+This includes Income Tax, VAT, and PAYE.
+
+No action is required at this time.`;
+      } else {
+        message = `Dear ${taxpayerInfo.fullName},
+
+Your PIN: ${taxpayerInfo.pin} currently has no available filing period for the selected obligation.
+
+No action is required at this time.`;
+      }
+      
+      await sendWhatsAppMessage({
+        recipientPhone: storedPhone,
+        message: message
+      });
+    }
+    
+    // Redirect to home
+    router.push('/');
+  };
+
   return (
     <Layout title="Back to Taxpayer Validation" onBack={handleBack}>
       <div className="space-y-6">
@@ -222,7 +254,7 @@ function NilVerifyContent() {
                   </div>
                 </div>
                 <Button 
-                  onClick={() => router.push('/')}
+                  onClick={() => handleFinish('no_obligation')}
                   className="w-full bg-[var(--kra-red)] hover:bg-red-700 mt-4"
                 >
                   Finish
@@ -265,7 +297,7 @@ function NilVerifyContent() {
             {/* Finish button when no filing period */}
             {selectedObligation && !loadingPeriod && !filingPeriod && (
               <Button 
-                onClick={() => router.push('/')}
+                onClick={() => handleFinish('no_period')}
                 className="w-full bg-[var(--kra-red)] hover:bg-red-700"
               >
                 Finish

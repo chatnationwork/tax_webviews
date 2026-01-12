@@ -134,7 +134,7 @@ function NilValidationContent() {
   };
 
   return (
-    <Layout title="Validate Taxpayer">
+    <Layout title="Validate Taxpayer" onBack={() => router.push('/nil-mri-tot')}>
       <div className="space-y-4">
         {/* Header Card */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
