@@ -166,7 +166,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       if (returnedYob !== yearOfBirth.trim()) {
         return {
           success: false,
-          error: `Some of your information didn't match. Please check your details and try again.`
+          error: `Information Mismatch`
         };
       }
 

@@ -179,7 +179,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       if (returnedYob !== yearOfBirth.trim()) {
         return {
           success: false,
-          error: `Some of your information didn't match. Please check your details and try again.`
+          error: `Information Mismatch`
         };
       }
 
@@ -574,4 +574,13 @@ export async function makePayment(
       message: error.response?.data?.message || error.message || 'Failed to initiate payment',
     };
   }
+}
+
+/**
+ * Send WhatsApp message
+ */
+export async function sendWhatsAppMessage(
+  params: SendWhatsAppMessageParams
+): Promise<SendWhatsAppMessageResult> {
+  return sharedSendWhatsAppMessage(params);
 }

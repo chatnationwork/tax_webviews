@@ -9,6 +9,9 @@ import {
   checkServerSession as sharedCheckSession,
   getStoredPhoneServer,
   OTPResult,
+  sendWhatsAppMessage as sharedSendWhatsAppMessage,
+  SendWhatsAppMessageParams,
+  SendWhatsAppMessageResult,
 } from './auth';
 import { cleanPhoneNumber } from '../_lib/utils';
 
@@ -136,7 +139,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       if (returnedYob !== yearOfBirth.trim()) {
         return {
           success: false,
-          error: `Some of your information didn't match. Please check your details and try again.`
+          error: `Information Mismatch`
         };
       }
 
@@ -266,3 +269,11 @@ export async function logout(): Promise<void> {
     return sharedLogout();
 }
 
+/**
+ * Send WhatsApp message
+ */
+export async function sendWhatsAppMessage(
+  params: SendWhatsAppMessageParams
+): Promise<SendWhatsAppMessageResult> {
+  return sharedSendWhatsAppMessage(params);
+}

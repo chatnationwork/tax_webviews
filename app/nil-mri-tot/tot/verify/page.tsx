@@ -2,9 +2,9 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
-import { Layout, IdentityStrip, Button, Select, Input, Card } from '../../../_components/Layout';
+import { Layout, IdentityStrip, Button, Input, Card } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { fileTotReturn, getTaxpayerObligations, getFilingPeriods, generatePrn, makePayment, getStoredPhone } from '@/app/actions/nil-mri-tot';
+import { fileTotReturn, getTaxpayerObligations, getFilingPeriods, generatePrn, makePayment, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 function TotVerifyContent() {
@@ -23,7 +23,6 @@ function TotVerifyContent() {
   const [prn, setPrn] = useState('');
 
   // Filing Period State
-  const [periods, setPeriods] = useState<string[]>([]);
   const [filingPeriod, setFilingPeriod] = useState<string>('');
   const [loadingPeriod, setLoadingPeriod] = useState(false);
 
@@ -65,7 +64,6 @@ function TotVerifyContent() {
              try {
                 const periodCheck = await getFilingPeriods(taxpayerInfo.pin, '8'); // 8 is TOT
                 if (periodCheck.success && periodCheck.periods && periodCheck.periods.length > 0) {
-                   setPeriods(periodCheck.periods);
                    setFilingPeriod(periodCheck.periods[periodCheck.periods.length - 1]);
                 }
              } catch (e) {
@@ -194,31 +192,56 @@ function TotVerifyContent() {
   }
 
   if (hasTotObligation === false) {
+    const handleClose = async () => {
+      // Send WhatsApp message
+      const storedPhone = await getStoredPhone();
+      if (storedPhone && taxpayerInfo) {
+        const message = `*Turnover Tax Status*
+
+Dear *${taxpayerInfo.fullName}*,
+Your PIN: *${taxpayerInfo.pin}* currently has *no Turnover Tax (TOT) obligation*.
+
+No filing or payment is required at this time.
+
+If your business income qualifies for TOT in the future, please contact *KRA* to update your tax profile.`;
+        
+        await sendWhatsAppMessage({
+          recipientPhone: storedPhone,
+          message: message
+        });
+      }
+      
+      // Redirect to home
+      const msisdn = taxpayerStore.getMsisdn() || localStorage.getItem('phone_Number');
+      taxpayerStore.clear();
+      router.push(`/?msisdn=${msisdn || ''}`);
+    };
+
     return (
-      <Layout title="Verify & File TOT" onBack={handleBack}>
+      <Layout title="Turnover Tax" onBack={handleBack}>
         <div className="space-y-6">
-           <Card className="p-4 space-y-4">
-            <div>
-              <h2 className="text-sm font-semibold text-gray-800 mb-2">Taxpayer Details</h2>
-              <div className="space-y-1">
-                <IdentityStrip label="Name" value={taxpayerInfo.fullName} />
-                <IdentityStrip label="PIN" value={taxpayerInfo.pin} />
+          {/* Info Card */}
+          <Card className="p-6 bg-blue-50 border border-blue-200">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">*No Turnover Tax Obligation*</h2>
+            
+            <div className="flex items-start gap-3 bg-white/60 p-4 rounded-lg border border-blue-100">
+              <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-white text-xs font-bold">i</span>
+              </div>
+              <div className="text-sm text-gray-700">
+                <p>Based on our records, you do not currently have a Turnover Tax (TOT) obligation.</p>
+                <p className="mt-2">No filing or payment is required at this time.</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 border-l-4 border-yellow-500 bg-yellow-50">
-            <div className="flex items-start gap-4">
-              <AlertCircle className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="font-semibold text-yellow-800 mb-1">Obligation Missing</h3>
-                <p className="text-sm text-yellow-700">
-                  You are not registered for Turnover Tax (TOT). 
-                </p>
-              </div>
-            </div>
-           
-          </Card>
+          {/* Close Button */}
+          <Button 
+            onClick={handleClose}
+            className="w-full bg-[var(--kra-red)] hover:bg-red-700"
+          >
+            Close
+          </Button>
         </div>
       </Layout>
     );
@@ -249,17 +272,19 @@ function TotVerifyContent() {
             <h2 className="text-sm font-semibold text-gray-800">Return Details</h2>
             
              <div className="space-y-4">
-                <Select
-                  label="Filing Period"
-                  options={periods.map(p => ({ value: p, label: p }))}
-                  value={filingPeriod}
-                  onChange={(val) => setFilingPeriod(val)}
-                  disabled={loadingPeriod || periods.length === 0}
-                />
-                
-                {periods.length === 0 && !loadingPeriod && (
-                   <p className="text-xs text-red-500">No filing period found</p>
-                )}
+                {/* Filing Period Display (not a select) */}
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                   <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Filing Period</span>
+                      {loadingPeriod ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                      ) : filingPeriod ? (
+                        <span className="text-sm font-semibold text-gray-900">{filingPeriod}</span>
+                      ) : (
+                        <span className="text-sm text-red-500">No period available</span>
+                      )}
+                   </div>
+                </div>
 
                 <Input
                   label="Turnover Amount (KES)"
