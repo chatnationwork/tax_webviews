@@ -151,7 +151,7 @@ function TccValidationContent() {
             {loading ? (
               <><Loader2 className="w-4 h-4 animate-spin inline mr-1" /> Validating...</>
             ) : (
-              'Validate & Continue'
+              'Continue'
             )}
           </Button>
         </Card>
