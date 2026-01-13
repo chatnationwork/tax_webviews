@@ -117,7 +117,7 @@ function NilValidationContent() {
       if (result.success) {
         const taxpayer = {
           fullName: result.name || 'Unknown',
-          pin: result.pin || idNumber,
+          pin: result.pin || 'Unknown',
           yob: parseInt(yob),
         };
         taxpayerStore.setTaxpayerInfo(idNumber, parseInt(yob), taxpayer.fullName, taxpayer.pin);

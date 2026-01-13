@@ -98,7 +98,7 @@ function MriValidationContent() {
       if (result.success) {
         const taxpayer = {
           fullName: result.name || 'Unknown',
-          pin: result.pin || idNumber,  // PIN stores the ID number
+          pin: result.pin || 'Unknown',  // PIN stores the ID number
           yob: parseInt(yob),
         };
         // Save to store

@@ -94,10 +94,10 @@ function TotValidationContent() {
       
       if (result.success) {
         taxpayerStore.setTaxpayerInfo(
-          idNumber,
+        idNumber || 'Unknown',
           parseInt(yob),
-          result.name || '',
-          result.pin || ''
+          result.name || 'Unknown',
+          result.pin || 'Unknown'
         );
         
         const nextUrl = `/nil-mri-tot/tot/verify${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`;
