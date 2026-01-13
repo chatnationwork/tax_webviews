@@ -116,12 +116,11 @@ function AuthContent() {
         <div className="grid grid-cols-2 gap-2 pt-4">
           <button 
             onClick={() => {
-              const message = encodeURIComponent('Main menu');
-              window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+             router.push('/');
             }}
             className="flex flex-col items-center justify-center gap-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium text-xs"
           >
-            Go Main Menu
+            Go to Main Menu
           </button>
           <button 
             onClick={() => {

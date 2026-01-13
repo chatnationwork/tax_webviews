@@ -44,16 +44,11 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
   const isF88 = pathname?.startsWith('/f88');
   const activePhone = phone || internalPhone;
 
-  // Get the base page for the current route
+  // Get the base page for the current route (first path segment)
   const getBasePage = (): string => {
-    if (pathname.startsWith('/checkers')) return '/checkers';
-    if (pathname.startsWith('/nil-mri-tot')) return '/nil-mri-tot';
-    if (pathname.startsWith('/payments')) return '/payments';
-    if (pathname.startsWith('/pin-registration')) return '/pin-registration';
-    if (pathname.startsWith('/tcc')) return '/tcc';
-    if (pathname.startsWith('/etims')) return '/etims';
-    if (pathname.startsWith('/f88')) return '/f88';
-    return '/'; // Default to home
+    if (!pathname || pathname === '/') return '/';
+    const segments = pathname.split('/').filter(Boolean);
+    return segments.length > 0 ? `/${segments[0]}` : '/';
   };
 
   const handleMenuClick = () => {
