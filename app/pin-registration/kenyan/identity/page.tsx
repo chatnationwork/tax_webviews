@@ -108,7 +108,6 @@ export default function KenyanIdentityInput() {
           }}
           onValidationChange={setIsIdValid}
           error={errors.nationalId}
-          helperText="Enter 6-8 digit National ID"
           disabled={isLoading}
         />
 
