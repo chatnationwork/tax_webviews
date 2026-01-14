@@ -7,6 +7,7 @@ import { IDInput } from '@/app/_components/KRAInputs';
 import { getPhoneNumber, saveRegistrationData } from '../../_lib/store';
 import { lookupById } from '../../../actions/pin-registration';
 import { Loader2 } from 'lucide-react';
+import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
 
 export default function KenyanIdentityInput() {
   const router = useRouter();
@@ -122,17 +123,12 @@ export default function KenyanIdentityInput() {
           required
         />
 
-        <Input
+        <YearOfBirthInput
           label="Year of Birth"
-          type="text"
-          inputMode="numeric"
-          placeholder="YYYY"
-          maxLength={4}
           value={formData.yearOfBirth}
           onChange={value => setFormData({ ...formData, yearOfBirth: value })}
           error={errors.yearOfBirth}
           disabled={isLoading}
-          required
         />
 
         <div className="pt-4">
