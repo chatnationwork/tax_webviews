@@ -28,6 +28,9 @@ function OTPContent() {
     if (pathLower.includes('/payroll')) return 'Payroll';
     if (pathLower.includes('/customs')) return 'Customs';
     if (pathLower.includes('/invoice')) return 'e-Invoicing';
+    if (pathLower.includes('/f88')) return 'F88';
+    if (pathLower.includes('/etims')) return 'ETIMS';
+    if (pathLower.includes('/pin-registration')) return 'Pin Registration';
     
     return null;
   };
@@ -126,7 +129,7 @@ function OTPContent() {
         {/* Header */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
           <h1 className="text-base font-semibold">
-            OTP Verification{serviceName && <span className="text-gray-300"> for {serviceName}</span>}
+            OTP Verification{serviceName && <span> for {serviceName}</span>}
           </h1>
           <p className="text-gray-400 text-xs">Verify phone number</p>
         </div>

@@ -164,12 +164,20 @@ export const DateInput = ({
     
     if (isNaN(date.getTime()) || date.getDate() !== day) return 'Invalid date';
     
-    if (minDate && date < minDate) {
-      return `Date must be after ${minDate.toLocaleDateString('en-GB')}`;
+    if (minDate) {
+      const minDateNormalized = new Date(minDate);
+      minDateNormalized.setHours(0, 0, 0, 0);
+      if (date < minDateNormalized) {
+        return `Date must be on or after ${minDateNormalized.toLocaleDateString('en-GB')}`;
+      }
     }
     
-    if (maxDate && date > maxDate) {
-      return `Date must be before ${maxDate.toLocaleDateString('en-GB')}`;
+    if (maxDate) {
+      const maxDateNormalized = new Date(maxDate);
+      maxDateNormalized.setHours(0, 0, 0, 0);
+      if (date > maxDateNormalized) {
+        return `Date must be on or before ${maxDateNormalized.toLocaleDateString('en-GB')}`;
+      }
     }
     
     return null;

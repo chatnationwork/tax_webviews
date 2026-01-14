@@ -1002,7 +1002,7 @@ const PassengerInformation = () => {
           onClick={handleNext}
           className="px-6 py-2 bg-[#CC0000] text-white rounded text-sm font-medium"
         >
-          {useFormContext().loading ? 'Saving...' : 'Next →'}
+          {useFormContext().loading ? '...' : 'Next →'}
         </button>
       </div>
     </div>
@@ -1219,7 +1219,7 @@ const TravelInformation = () => {
           onClick={handleNext}
           className="px-6 py-2 bg-[#CC0000] text-white rounded text-sm font-medium"
         >
-          {useFormContext().loading ? 'Saving...' : 'Next'}
+          {useFormContext().loading ? '...' : 'Next'}
         </button>
       </div>
     </div>
@@ -1497,7 +1497,7 @@ const Declarations = () => {
           onClick={handleNext}
           className="px-6 py-2 bg-[#CC0000] text-white rounded text-sm font-medium"
         >
-          {useFormContext().loading ? 'Calculating...' : 'Next →'}
+          {useFormContext().loading ? '...' : 'Next →'}
         </button>
       </div>
 
