@@ -178,9 +178,16 @@ export const DateInput = ({
   const dateError = validateDate(value);
   const displayError = error || dateError;
   
-  // Convert min/max dates to native format
-  const minValue = minDate ? minDate.toISOString().split('T')[0] : undefined;
-  const maxValue = maxDate ? maxDate.toISOString().split('T')[0] : undefined;
+  // Convert min/max dates to native format (set to start of day for proper comparison)
+  const getDateString = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  const minValue = minDate ? getDateString(minDate) : undefined;
+  const maxValue = maxDate ? getDateString(maxDate) : undefined;
 
   return (
     <div>

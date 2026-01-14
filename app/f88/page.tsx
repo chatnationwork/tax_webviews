@@ -837,13 +837,17 @@ const PassengerInformation = () => {
         </div>
 
         {formData.citizenship === 'Kenyan' && (
-          <div className="flex gap-2">
-            <PINInput
-              required={false}
-              value={formData.kraPin}
-               onChange={(pin) => updateFormData({ kraPin: pin})}
-            />
-            <button className="px-3 py-1.5 bg-gray-100 text-gray-600 rounded text-xs">OTP</button>
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <PINInput
+                required={false}
+                value={formData.kraPin}
+                onChange={(pin) => updateFormData({ kraPin: pin})}
+              />
+            </div>
+            <button className="px-4 py-2.5 bg-gray-100 text-gray-600 rounded text-sm font-medium hover:bg-gray-200 whitespace-nowrap">
+              Verify OTP
+            </button>
           </div>
         )}
 
