@@ -188,6 +188,7 @@ function TotVerifyContent() {
       if (action === 'file_only') {
           try {
              taxpayerStore.setReceiptNumber(result.receiptNumber || '');
+             taxpayerStore.setFilingPeriod(filingPeriod);
           } catch (e) {}
           router.push('/nil-mri-tot/tot/result');
           setLoading(false);
@@ -200,12 +201,7 @@ function TotVerifyContent() {
           
           let prnValue = '';
           // Check if PRN was returned from filing (only for file_and_pay and if it was a file action)
-          if ((action === 'file_and_pay' || action === 'pay_only') && 'prn' in result && result.prn) {
-             prnValue = result.prn;
-             console.log('Using PRN from filing:', prnValue);
-          }
-
-          if (!prnValue) {
+          if (action === 'file_and_pay' || action === 'pay_only'){
               const [from, to] = filingPeriod.split(' - ');
               const taxPayable = (Number(grandTotal) * 0.03).toFixed(2);
     
@@ -235,6 +231,7 @@ function TotVerifyContent() {
           
           // Always set store data before potential redirect
           taxpayerStore.setPrn(prnValue);
+          taxpayerStore.setFilingPeriod(filingPeriod);
           if (calculatedTax > 0) taxpayerStore.setTaxAmount(calculatedTax);
           
           if (storedPhone) {
@@ -345,8 +342,8 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                 <span className="text-white text-xs font-bold">i</span>
               </div>
               <div className="text-sm text-gray-700">
-                <p>Based on our records, you do not currently have a Turnover Tax (TOT) obligation.</p>
-                <p className="mt-2">No filing or payment is required at this time.</p>
+                <p>You do not currently have a Turnover Tax (TOT) obligation.</p>
+               
               </div>
             </div>
           </Card>

@@ -15,6 +15,7 @@ class TaxpayerStore {
     receiptNumber?: string;
     taxAmount?: number;
     prn?: string;
+    filingPeriod?: string;
   } = {
     msisdn: '',
     idNumber: '',
@@ -61,6 +62,10 @@ class TaxpayerStore {
 
   setReceiptNumber(receiptNumber: string) {
     this.data.receiptNumber = receiptNumber;
+  }
+
+  setFilingPeriod(period: string) {
+    this.data.filingPeriod = period;
   }
 
   setPrn(prn: string) {

@@ -39,26 +39,24 @@ export default function TotResultPage() {
             </div>
             
             <div>
-              <h2 className="text-green-900 text-xl font-bold mb-2">TOT Return Filed!</h2>
-              <p className="text-sm text-green-800 px-4">
-                Turnover Tax return for {taxpayerInfo?.fullName} has been submitted successfully.
-              </p>
+              <h2 className="text-green-900 text-xl font-bold mb-4">Turnover Tax Return Submitted</h2>
               
-              {/* Receipt Number Display */}
-              {taxpayerInfo?.receiptNumber && (
-                <div className="mt-4 bg-white/60 px-4 py-2 rounded-lg inline-block border border-green-200">
-                  <p className="text-xs text-green-600 uppercase font-semibold">Receipt Number</p>
-                  <p className="text-lg font-mono text-green-800">{taxpayerInfo.receiptNumber}</p>
+              <div className="w-full text-left space-y-3 bg-white/60 p-4 rounded-lg border border-green-100">
+                <div className="flex justify-between items-start border-b border-green-100 pb-2">
+                  <span className="text-sm text-gray-600">Taxpayer</span>
+                  <span className="text-sm font-semibold text-gray-900 text-right">{taxpayerInfo?.fullName}</span>
                 </div>
-              )}
-
-               {/* Tax Amount Display */}
-               {taxpayerInfo?.taxAmount > 0 && (
-                <div className="mt-2 bg-white/60 px-4 py-2 rounded-lg inline-block border border-green-200 ml-2">
-                   <p className="text-xs text-green-600 uppercase font-semibold">Tax Paid</p>
-                   <p className="text-lg font-mono text-green-800">KES {taxpayerInfo.taxAmount.toLocaleString()}</p>
+                
+                <div className="flex justify-between items-start border-b border-green-100 pb-2">
+                   <span className="text-sm text-gray-600">Period</span>
+                   <span className="text-sm font-semibold text-gray-900 text-right">{taxpayerInfo?.filingPeriod || 'N/A'}</span>
                 </div>
-              )}
+                
+                 <div className="flex justify-between items-start">
+                   <span className="text-sm text-gray-600">Tax Due</span>
+                   <span className="text-sm font-bold text-[var(--kra-red)] text-right">KES {(taxpayerInfo?.taxAmount || 0).toLocaleString()}</span>
+                </div>
+              </div>
 
               {/* PRN Display */}
               {taxpayerInfo?.prn && (
@@ -83,18 +81,15 @@ export default function TotResultPage() {
 
         {/* Action Buttons */}
         <div className="space-y-3 pt-2">
-          <Button onClick={handleReturnHome}>
-            Return to Home
-          </Button>
           
           <button 
             onClick={() => {
                const phone = taxpayerStore.getMsisdn() || localStorage.getItem('phone_Number');
                router.push(`/nil-mri-tot/tot/validation${phone ? `?phone=${phone}` : ''}`);
             }}
-            className="w-full py-3 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors border border-blue-200"
+            className="w-full py-3 text-white bg-[var(--kra-red)] hover:bg-red-700 rounded-lg text-sm font-medium transition-colors shadow-sm"
           >
-            File Another Return
+            Turn Over Tax
           </button>
         </div>
 

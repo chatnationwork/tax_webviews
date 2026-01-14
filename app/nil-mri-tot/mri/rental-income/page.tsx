@@ -235,8 +235,8 @@ If you have rental income in the future, please contact *KRA* to update your tax
                 <span className="text-white text-xs font-bold">i</span>
               </div>
               <div className="text-sm text-gray-700">
-                <p>Based on our records, you do not currently have a Monthly Rental Income (MRI) obligation.</p>
-                <p className="mt-2">No filing or payment is required at this time.</p>
+                <p>You do not currently have a Monthly Rental Income (MRI) obligation.</p>
+
               </div>
             </div>
           </Card>
