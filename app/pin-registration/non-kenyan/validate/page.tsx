@@ -97,10 +97,8 @@ Complete your registration to receive your PIN certificate.`;
 
   const displayData = {
     alienId: maskedId,
-    name: validatedData?.name || 'Verified Applicant',
-    gender: 'Female', // Would come from API
-    dateOfBirth: '22nd June, 1988', // Mock
-    email: data.email || 'user@example.com',
+    name: validatedData?.name || validatedData?.firstName || 'Verified Applicant',
+    yearOfBirth: validatedData?.yob || data.yearOfBirth || '',
     phoneNumber: phoneNumber,
     existingPin: validatedData?.pin || null,
   };
@@ -179,9 +177,7 @@ Complete your registration to receive your PIN certificate.`;
 
       <div className="space-y-3 mb-8">
         <MaskedDataCard label="Alien ID Number" value={displayData.alienId} />
-        <MaskedDataCard label="Gender" value={displayData.gender} />
-        <MaskedDataCard label="Date of Birth" value={displayData.dateOfBirth} />
-        <MaskedDataCard label="Email Address" value={displayData.email} />
+        <MaskedDataCard label="Year of Birth" value={displayData.yearOfBirth} />
         <MaskedDataCard label="Phone Number" value={displayData.phoneNumber} />
       </div>
 

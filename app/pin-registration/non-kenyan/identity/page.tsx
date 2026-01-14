@@ -6,13 +6,15 @@ import { Layout, Button, Input } from '../../../_components/Layout';
 import { getPhoneNumber, saveRegistrationData } from '../../_lib/store';
 import { lookupById } from '../../../actions/pin-registration';
 import { Loader2 } from 'lucide-react';
+import { IDInput } from '@/app/_components/KRAInputs';
+import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
 
 export default function NonKenyanIdentityInput() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     alienId: '',
     yearOfBirth: '',
-    email: '',
+    firstName: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -39,8 +41,8 @@ export default function NonKenyanIdentityInput() {
       newErrors.yearOfBirth = 'Please enter a valid year (e.g., 1990)';
     }
 
-    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+    if (!formData.firstName || formData.firstName.trim().length < 2) {
+      newErrors.firstName = 'Please enter your first name';
     }
 
     setErrors(newErrors);
@@ -55,7 +57,7 @@ export default function NonKenyanIdentityInput() {
 
     try {
       // For non-Kenyan, we attempt lookup but allow continuation even if not found
-      const result = await lookupById(formData.alienId,phoneNumber, formData.yearOfBirth);
+      const result = await lookupById(formData.alienId,phoneNumber, formData.yearOfBirth, formData.firstName);
       
       // Save registration data
       saveRegistrationData({
@@ -63,36 +65,32 @@ export default function NonKenyanIdentityInput() {
         type: 'non-kenyan',
       });
       
+      
       // Store validated data if available
       if (result.success && typeof window !== 'undefined') {
         sessionStorage.setItem('pin_validated_data', JSON.stringify({
           idNumber: formData.alienId,
-          name: result.name || 'Non-Kenyan Resident',
+          name: result.name || formData.firstName,
           pin: result.pin,
-          email: formData.email,
+          firstName: formData.firstName,
+          yob: result.yob,
         }));
+        router.push('/pin-registration/non-kenyan/validate');
+      } else {
+        setApiError(result.error || 'Validation failed. Please check your details.');
       }
-      
-      router.push('/pin-registration/non-kenyan/validate');
     } catch (err: any) {
-      // Allow continuation even on error for non-Kenyan
-      saveRegistrationData({
-        ...formData,
-        type: 'non-kenyan',
-      });
-      router.push('/pin-registration/non-kenyan/validate');
+      console.error(err);
+      setApiError(err.message || 'An error occurred during validation');
     } finally {
       setIsLoading(false);
     }
+
   };
 
   return (
     <Layout title="Verify Your Identity" onBack={() => router.back()} showMenu>
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-        <p className="text-xs text-blue-900">
-          <strong>Test Data:</strong> Alien ID: A1234567 | Year: 1988 | Email: test@test.com
-        </p>
-      </div>
+
 
       {apiError && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
@@ -101,9 +99,9 @@ export default function NonKenyanIdentityInput() {
       )}
 
       <div className="space-y-5">
-        <Input
+        <IDInput
           label="Alien ID Number"
-          type="text"
+         
           placeholder="Enter your Alien ID"
           value={formData.alienId}
           onChange={value => {
@@ -114,12 +112,8 @@ export default function NonKenyanIdentityInput() {
           disabled={isLoading}
         />
 
-        <Input
+        <YearOfBirthInput
           label="Year of Birth"
-          type="text"
-          inputMode="numeric"
-          placeholder="YYYY"
-          maxLength={4}
           value={formData.yearOfBirth}
           onChange={value => setFormData({ ...formData, yearOfBirth: value })}
           error={errors.yearOfBirth}
@@ -127,14 +121,14 @@ export default function NonKenyanIdentityInput() {
         />
 
         <Input
-          label="Email Address"
-          type="email"
-          placeholder="you@example.com"
-          value={formData.email}
-          onChange={value => setFormData({ ...formData, email: value })}
-          error={errors.email}
-          helperText="We'll send your PIN certificate to this email"
+          label="First Name"
+          type="text"
+          placeholder="Enter your first name"
+          value={formData.firstName}
+          onChange={value => setFormData({ ...formData, firstName: value })}
+          error={errors.firstName}
           disabled={isLoading}
+          required
         />
 
         <div className="pt-4">

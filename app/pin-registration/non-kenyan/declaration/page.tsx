@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Button, DeclarationCheckbox } from '../../../_components/Layout';
+import { Layout, Button, DeclarationCheckbox, Input } from '../../../_components/Layout';
 import { getRegistrationData, getPhoneNumber } from '../../_lib/store';
 import { submitPinRegistration } from '../../../actions/pin-registration';
 import { Loader2 } from 'lucide-react';
@@ -12,6 +12,7 @@ export default function NonKenyanDeclaration() {
   const [isAgreed, setIsAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [email, setEmail] = useState('');
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function NonKenyanDeclaration() {
       const result = await submitPinRegistration(
         'resident', // non-kenyan = resident
         data.alienId,
-        data.email,
+        email,
         phoneNumber
       );
 
@@ -72,6 +73,15 @@ export default function NonKenyanDeclaration() {
           </div>
         )}
 
+        <Input
+          label="Email Address"
+          type="email"
+          placeholder="e.g., yourname@example.com"
+          value={email}
+          onChange={value => setEmail(value)}
+          required
+        />
+
         <DeclarationCheckbox
           label="I confirm that the information provided is true and correct, and I understand that providing false information may result in legal consequences."
           legalNote="By submitting this registration, you agree to the Kenya Revenue Authority's terms and conditions. Your data will be processed in accordance with the Data Protection Act, 2019."
@@ -83,7 +93,7 @@ export default function NonKenyanDeclaration() {
         <div className="pt-4">
           <Button 
             onClick={handleSubmit}
-            disabled={!isAgreed || isSubmitting}
+            disabled={!isAgreed || isSubmitting || !email || !/\S+@\S+\.\S+/.test(email)}
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">

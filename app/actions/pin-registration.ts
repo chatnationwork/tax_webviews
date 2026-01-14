@@ -30,6 +30,7 @@ export interface LookupByIdResult {
   idNumber?: string;
   name?: string;
   pin?: string;
+  yob?: string;
 }
 
 export interface PinRegistrationResult {
@@ -157,6 +158,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
         idNumber: response.data.id_number || idNumber.trim(),
         name: response.data.name,
         pin: response.data.pin,
+        yob: response.data.yob,
       };
     } else {
       return { 
