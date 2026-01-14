@@ -16,6 +16,7 @@ import {
   initializeDeclaration
 } from '../actions/customs';
 import { Layout } from '../_components/Layout';
+import { PINInput } from '../_components/KRAInputs';
 
 // Form Context
 const FormContext = createContext<any>(null);
@@ -358,6 +359,7 @@ const DeclarationModal = ({ isOpen, onClose, declarationType, onSave }: any) => 
   const [file, setFile] = useState<File | null>(null);
   const [hsCodeResults, setHsCodeResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const [errors, setErrors] = useState<any>({});
 
   if (!isOpen) return null;
 
@@ -415,11 +417,42 @@ const DeclarationModal = ({ isOpen, onClose, declarationType, onSave }: any) => 
 
   const config = getModalConfig();
 
+  // Define required fields per declaration type (excluding 'file' and 'description' as optional)
+  const getRequiredFields = () => {
+    switch (declarationType) {
+      case 'exceeding10000':
+        return ['currency', 'valueOfFund', 'sourceOfFund', 'purposeOfFund'];
+      case 'reImportationGoods':
+        return ['certificateNo'];
+      case 'mobileDevices':
+        return ['hsCode', 'packages', 'currency', 'value', 'make', 'model', 'imei'];
+      default:
+        return ['hsCode', 'packages', 'currency', 'value'];
+    }
+  };
+
+  const validate = () => {
+    const required = getRequiredFields();
+    const newErrors: any = {};
+    
+    required.forEach(field => {
+      if (!formData[field] || formData[field].toString().trim() === '') {
+        newErrors[field] = 'Required';
+      }
+    });
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSave = () => {
+    if (!validate()) return;
+    
     onSave(formData);
     setFormData({});
     setFile(null);
     setHsCodeResults([]);
+    setErrors({});
   };
 
   const handleFileChange = (e: any) => {
@@ -454,7 +487,7 @@ const DeclarationModal = ({ isOpen, onClose, declarationType, onSave }: any) => 
                     setFormData((prev: any) => ({ ...prev, hsCode: e.target.value }));
                     handleHsCodeSearch(e.target.value);
                   }}
-                  className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                  className={`w-full px-2 py-1.5 border rounded text-sm ${errors.hsCode ? 'border-red-300' : 'border-gray-300'}`}
                 />
                 {searching && <p className="text-xs text-gray-500 mt-0.5">Searching...</p>}
                 {hsCodeResults.length > 0 && (
@@ -499,8 +532,9 @@ const DeclarationModal = ({ isOpen, onClose, declarationType, onSave }: any) => 
                       type="number"
                       value={formData.packages || ''}
                       onChange={(e) => setFormData((prev: any) => ({ ...prev, packages: e.target.value }))}
-                      className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                      className={`w-full px-2 py-1.5 border rounded text-sm ${errors.packages ? 'border-red-300' : 'border-gray-300'}`}
                     />
+                    {errors.packages && <p className="text-red-500 text-xs">Required</p>}
                   </div>
                 )}
                 {config.fields.includes('currency') && (
@@ -509,7 +543,7 @@ const DeclarationModal = ({ isOpen, onClose, declarationType, onSave }: any) => 
                     <select
                       value={formData.currency || ''}
                       onChange={(e) => setFormData((prev: any) => ({ ...prev, currency: e.target.value }))}
-                      className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                      className={`w-full px-2 py-1.5 border rounded text-sm ${errors.currency ? 'border-red-300' : 'border-gray-300'}`}
                     >
                       <option value="">...</option>
                       {currencies?.map((curr: any) => (
@@ -525,8 +559,9 @@ const DeclarationModal = ({ isOpen, onClose, declarationType, onSave }: any) => 
                       type="number"
                       value={formData.value || ''}
                       onChange={(e) => setFormData((prev: any) => ({ ...prev, value: e.target.value }))}
-                      className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                      className={`w-full px-2 py-1.5 border rounded text-sm ${errors.value ? 'border-red-300' : 'border-gray-300'}`}
                     />
+                    {errors.value && <p className="text-red-500 text-xs">Required</p>}
                   </div>
                 )}
               </div>
@@ -760,13 +795,16 @@ const PassengerInformation = () => {
       </div>
 
       <div className="space-y-4">
+        {/* Passenger Information Section Title */}
+        <h2 className="text-sm font-semibold text-gray-700 border-b border-gray-200 pb-2">Passenger Information</h2>
+
         {/* Citizenship - compact 2x2 grid */}
         <div>
           <label className="block text-sm font-medium mb-2 text-gray-700">
             Citizenship <span className="text-[#C8102E]">*</span>
           </label>
           <div className="grid grid-cols-2 gap-2">
-            {['Foreigner', 'Kenyan', 'East African', 'Diplomat'].map(option => (
+            {['Kenyan', 'Foreigner', 'East African', 'Diplomat'].map(option => (
               <label 
                 key={option} 
                 className={`flex items-center gap-1.5 p-2 rounded-lg border cursor-pointer text-xs ${
@@ -846,14 +884,36 @@ const PassengerInformation = () => {
 
         {/* DOB and Gender row */}
         <div className="grid grid-cols-2 gap-3">
-          <DateInput
+          {/* TEMPORARILY REPLACED for testing - original DateInput below */}
+          {/* <DateInput
             label="Date of Birth"
             required
             value={formData.dateOfBirth}
             onChange={(val) => updateFormData({ dateOfBirth: val })}
             error={errors.dateOfBirth}
             maxDate={new Date()}
-          />
+          /> */}
+          <div>
+            <label className="block text-xs font-medium mb-1">Date of Birth <span className="text-red-500">*</span></label>
+            <input
+              type="date"
+              value={formData.dateOfBirthNative || ''}
+              onChange={(e) => {
+                const dateVal = e.target.value;
+                // Convert YYYY-MM-DD to DD/MM/YYYY for consistency
+                if (dateVal) {
+                  const [year, month, day] = dateVal.split('-');
+                  updateFormData({ 
+                    dateOfBirthNative: dateVal,
+                    dateOfBirth: `${day}/${month}/${year}`
+                  });
+                }
+              }}
+              max={new Date().toISOString().split('T')[0]}
+              className={`w-full px-2 py-1.5 border rounded text-sm ${errors.dateOfBirth ? 'border-red-300' : 'border-gray-300'}`}
+            />
+            {errors.dateOfBirth && <p className="text-red-500 text-xs mt-0.5">{errors.dateOfBirth}</p>}
+          </div>
           <div>
             <label className="block text-xs font-medium mb-1">Gender <span className="text-red-500">*</span></label>
             <div className="flex gap-2">
@@ -895,16 +955,17 @@ const PassengerInformation = () => {
 
         {formData.citizenship === 'Kenyan' && (
           <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="KRA PIN (optional)"
+            <PINInput
+              required={false}
               value={formData.kraPin}
-              onChange={(e) => updateFormData({ kraPin: e.target.value })}
-              className="flex-1 px-2 py-1.5 border border-gray-300 rounded text-sm"
+               onChange={(pin) => updateFormData({ kraPin: pin})}
             />
             <button className="px-3 py-1.5 bg-gray-100 text-gray-600 rounded text-xs">OTP</button>
           </div>
         )}
+
+        {/* Contact Information Section Title */}
+        <h2 className="text-sm font-semibold text-gray-700 border-b border-gray-200 pb-2 mt-4">Contact Information</h2>
 
         {/* Contact Information - compact */}
         <div className="grid grid-cols-2 gap-3">
@@ -983,6 +1044,7 @@ const TravelInformation = () => {
 
     if (!formData.arrivingFrom) newErrors.arrivingFrom = 'Required';
     if (!formData.conveyanceMode) newErrors.conveyanceMode = 'Required';
+    if (!formData.pointOfEntry) newErrors.pointOfEntry = 'Required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -1104,44 +1166,59 @@ const TravelInformation = () => {
             <select
               value={formData.pointOfEntry}
               onChange={(e) => updateFormData({ pointOfEntry: e.target.value })}
-              className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+              className={`w-full px-2 py-1.5 border rounded text-sm ${errors.pointOfEntry ? 'border-red-300' : 'border-gray-300'}`}
             >
               <option value="">Select...</option>
               {entryPoints?.map((ep: any) => (
                 <option key={ep.code} value={ep.code}>{ep.name}</option>
               ))}
             </select>
+            {errors.pointOfEntry && <p className="text-red-500 text-xs mt-0.5">{errors.pointOfEntry}</p>}
           </div>
         </div>
 
         {/* Countries visited - compact */}
         <div>
-          <label className="block text-xs font-medium mb-1">Countries Visited (last 3 months)</label>
+          <label className="block text-xs font-medium mb-1">
+            Countries Visited (last 3 months) 
+            {formData.countriesVisited.length > 0 && (
+              <span className="text-gray-400 font-normal ml-1">({formData.countriesVisited.length}/6)</span>
+            )}
+          </label>
           <select
-            className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+            className={`w-full px-2 py-1.5 border border-gray-300 rounded text-sm ${formData.countriesVisited.length >= 6 ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+            disabled={formData.countriesVisited.length >= 6}
             onChange={(e) => {
-              if (e.target.value && !formData.countriesVisited.includes(e.target.value)) {
+              if (e.target.value && !formData.countriesVisited.includes(e.target.value) && formData.countriesVisited.length < 6) {
                 updateFormData({ countriesVisited: [...formData.countriesVisited, e.target.value] });
+                e.target.value = ''; // Reset select
               }
             }}
           >
+            <option value="">Select a country...</option>
             {countries?.map((country: any) => (
               <option key={country.code} value={country.code}>{country.name}</option>
             ))}
           </select>
+          {formData.countriesVisited.length >= 6 && (
+            <p className="text-xs text-amber-600 mt-1">Maximum 6 countries reached</p>
+          )}
           {formData.countriesVisited.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {formData.countriesVisited.map((country: string, idx: number) => (
-                <span key={idx} className="bg-gray-100 px-2 py-0.5 rounded text-xs flex items-center gap-1">
-                  {country}
-                  <button
-                    onClick={() => updateFormData({
-                      countriesVisited: formData.countriesVisited.filter((_: string, i: number) => i !== idx)
-                    })}
-                    className="text-gray-400 hover:text-red-500"
-                  >×</button>
-                </span>
-              ))}
+            <div className="flex flex-wrap gap-1 mt-2">
+              {formData.countriesVisited.map((countryCode: string, idx: number) => {
+                const countryName = countries?.find((c: any) => c.code === countryCode)?.name || countryCode;
+                return (
+                  <span key={idx} className="bg-gray-100 px-2 py-0.5 rounded text-xs flex items-center gap-1">
+                    {countryName}
+                    <button
+                      onClick={() => updateFormData({
+                        countriesVisited: formData.countriesVisited.filter((_: string, i: number) => i !== idx)
+                      })}
+                      className="text-gray-400 hover:text-red-500"
+                    >×</button>
+                  </span>
+                );
+              })}
             </div>
           )}
         </div>
@@ -1170,6 +1247,7 @@ const TravelInformation = () => {
 const Declarations = () => {
   const { formData, updateFormData, setCurrentStep, addDeclarationItem, removeDeclarationItem, setLoading, refNo } = useFormContext();
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
   const declarationTypes = [
     { id: 'prohibitedItems', label: 'Prohibited Items' },
@@ -1185,7 +1263,18 @@ const Declarations = () => {
     { id: 'reImportationGoods', label: 'Re-Importation Goods' }
   ];
 
+  const validate = () => {
+    if (!formData.hasItemsToDeclare) {
+      setError('Please indicate whether you have items to declare');
+      return false;
+    }
+    setError('');
+    return true;
+  };
+
   const handleNext = async () => {
+    if (!validate()) return;
+    
     console.log(formData);
     setLoading(true);
     try {
@@ -1307,67 +1396,111 @@ const Declarations = () => {
         
       </div>
 
-      <div className="space-y-2">
-        {declarationTypes.map((type) => (
-          <div key={type.id} className="border-b border-gray-100 pb-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">{type.label}</span>
-              <div className="flex gap-1">
-                {['Yes', 'No'].map((option) => (
-                  <label 
-                    key={option}
-                    className={`px-3 py-1 rounded text-xs font-medium cursor-pointer ${
-                      formData[type.id] === option
-                        ? option === 'Yes' 
-                          ? 'bg-[#CC0000]/10 text-[#CC0000] border border-[#CC0000]'
-                          : 'bg-gray-100 text-gray-600 border border-gray-300'
-                        : 'bg-white text-gray-500 border border-gray-200'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name={type.id}
-                      value={option}
-                      checked={formData[type.id] === option}
-                      onChange={(e) => updateFormData({ [type.id]: e.target.value })}
-                      className="sr-only"
-                    />
-                    {option}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {formData[type.id] === 'Yes' && (
-              <div className="mt-2 ml-2">
-                {type.id === 'prohibitedItems' ? (
-                  <div className="p-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
-                    All prohibited items will be seized
-                  </div>
-                ) : (
-                  <>
-                    {formData[`${type.id}List`]?.map((item: any, idx: number) => (
-                      <div key={idx} className="flex justify-between items-center bg-gray-50 p-2 rounded text-xs mb-1">
-                        <span className="truncate flex-1">{item.description || item.hsCode || 'Item'}</span>
-                        <button
-                          onClick={() => removeDeclarationItem(type.id, idx)}
-                          className="text-red-500 ml-2"
-                        >×</button>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => setActiveModal(type.id)}
-                      className="text-[#CC0000] text-xs font-medium"
-                    >
-                      + Add Item
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
+      {/* Main Question */}
+      <div className={`bg-gray-50 border rounded-lg p-4 mb-4 ${error ? 'border-red-300' : 'border-gray-200'}`}>
+        <p className="text-sm font-medium text-gray-800 mb-3">Do you have any items to declare? <span className="text-red-500">*</span></p>
+        <div className="flex gap-3">
+          {['Yes', 'No'].map((option) => (
+            <label 
+              key={option}
+              className={`flex-1 text-center py-3 rounded-lg border cursor-pointer text-sm font-medium transition-colors ${
+                formData.hasItemsToDeclare === option
+                  ? option === 'Yes' 
+                    ? 'bg-[#CC0000]/10 text-[#CC0000] border-[#CC0000]'
+                    : 'bg-green-50 text-green-700 border-green-500'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <input
+                type="radio"
+                name="hasItemsToDeclare"
+                value={option}
+                checked={formData.hasItemsToDeclare === option}
+                onChange={(e) => {
+                  updateFormData({ hasItemsToDeclare: e.target.value });
+                  setError('');
+                }}
+                className="sr-only"
+              />
+              {option}
+            </label>
+          ))}
+        </div>
+        {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
       </div>
+
+      {/* Show declaration categories only if Yes */}
+      {formData.hasItemsToDeclare === 'Yes' && (
+        <div className="space-y-2">
+          {declarationTypes.map((type) => (
+            <div key={type.id} className="border-b border-gray-100 pb-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">{type.label}</span>
+                <div className="flex gap-1">
+                  {['Yes', 'No'].map((option) => (
+                    <label 
+                      key={option}
+                      className={`px-3 py-1 rounded text-xs font-medium cursor-pointer ${
+                        formData[type.id] === option
+                          ? option === 'Yes' 
+                            ? 'bg-[#CC0000]/10 text-[#CC0000] border border-[#CC0000]'
+                            : 'bg-gray-100 text-gray-600 border border-gray-300'
+                          : 'bg-white text-gray-500 border border-gray-200'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name={type.id}
+                        value={option}
+                        checked={formData[type.id] === option}
+                        onChange={(e) => updateFormData({ [type.id]: e.target.value })}
+                        className="sr-only"
+                      />
+                      {option}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {formData[type.id] === 'Yes' && (
+                <div className="mt-2 ml-2">
+                  {type.id === 'prohibitedItems' ? (
+                    <div className="p-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
+                      All prohibited items will be seized
+                    </div>
+                  ) : (
+                    <>
+                      {formData[`${type.id}List`]?.map((item: any, idx: number) => (
+                        <div key={idx} className="flex justify-between items-center bg-gray-50 p-2 rounded text-xs mb-1">
+                          <span className="truncate flex-1">{item.description || item.hsCode || 'Item'}</span>
+                          <button
+                            onClick={() => removeDeclarationItem(type.id, idx)}
+                            className="text-red-500 ml-2"
+                          >×</button>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => setActiveModal(type.id)}
+                        className="text-[#CC0000] text-xs font-medium"
+                      >
+                        + Add Item
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Nothing to declare message */}
+      {formData.hasItemsToDeclare === 'No' && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+          <p className="text-sm text-green-700 font-medium">Nothing to declare</p>
+          <p className="text-xs text-green-600 mt-1">You can proceed to the next step</p>
+        </div>
+      )}
 
       {/* Compact navigation */}
       <div className="flex justify-between gap-2 mt-4 pt-3 border-t border-gray-100">

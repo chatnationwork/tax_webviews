@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Button, DeclarationCheckbox } from '../../../_components/Layout';
+import { Layout, Button, DeclarationCheckbox, Input } from '../../../_components/Layout';
 import { getRegistrationData, getPhoneNumber } from '../../_lib/store';
 import { submitPinRegistration } from '../../../actions/pin-registration';
 import { Loader2 } from 'lucide-react';
@@ -13,6 +13,8 @@ export default function KenyanDeclaration() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [data, setData] = useState<any>(null);
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   useEffect(() => {
     const regData = getRegistrationData();
@@ -23,8 +25,24 @@ export default function KenyanDeclaration() {
     setData(regData);
   }, [router]);
 
+  const validateEmail = (value: string): boolean => {
+    if (!value) {
+      setEmailError('Email is required');
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+      setEmailError('Please enter a valid email address');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+
   const handleSubmit = async () => {
     if (!isAgreed || !data) return;
+    
+    if (!validateEmail(email)) return;
     
     setIsSubmitting(true);
     setError('');
@@ -35,7 +53,7 @@ export default function KenyanDeclaration() {
       const result = await submitPinRegistration(
         'citizen',
         data.nationalId,
-        data.email,
+        email,
         phoneNumber
       );
 
@@ -72,6 +90,17 @@ export default function KenyanDeclaration() {
           </div>
         )}
 
+        <Input
+          label="Email Address"
+          type="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={setEmail}
+          error={emailError}
+          required
+          disabled={isSubmitting}
+        />
+
         <DeclarationCheckbox
           label="I confirm that the information provided is true and correct, and I understand that providing false information may result in legal consequences."
           legalNote="By submitting this registration, you agree to the Kenya Revenue Authority's terms and conditions. Your data will be processed in accordance with the Data Protection Act, 2019."
@@ -83,7 +112,7 @@ export default function KenyanDeclaration() {
         <div className="pt-4">
           <Button 
             onClick={handleSubmit}
-            disabled={!isAgreed || isSubmitting}
+            disabled={!isAgreed || isSubmitting || !email}
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
