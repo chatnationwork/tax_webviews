@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { shouldUseConfirmation } from "@/app/_lib/services-config";
 
 // Service URL mappings - maps service names to their external URLs
 // {{phone}} will be replaced with the actual phone number of the user
@@ -124,8 +125,15 @@ function HomeContent() {
     const urlTemplate = SERVICE_URLS[serviceKey];
     
     if (urlTemplate) {
-      const url = urlTemplate.replace("{{phone}}", phone);
-      window.location.href = url;
+      // Check if this service should use the confirmation page
+      if (shouldUseConfirmation(serviceKey)) {
+        // Route through confirmation page
+        window.location.href = `/confirm?service=${encodeURIComponent(serviceKey)}&phone=${encodeURIComponent(phone)}`;
+      } else {
+        // Direct navigation (eTIMS, F88, etc.)
+        const url = urlTemplate.replace("{{phone}}", phone);
+        window.location.href = url;
+      }
     } else {
       setToast(`${serviceKey} - Coming Soon`);
       setTimeout(() => setToast(null), 2000);

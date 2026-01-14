@@ -93,8 +93,12 @@ function EslipPaymentContent() {
       } else {
         taxpayerStore.setPrn(prn.trim());
         if (payRes.checkoutUrl) taxpayerStore.setCheckoutUrl(payRes.checkoutUrl);
-        taxpayerStore.setPaymentStatus('failed', payRes.message);
-        setError(payRes.message || 'Payment initiation failed. Please try again.');
+        // Handle error message that might be an object
+        const errorMsg = typeof payRes.message === 'object' 
+          ? (payRes.message as any)?.desc || JSON.stringify(payRes.message)
+          : payRes.message || 'Payment initiation failed. Please try again.';
+        taxpayerStore.setPaymentStatus('failed', errorMsg);
+        setError(errorMsg);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to initiate payment. Please try again.');
@@ -123,7 +127,7 @@ function EslipPaymentContent() {
             <div>
               <h3 className="font-semibold text-blue-800 mb-1">Pay with PRN</h3>
               <p className="text-sm text-blue-700">
-                Enter your Payment Reference Number (PRN) to complete your payment via M-Pesa.
+                Enter your Payment Reference Number (PRN) to complete your payment.
               </p>
             </div>
           </div>

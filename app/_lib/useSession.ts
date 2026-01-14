@@ -15,6 +15,7 @@ const PUBLIC_PATHS = [
     '*/otp',
     '*/otp',
     '/',
+    '/confirm',
     '/f88',
     '*/checkers',
     '*/checkers/*',
