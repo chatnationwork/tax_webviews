@@ -409,7 +409,7 @@ export async function fileNilReturn(
     return {
       success: false,
       code: error.response?.status || 500,
-      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file NIL return. Please try again or contact support.',
+      message: error.response?.data?.Message || error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file NIL return. Please try again or contact support.',
     };
   }
 }
