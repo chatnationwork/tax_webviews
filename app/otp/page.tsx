@@ -126,14 +126,7 @@ function OTPContent() {
           <img src="/kra_logo.png" alt="KRA Logo" className="h-12 w-auto" />
         </div>
 
-        {/* Header */}
-        <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
-          <h1 className="text-base font-semibold">
-            OTP Verification{serviceName && <span> for {serviceName}</span>}
-          </h1>
-          <p className="text-gray-400 text-xs">Verify phone number</p>
-        </div>
-
+     
         {/* Error State if No Phone */}
         {!phoneNumber && (
            <Card className="bg-red-50 border-red-200">
@@ -156,8 +149,8 @@ function OTPContent() {
             <div className="flex items-start gap-2">
               <MessageSquare className="w-5 h-5 text-blue-600 flex-shrink-0" />
               <div className="text-xs text-blue-800">
-                <p className="font-medium">OTP sent to {phoneNumber}</p>
-                <p className="text-blue-600">Check your SMS for the verification code</p>
+                <p className="font-medium">We have sent a login OTP to {phoneNumber}</p>
+                <p className="text-blue-600">Enter the code to continue</p>
               </div>
             </div>
           </Card>
