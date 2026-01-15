@@ -136,7 +136,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
       {showFooter && (
         <div className="bg-white border-t border-gray-200 sticky bottom-0 z-10">
           <div className="max-w-4xl mx-auto px-3 py-2">
-            <div className="grid grid-cols-3 gap-2">
+            <div className={`grid gap-2 ${hasSession ? 'grid-cols-3' : 'grid-cols-2'}`}>
               <button 
                 onClick={handleMainMenu}
                 className="flex flex-col items-center justify-center gap-0.5 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium text-[10px]"
