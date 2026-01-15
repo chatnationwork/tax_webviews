@@ -42,7 +42,6 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
 
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
   const isF88 = pathname?.startsWith('/f88');
-  const activePhone = phone || internalPhone;
 
   // Get the base page for the current route (first path segment)
   const getBasePage = (): string => {

@@ -16,10 +16,10 @@ const PUBLIC_PATHS = [
     '*/otp',
     '/',
     '/confirm',
+    '/f88/*',
     '/f88',
     '*/checkers',
     '*/checkers/*',
-    // We do NOT include '*/pin-registration' here so checkSession runs and handles redirection
 ];
 
 const isPathPublic = (pathname: string | null) => {
