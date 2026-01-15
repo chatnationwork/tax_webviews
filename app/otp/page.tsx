@@ -119,7 +119,7 @@ function OTPContent() {
   };
 
   return (
-    <Layout title="Verify OTP" showHeader={false} showFooter={false} onBack={() => router.back()}>
+    <Layout title="Verify OTP" showHeader={false} showFooter={true} onBack={() => router.back()}>
       <div className="space-y-4">
         {/* Logo */}
         <div className="flex justify-center py-2">
