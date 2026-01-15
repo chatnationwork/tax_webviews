@@ -84,6 +84,8 @@ const FormProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [currentStep, setCurrentStep] = useState(0); // Always start at landing page
   const [loading, setLoading] = useState(false);
+  const [globalError, setGlobalError] = useState('');
+  const [globalSuccess, setGlobalSuccess] = useState('');
   const [countries, setCountries] = useState<any[]>([]);
   const [entryPoints, setEntryPoints] = useState<any[]>([]);
   const [currencies, setCurrencies] = useState<any[]>([]);
@@ -91,6 +93,7 @@ const FormProvider = ({ children }: { children: React.ReactNode }) => {
   // NEW: Function to handle the "Start Application" click
   const startApplication = async () => {
     setLoading(true);
+    setGlobalError('');
     try {
       const newRefNo = await initializeDeclaration();
       
@@ -98,11 +101,11 @@ const FormProvider = ({ children }: { children: React.ReactNode }) => {
         setFormData((prev: any) => ({ ...prev, ref_no: newRefNo }));
         setCurrentStep(1); // Move to Step 1
       } else {
-        alert("Could not generate a reference number. Please try again.");
+        setGlobalError("Could not generate a reference number. Please try again.");
       }
     } catch (e) {
       console.error("Failed to start application", e);
-      alert("System error. Please try again.");
+      setGlobalError("System error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -171,6 +174,10 @@ const FormProvider = ({ children }: { children: React.ReactNode }) => {
       removeDeclarationItem,
       loading,
       setLoading,
+      globalError,
+      setGlobalError,
+      globalSuccess,
+      setGlobalSuccess,
       countries,
       entryPoints,
       currencies,
@@ -624,7 +631,7 @@ const DeclarationModal = ({ isOpen, onClose, declarationType, onSave }: any) => 
 
 // Page 1: Passenger Information
 const PassengerInformation = () => {
-  const { formData, updateFormData, setCurrentStep, setLoading, refNo, countries } = useFormContext();
+  const { formData, updateFormData, setCurrentStep, setLoading, refNo, countries, setGlobalError } = useFormContext();
   const [errors, setErrors] = useState<any>({});
   const [otpSent, setOtpSent] = useState(false);
   const [otpValue, setOtpValue] = useState('');
@@ -692,9 +699,9 @@ const PassengerInformation = () => {
         };
         await submitPassengerInfo(payload);
         setCurrentStep(2);
-      } catch (e) {
+      } catch (e: any) {
         console.error("Failed to submit passenger info", e);
-        alert("Failed to submit passenger info. Please try again.");
+        setGlobalError(e.message || "Failed to submit passenger info. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -1011,7 +1018,7 @@ const PassengerInformation = () => {
 
 // Page 2: Travel Information
 const TravelInformation = () => {
-  const { formData, updateFormData, setCurrentStep, setLoading, refNo, countries, entryPoints } = useFormContext();
+  const { formData, updateFormData, setCurrentStep, setLoading, refNo, countries, entryPoints, setGlobalError } = useFormContext();
   const [errors, setErrors] = useState<any>({});
 
   const validate = () => {
@@ -1054,9 +1061,9 @@ const TravelInformation = () => {
         };
         await submitTravelInfo(payload);
         setCurrentStep(3);
-      } catch (e) {
+      } catch (e: any) {
         console.error("Failed to submit travel info", e);
-        alert("Failed to submit travel info. Please try again.");
+        setGlobalError(e.message || "Failed to submit travel info. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -1228,7 +1235,7 @@ const TravelInformation = () => {
 
 // Page 3: Declarations
 const Declarations = () => {
-  const { formData, updateFormData, setCurrentStep, addDeclarationItem, removeDeclarationItem, setLoading, refNo } = useFormContext();
+  const { formData, updateFormData, setCurrentStep, addDeclarationItem, removeDeclarationItem, setLoading, refNo, setGlobalError } = useFormContext();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [error, setError] = useState('');
 
@@ -1363,9 +1370,9 @@ const Declarations = () => {
             }
         }
         setCurrentStep(4);
-    } catch (e) {
+    } catch (e: any) {
         console.error("Failed to submit declarations", e);
-        alert("Failed to submit declarations. Please try again.");
+        setGlobalError(e.message || "Failed to submit declarations. Please try again.");
     } finally {
         setLoading(false);
     }
@@ -1493,12 +1500,37 @@ const Declarations = () => {
         >
           ← Back
         </button>
-        <button 
-          onClick={handleNext}
-          className="px-6 py-2 bg-[#CC0000] text-white rounded text-sm font-medium"
-        >
-          {useFormContext().loading ? '...' : 'Next →'}
-        </button>
+        {(() => {
+          // Check if user has added any items when they said Yes to having items
+          const hasAnyItems = 
+            (formData.restrictedItemsList?.length > 0) ||
+            (formData.dutyFreeExceedingList?.length > 0) ||
+            (formData.commercialGoodsList?.length > 0) ||
+            (formData.dutiableGoodsList?.length > 0) ||
+            (formData.giftsList?.length > 0) ||
+            (formData.exceeding10000List?.length > 0) ||
+            (formData.exceeding2000List?.length > 0) ||
+            (formData.mobileDevicesList?.length > 0) ||
+            (formData.filmingEquipmentList?.length > 0) ||
+            (formData.reImportationGoodsList?.length > 0) ||
+            (formData.prohibitedItems === 'Yes');
+          
+          const isDisabled = formData.hasItemsToDeclare === 'Yes' && !hasAnyItems;
+          
+          return (
+            <button 
+              onClick={handleNext}
+              disabled={isDisabled}
+              className={`px-6 py-2 rounded text-sm font-medium ${
+                isDisabled 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  : 'bg-[#CC0000] text-white'
+              }`}
+            >
+              {useFormContext().loading ? '...' : 'Next →'}
+            </button>
+          );
+        })()}
       </div>
 
       <DeclarationModal
@@ -1518,7 +1550,7 @@ const Declarations = () => {
 
 // Page 4: Tax Computation
 const TaxComputation = () => {
-  const { formData, setCurrentStep, setLoading, refNo, phone } = useFormContext();
+  const { formData, setCurrentStep, setLoading, refNo, phone, setGlobalError, setGlobalSuccess } = useFormContext();
 
   const totalTax = formData.assessments?.reduce((sum: number, a: any) => sum + (parseFloat(a.tax_amount) || 0), 0) || 0;
 
@@ -1536,14 +1568,14 @@ const TaxComputation = () => {
               if (payNow) {
                   window.location.href = response.checkout_url;
               } else {
-                  alert(`Invoice ${response.invoice_number} sent to your whatsapp`);
+                  setGlobalSuccess(`Invoice ${response.invoice_number} sent to your WhatsApp`);
               }
           } else {
-              alert("Payment initiated successfully!");
+              setGlobalSuccess("Declaration submitted successfully!");
           }
-      } catch (e) {
-          console.error("Payment failed", e);
-          alert("Payment initiation failed.");
+      } catch (e: any) {
+          console.error("Submission failed", e);
+          setGlobalError(e.message || "Submission failed. Please try again.");
       } finally {
           setLoading(false);
       }
@@ -1646,7 +1678,7 @@ export default function Home() {
 // Main Content
 const MainContent = () => {
   const router = useRouter();
-  const { currentStep, setCurrentStep, formData } = useFormContext();
+  const { currentStep, setCurrentStep, formData, globalError, setGlobalError, globalSuccess, setGlobalSuccess } = useFormContext();
 
   const getStepTitle = () => {
     switch(currentStep) {
@@ -1666,6 +1698,9 @@ const MainContent = () => {
   };
 
   const handleBack = () => {
+    // Clear messages when navigating
+    setGlobalError('');
+    setGlobalSuccess('');
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
@@ -1685,6 +1720,36 @@ const MainContent = () => {
       showFooter={true}
       
     >
+      {/* Fixed Toast Messages - positioned above footer */}
+      {(globalError || globalSuccess) && (
+        <div className="fixed bottom-20 left-0 right-0 z-50 px-4 flex justify-center">
+          {globalError && (
+            <div className="max-w-lg w-full p-3 bg-red-600 text-white rounded-lg shadow-lg flex items-start gap-2 animate-in slide-in-from-bottom">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm">{globalError}</p>
+              </div>
+              <button onClick={() => setGlobalError('')} className="text-red-200 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          {globalSuccess && (
+            <div className="max-w-lg w-full p-3 bg-green-600 text-white rounded-lg shadow-lg flex items-start gap-2 animate-in slide-in-from-bottom">
+              <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-white text-xs font-bold">✓</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm">{globalSuccess}</p>
+              </div>
+              <button onClick={() => setGlobalSuccess('')} className="text-green-200 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {currentStep === 0 ? (
         <LandingPage />
       ) : (

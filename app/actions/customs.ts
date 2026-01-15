@@ -7,7 +7,23 @@ const BASE_URL = 'https://kratest.pesaflow.com';
 // Helper to handle API errors
 const handleApiError = (error: any) => {
   console.error('API Error:', error.response?.data || error.message);
-  throw new Error(error.response?.data?.message || error.message || 'An error occurred while communicating with the server');
+  
+  // Extract error message - handle both string and object formats
+  let errorMessage = 'An error occurred while communicating with the server';
+  
+  const responseMessage = error.response?.data?.message;
+  if (responseMessage) {
+    if (typeof responseMessage === 'string') {
+      errorMessage = responseMessage;
+    } else if (typeof responseMessage === 'object' && responseMessage.message) {
+      // Handle { code: '...', message: '...' } format
+      errorMessage = responseMessage.message;
+    }
+  } else if (error.message && typeof error.message === 'string') {
+    errorMessage = error.message;
+  }
+  
+  throw new Error(errorMessage);
 };
 
 export async function submitPassengerInfo(data: any) {
