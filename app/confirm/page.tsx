@@ -102,6 +102,11 @@ function ConfirmContent() {
             Go Back
           </button>
         </div>
+
+        {/* KRA 30 Years Image */}
+        <div className="flex justify-center pt-2">
+          <img src="/kra30.jpg" alt="KRA 30 Years" className="w-full max-w-sm rounded-lg shadow-md" />
+        </div>
       </div>
     </Layout>
   );
