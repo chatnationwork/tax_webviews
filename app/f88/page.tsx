@@ -144,6 +144,34 @@ const FormProvider = ({ children }: { children: React.ReactNode }) => {
     init();
   }, [formData.ref_no]); // Depend on formData.ref_no so it triggers after startApplication
 
+  // Persist form data to sessionStorage for navigation preservation
+  useEffect(() => {
+    if (formData.ref_no) {
+      sessionStorage.setItem('f88FormData', JSON.stringify(formData));
+      sessionStorage.setItem('f88CurrentStep', String(currentStep));
+    }
+  }, [formData, currentStep]);
+
+  // Restore form data from sessionStorage on mount
+  useEffect(() => {
+    const savedFormData = sessionStorage.getItem('f88FormData');
+    const savedStep = sessionStorage.getItem('f88CurrentStep');
+    
+    if (savedFormData) {
+      try {
+        const parsed = JSON.parse(savedFormData);
+        if (parsed.ref_no) {
+          setFormData(parsed);
+          if (savedStep) {
+            setCurrentStep(Number(savedStep));
+          }
+        }
+      } catch (e) {
+        console.error('Failed to restore form data', e);
+      }
+    }
+  }, []);
+
   const updateFormData = (updates: any) => {
     setFormData((prev: any) => ({ ...prev, ...updates }));
   };
@@ -1454,6 +1482,19 @@ const Declarations = () => {
 
               {formData[type.id] === 'Yes' && (
                 <div className="mt-2 ml-2">
+                  {/* Learn More link for items with restrictions info */}
+                  {['prohibitedItems', 'restrictedItems', 'dutyFreeExceeding'].includes(type.id) && (
+                    <a 
+                      href={`/f88/restrictions?phone=${encodeURIComponent(formData.phone || '')}`}
+                      className="inline-flex items-center gap-1 text-blue-600 text-xs mb-2 hover:underline"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Learn more about {type.label.toLowerCase()}
+                    </a>
+                  )}
+                  
                   {type.id === 'prohibitedItems' ? (
                     <div className="p-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
                       All prohibited items will be seized
@@ -1487,8 +1528,8 @@ const Declarations = () => {
       {/* Nothing to declare message */}
       {formData.hasItemsToDeclare === 'No' && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-          <p className="text-sm text-green-700 font-medium">Nothing to declare</p>
-          <p className="text-xs text-green-600 mt-1">You can proceed to the next step</p>
+          <p className="text-sm text-green-700 font-medium">By selecting “No,” you confirm this declaration is true. False declarations are an offence under EACCMA, 2004 (Section 203) and may result in fines, legal action, or confiscation of goods.</p>
+        
         </div>
       )}
 
@@ -1568,10 +1609,12 @@ const TaxComputation = () => {
               if (payNow) {
                   window.location.href = response.checkout_url;
               } else {
-                  setGlobalSuccess(`Invoice ${response.invoice_number} sent to your WhatsApp`);
+                  // Navigate to completion screen
+                  setCurrentStep(5);
               }
           } else {
-              setGlobalSuccess("Declaration submitted successfully!");
+              // Navigate to completion screen
+              setCurrentStep(5);
           }
       } catch (e: any) {
           console.error("Submission failed", e);
@@ -1659,6 +1702,53 @@ const TaxComputation = () => {
   );
 };
 
+// Page 5: Completion Screen
+const CompletionScreen = () => {
+  const router = useRouter();
+  const { formData, setCurrentStep } = useFormContext();
+
+  const handleNewDeclaration = () => {
+    // Clear session storage and restart
+    sessionStorage.removeItem('f88FormData');
+    sessionStorage.removeItem('f88CurrentStep');
+    window.location.reload();
+  };
+
+  return (
+    <div className="text-center py-4">
+      {/* Success Image */}
+      <img 
+        src="/f88finish.png" 
+        alt="Declaration Complete" 
+        className="mx-auto max-w-full h-auto mb-4"
+      />
+      
+      {/* Reference number */}
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+        <p className="text-sm text-green-700">
+          Reference No: <span className="font-bold">{formData.ref_no}</span>
+        </p>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex flex-col gap-3">
+        <button 
+          onClick={handleNewDeclaration}
+          className="w-full px-4 py-3 bg-[#CC0000] text-white rounded-lg text-sm font-medium"
+        >
+          Start New Declaration
+        </button>
+        <button 
+          onClick={() => router.push('/')}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm"
+        >
+          Back to Home
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1687,6 +1777,7 @@ const MainContent = () => {
       case 2: return "Travel Information";
       case 3: return "Declarations";
       case 4: return "Tax Computation";
+      case 5: return "Declaration Complete";
       default: return "F88 Declaration";
     }
   };
@@ -1759,6 +1850,7 @@ const MainContent = () => {
           {currentStep === 2 && <TravelInformation />}
           {currentStep === 3 && <Declarations />}
           {currentStep === 4 && <TaxComputation />}
+          {currentStep === 5 && <CompletionScreen />}
         </div>
       )}
     </Layout>

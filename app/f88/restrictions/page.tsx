@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { Layout, Card, Button } from '@/app/_components/Layout';
-import { ArrowLeft, AlertTriangle, Ban, Package } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Ban, Package, Info } from 'lucide-react';
 
 function RestrictionsContent() {
   const router = useRouter();
@@ -11,7 +11,8 @@ function RestrictionsContent() {
   const phone = searchParams.get('phone') || '';
 
   const handleGoBack = () => {
-    router.push(`/f88${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`);
+    // Use router.back() to preserve form state
+    router.back();
   };
 
   return (
@@ -19,9 +20,9 @@ function RestrictionsContent() {
       <div className="space-y-4">
         {/* Header */}
         <div className="text-center py-2">
-          <h1 className="text-lg font-bold text-gray-900">Import Restrictions & Prohibitions</h1>
+          <h1 className="text-lg font-bold text-gray-900">Prohibited, Restricted, and Dutiable Items</h1>
           <p className="text-xs text-gray-600 mt-1">
-            East African Community Customs Management Act
+            The importation and exportation of certain goods is regulated under the East African Community Customs Management Act (EACCMA), as set out in the Second and Third Schedules.
           </p>
         </div>
 
@@ -32,28 +33,28 @@ function RestrictionsContent() {
             <h2 className="text-base font-bold text-red-900">1. Prohibited Items</h2>
           </div>
           <p className="text-xs text-gray-600 mb-3">
-            Items completely banned from import/export under the 2nd and 3rd Schedule of the Act:
+            The following items are strictly prohibited from import or export under the Act. This list is not exhaustive:
           </p>
           <ul className="space-y-1.5 text-xs text-gray-700">
             <li className="flex items-start gap-2">
               <span className="text-red-500 mt-0.5">•</span>
-              <span>False money and counterfeit currency (notes & coins)</span>
+              <span>Counterfeit currency, including false money, notes, and coins</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-red-500 mt-0.5">•</span>
-              <span>Pornographic materials in all media formats</span>
+              <span>Pornographic materials in any form or media</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-red-500 mt-0.5">•</span>
-              <span>Distilled beverages harmful to health</span>
+              <span>Distilled beverages that are harmful to health</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-red-500 mt-0.5">•</span>
-              <span>Used tyres for light commercial vehicles & passenger cars</span>
+              <span>Used tyres for passenger cars and light commercial vehicles</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-red-500 mt-0.5">•</span>
-              <span>Matches containing white phosphorous</span>
+              <span>Matches containing white phosphorus</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-red-500 mt-0.5">•</span>
@@ -61,11 +62,15 @@ function RestrictionsContent() {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-red-500 mt-0.5">•</span>
-              <span>Hazardous wastes and their disposal materials</span>
+              <span>Hazardous waste and materials intended for disposal</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-red-500 mt-0.5">•</span>
-              <span>All soaps and cosmetic products containing mercury</span>
+              <span>Soaps and cosmetic products containing mercury</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-red-500 mt-0.5">•</span>
+              <span>Any goods whose importation is prohibited under the Act or any other written law in force within a Partner State</span>
             </li>
           </ul>
         </Card>
@@ -77,12 +82,12 @@ function RestrictionsContent() {
             <h2 className="text-base font-bold text-orange-900">2. Restricted Items</h2>
           </div>
           <p className="text-xs text-gray-600 mb-3">
-            Items requiring special permits or documentation:
+            The following items are restricted and require prior approval, permits, or licenses before import or export. This list is not exhaustive:
           </p>
           <ul className="space-y-1.5 text-xs text-gray-700">
             <li className="flex items-start gap-2">
               <span className="text-orange-500 mt-0.5">•</span>
-              <span>Live animals including pets</span>
+              <span>Live animals, including pets</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-orange-500 mt-0.5">•</span>
@@ -94,15 +99,15 @@ function RestrictionsContent() {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-orange-500 mt-0.5">•</span>
-              <span>Wildlife products (e.g., ivory)</span>
+              <span>Wildlife products, including ivory</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-orange-500 mt-0.5">•</span>
-              <span>Precious metals and stones</span>
+              <span>Precious metals and precious stones</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-orange-500 mt-0.5">•</span>
-              <span>Arms, ammunition, and accessories</span>
+              <span>Arms, ammunition, and related parts or accessories</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-orange-500 mt-0.5">•</span>
@@ -112,6 +117,10 @@ function RestrictionsContent() {
               <span className="text-orange-500 mt-0.5">•</span>
               <span>Bows and arrows</span>
             </li>
+            <li className="flex items-start gap-2">
+              <span className="text-orange-500 mt-0.5">•</span>
+              <span>Any goods whose importation is restricted under the Act or any other written law in force within a Partner State</span>
+            </li>
           </ul>
         </Card>
 
@@ -119,28 +128,38 @@ function RestrictionsContent() {
         <Card className="p-4 border-l-4 border-blue-500">
           <div className="flex items-center gap-2 mb-3">
             <Package className="w-5 h-5 text-blue-600" />
-            <h2 className="text-base font-bold text-blue-900">3. Duty-Free Allowance Limits</h2>
+            <h2 className="text-base font-bold text-blue-900">3. Items Exceeding Duty-Free Allowances</h2>
           </div>
           <p className="text-xs text-gray-600 mb-3">
-            Items exceeding these limits require duty payment (passengers 18+ years only):
+            The following items are subject to duty when they exceed the allowable limits:
           </p>
-          <div className="space-y-2 text-xs">
-            <div className="bg-blue-50 p-2 rounded-lg">
-              <span className="font-semibold text-blue-800">Spirits/Wine:</span>
-              <span className="text-gray-700"> Max 1 litre spirits OR 2 litres wine</span>
+          <div className="space-y-3 text-xs">
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <span className="font-semibold text-blue-800 block mb-1">Alcoholic Beverages</span>
+              <ul className="text-gray-700 ml-2 space-y-0.5">
+                <li>• Spirits or liquors exceeding 1 litre, or</li>
+                <li>• Wine exceeding 2 litres</li>
+              </ul>
             </div>
-            <div className="bg-blue-50 p-2 rounded-lg">
-              <span className="font-semibold text-blue-800">Perfume:</span>
-              <span className="text-gray-700"> Max 0.5 litre total (max 0.25 litre perfume)</span>
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <span className="font-semibold text-blue-800 block mb-1">Perfume and Toilet Water</span>
+              <ul className="text-gray-700 ml-2 space-y-0.5">
+                <li>• Exceeding 0.5 litres in total, of which no more than 0.25 litres may be perfume</li>
+              </ul>
             </div>
-            <div className="bg-blue-50 p-2 rounded-lg">
-              <span className="font-semibold text-blue-800">Tobacco:</span>
-              <span className="text-gray-700"> Max 250g combined (cigarettes, cigars, snuff)</span>
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <span className="font-semibold text-blue-800 block mb-1">Tobacco Products</span>
+              <ul className="text-gray-700 ml-2 space-y-0.5">
+                <li>• Cigarettes, cigars, cigarillos, tobacco, or snuff exceeding 250 grams in total weight</li>
+              </ul>
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-3 italic">
-            Note: Duty-free allowance only applies to passengers aged 18 years and above.
-          </p>
+          <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
+            <Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-amber-800">
+              <strong>Note:</strong> Duty-free allowances apply only to passengers aged 18 years and above.
+            </p>
+          </div>
         </Card>
 
         {/* Back Button */}
