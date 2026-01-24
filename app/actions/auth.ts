@@ -347,3 +347,82 @@ export async function sendWhatsAppDocument(
 }
 
 // Template senders can be migrated here as needed, but for now base functions are key
+
+/**
+ * Send "Connect to agent" interactive message
+ */
+export async function sendConnectToAgentMessage(recipientPhone: string): Promise<SendWhatsAppMessageResult> {
+  const cleanNumber = cleanPhoneNumber(recipientPhone).replace(/^254/, '');
+  const finalNumber = cleanPhoneNumber(recipientPhone);
+
+  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const domain = 'https://crm.chatnation.co.ke';
+  const version = 'v21.0';
+  
+  if (!token || !phoneNumberId) {
+    console.error('WhatsApp API credentials not configured');
+    return { success: false, error: 'WhatsApp sending not configured' };
+  }
+
+  const url = `${domain}/api/meta/${version}/${phoneNumberId}/messages`;
+
+  const payload = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: finalNumber,
+    type: "interactive",
+    interactive: {
+        type: "button",
+        header: {
+            type: "text",
+            text: "Connect to agent?"
+        },
+        body: {
+            text: "Do you want to speak with a customer support agent?"
+        },
+        footer: {
+            text: "Select an option"
+        },
+        action: {
+            buttons: [
+                {
+                    type: "reply",
+                    reply: {
+                        id: "yes_connect",
+                        title: "Yes, Connect"
+                    }
+                },
+                {
+                    type: "reply",
+                    reply: {
+                        id: "main_menu",
+                        title: "Main Menu"
+                    }
+                }
+            ]
+        }
+    }
+  };
+
+  try {
+    const response = await axios.post(url, payload, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 30000
+    });
+
+    return {
+      success: true,
+      messageId: response.data.messages?.[0]?.id
+    };
+  } catch (error: any) {
+    console.error('Error sending Connect Agent message:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.error?.message || 'Failed to send message'
+    };
+  }
+}

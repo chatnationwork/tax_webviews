@@ -460,7 +460,7 @@ If you have rental income in the future, please contact *KRA* to update your tax
             </div>
 
             {/* Income Input - Only show if properties exist */}
-            {properties.length > 0 && (
+            {properties.length > 0 && filingPeriod && (
               <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
                  <Input
                     label="Total Rental Income (KES)"

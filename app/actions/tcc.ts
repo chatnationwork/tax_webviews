@@ -461,7 +461,7 @@ export async function fileNilReturn(
     return {
       success: false,
       code: error.response?.status || 500,
-      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file NIL return. Please try again or contact support.',
+      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file NIL return. .',
     };
   }
 }
@@ -505,7 +505,7 @@ export async function fileMriReturn(
     return {
       success: false,
       code: error.response?.status || 500,
-      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file MRI return. Please try again or contact support.',
+      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file MRI return. .',
     };
   }
 }
@@ -564,7 +564,7 @@ export async function fileTotReturn(
     return {
       success: false,
       code: error.response?.status || 500,
-      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file TOT return. Please try again or contact support.',
+      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file TOT return. .',
     };
   }
 }

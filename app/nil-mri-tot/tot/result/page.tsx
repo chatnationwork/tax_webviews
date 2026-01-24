@@ -82,9 +82,7 @@ export default function TotResultPage() {
                 </p>
               </div>
 
-               <p className="text-xs text-red-700 bg-red-100/50 px-4 py-2 rounded-full">
-                Please try again or contact support
-              </p>
+            
             </div>
           </Card>
         ) : (

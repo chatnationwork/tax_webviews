@@ -121,6 +121,8 @@ function TotVerifyContent() {
 
           if (hasTot && filingMode === 'Monthly') {
              setLoadingPeriod(true);
+             setFilingPeriod(''); // Clear previous period (e.g. from Daily)
+             setPeriodError('');  // Clear previous error
              try {
                 const periodCheck = await getFilingPeriods(taxpayerInfo.pin, '8'); // 8 is TOT
                 if (periodCheck.success && periodCheck.periods && periodCheck.periods.length > 0) {
@@ -128,10 +130,15 @@ function TotVerifyContent() {
                    setPeriodError('');
                 } else if (periodCheck.message) {
                    const msg = periodCheck.message as any;
+                   setFilingPeriod(''); // Ensure period remains empty on error
                    setPeriodError(typeof msg === 'string' ? msg : msg?.message || 'No filing period available');
+                } else {
+                   setFilingPeriod('');
+                   setPeriodError('No filing period available'); 
                 }
              } catch (e) {
                 console.error("Error fetching periods", e);
+                setPeriodError('Failed to fetch periods');
              } finally {
                 setLoadingPeriod(false);
              }
@@ -155,6 +162,11 @@ function TotVerifyContent() {
     if (filingMode === 'Daily') {
       const today = getTodayDate();
       setFilingPeriod(`${today} - ${today}`);
+      setPeriodError(''); // Clear any periodic error from Monthly
+    } else {
+        // When switching to Monthly, we might want to clear the daily period immediately
+        // while the other effect fetches the new period.
+        setFilingPeriod(''); 
     }
   }, [filingMode]);
 
@@ -457,7 +469,8 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                    </div>
                 </div>
 
-                <Input
+                {filingPeriod && (
+                  <Input
                   label={filingMode === 'Daily' ? 'Gross Daily Sales (KES)' : 'Gross Monthly Sales (KES)'}
                   value={grandTotal}
                   onChange={setGrandTotal}
@@ -466,7 +479,7 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                   required
                   disabled={!filingPeriod}
                 />
-
+                )}
                 {Number(grandTotal) > 0 && (
                   <TotalsCard
                     subtotal={Number(grandTotal)}

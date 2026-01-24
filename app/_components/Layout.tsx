@@ -7,7 +7,7 @@ import { ArrowLeft, Menu, Home, LogOut, Headphones, CheckCircle } from 'lucide-r
 import { useSessionManager } from '../_lib/useSession';
 import { clearUserSession, getKnownPhone, isSessionValid } from '../_lib/session-store';
 
-
+import { sendConnectToAgentMessage } from '@/app/actions/auth';
 interface LayoutProps {
   children: ReactNode;
   title: string;
@@ -78,11 +78,26 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
     }
   };
 
-  const handleConnectAgent = () => {
-    // WhatsApp number for eTIMS support (without + symbol)
-    const message = encodeURIComponent('Connect to agent');
-    // Open WhatsApp with pre-filled message
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+  
+  const handleConnectAgent = async () => {
+    const phoneToUse = phone || internalPhone || getKnownPhone();
+    
+    if (phoneToUse) {
+       // Send interactive message
+       try {
+         await sendConnectToAgentMessage(phoneToUse);
+         alert('A "Connect to Agent" request has been sent to your WhatsApp. Please check your phone.');
+       } catch (error) {
+         console.error('Failed to send connect agent message', error);
+         // Fallback to direct link if API fails
+      
+         window.open(`https://wa.me/${whatsappNumber}`, '_blank');
+       }
+    } else {
+      // Fallback if no phone known
+      const message = encodeURIComponent('Connect to agent');
+      window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+    }
   };
 
   const handleMainMenu = () => {
