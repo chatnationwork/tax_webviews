@@ -18,7 +18,7 @@ const SERVICE_URLS: Record<string, string> = {
   "TOT": "/nil-mri-tot/tot/validation?phone={{phone}}",
   
   // PIN Services
-  "PIN Registration": "/pin-registration?phone={{phone}}",
+  "PIN Registration": "/pin-registration/select-type?phone={{phone}}",
   
   // Customs Services
   "F88 Declaration": "/f88?phone={{phone}}",

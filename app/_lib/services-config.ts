@@ -104,7 +104,7 @@ export const SERVICES_CONFIG: Record<string, ServiceConfig> = {
     key: "PIN Registration",
     name: "PIN Registration",
     description: "Register for a new KRA PIN.",
-    targetUrl: "/pin-registration",
+    targetUrl: "/pin-registration/select-type",
   },
 };
 

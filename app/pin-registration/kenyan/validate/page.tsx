@@ -112,20 +112,7 @@ Complete your registration to receive your PIN certificate.`;
     return (
       <Layout title="PIN Registration" onBack={() => router.back()} showMenu>
         <div className="space-y-6">
-          {/* Status Card */}
-          <Card className="p-6 bg-blue-50 border border-blue-200">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">*Already Registered*</h2>
-            
-            <div className="flex items-start gap-3 bg-white/60 p-4 rounded-lg border border-blue-100">
-              <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-white text-xs font-bold">i</span>
-              </div>
-              <div className="text-sm text-gray-700">
-                <p>Our records indicate that you already have a KRA PIN registered.</p>
-                <p className="mt-2 font-semibold">Your existing PIN: <span className="font-mono">{displayData.existingPin}</span></p>
-              </div>
-            </div>
-          </Card>
+          
 
           {/* User Details */}
           <Card className="p-4">
@@ -140,6 +127,20 @@ Complete your registration to receive your PIN certificate.`;
             >
               Not your profile? Go back to Edit your details
             </button>
+          </Card>
+          {/* Status Card */}
+          <Card className="p-6 bg-blue-50 border border-blue-200">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Already Registered</h2>
+            
+            <div className="flex items-start gap-3 bg-white/60 p-4 rounded-lg border border-blue-100">
+              <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-white text-xs font-bold">i</span>
+              </div>
+              <div className="text-sm text-gray-700">
+                <p>Our records indicate that you already have a KRA PIN registered.</p>
+                <p className="mt-2 font-semibold">Your existing PIN: <span className="font-mono">{displayData.existingPin}</span></p>
+              </div>
+            </div>
           </Card>
 
           {sendingMessage && (
