@@ -23,7 +23,11 @@ export default function NilResultPage() {
          try {
            const phone = taxpayerStore.getMsisdn() || await getStoredPhone() || localStorage.getItem('phone_Number');
            if (phone) {
-             const message = `*NIL Return Filed Successfully*\n\nDear *${info.fullName}*,\nYour *${info.selectedNilType?.toUpperCase()} NIL Return* has been filed successfully.\n\nReceipt Number: *${(taxpayerStore as any).receiptNumber || 'N/A'}*\n\nThank you for using our service.`;
+             const baseMessage = info.successMessage || 'Successfully Filled NIL Return';
+             const receipt = (taxpayerStore as any).receiptNumber || 'N/A';
+             const taxDue = info.taxAmount !== undefined ? info.taxAmount : 0;
+             
+             const message = `${baseMessage}\n\nKRA Account Number: ${receipt}\nTax Due: KES ${taxDue}`;
              
              await sendWhatsAppMessage({
                recipientPhone: phone,

@@ -143,6 +143,10 @@ function NilVerifyContent() {
       if (result.success) {
         taxpayerStore.setSelectedNilType(obligationName);
         taxpayerStore.setReceiptNumber(result.receiptNumber || '');
+        taxpayerStore.setSuccessMessage(result.message);
+        if (result.taxDue) {
+            taxpayerStore.setTaxAmount(Number(result.taxDue) || 0);
+        }
         // Clear any previous error
         taxpayerStore.setError('');
         

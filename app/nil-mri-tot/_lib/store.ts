@@ -17,6 +17,7 @@ class TaxpayerStore {
     prn?: string;
     filingPeriod?: string;
     error?: string;
+    successMessage?: string;
   } = {
     msisdn: '',
     idNumber: '',
@@ -75,6 +76,10 @@ class TaxpayerStore {
 
   setError(error: string) {
     this.data.error = error;
+  }
+
+  setSuccessMessage(message: string) {
+    this.data.successMessage = message;
   }
 
   setTaxAmount(amount: number) {

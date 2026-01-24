@@ -54,6 +54,7 @@ export interface FileReturnResult {
   code: number;
   message: string;
   receiptNumber?: string;
+  taxDue?: string;
   prn?: string;
 }
 
@@ -424,6 +425,7 @@ export async function fileNilReturn(
       code: data.code || (isSuccess ? 200 : 500),
       message: message,
       receiptNumber: receiptNumber,
+      taxDue: data.tax_due,
     };
   } catch (error: any) {
     console.error('File NIL Return Error:', error.response?.data || error.message);
