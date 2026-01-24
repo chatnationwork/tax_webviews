@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Layout } from '../../_components/Layout';
 import { Globe, Flag, Loader2 } from 'lucide-react';
-import { checkSession, getStoredPhone } from '@/app/actions/pin-registration';
+import { getStoredPhone } from '@/app/actions/pin-registration';
 
 function SelectResidencyTypeContent() {
   const router = useRouter();
@@ -46,28 +46,11 @@ function SelectResidencyTypeContent() {
         if (currentPhone && currentPhone !== urlPhone) {
           setPhone(currentPhone);
           router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
-          return; // Let the effect re-run with new URL
         } else if (currentPhone) {
           setPhone(currentPhone);
         }
         
-        // Now check session
-        const hasSession = await checkSession();
-        if (!hasSession) {
-          // Redirect to OTP with phone if available
-          let redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
-          if (currentPhone) {
-            redirectUrl += `&phone=${encodeURIComponent(currentPhone)}`;
-          }
-          router.push(redirectUrl);
-        } else {
-          if (!currentPhone) {
-            // No phone anywhere, must go to OTP
-            router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
-          } else {
-            setCheckingSession(false);
-          }
-        }
+        setCheckingSession(false);
       } catch (err) {
         console.error('Session check failed', err);
         setCheckingSession(false);
