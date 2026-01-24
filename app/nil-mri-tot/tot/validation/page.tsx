@@ -8,6 +8,7 @@ import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
 import { lookupById, getStoredPhone } from '@/app/actions/nil-mri-tot';
 import { taxpayerStore } from '../../_lib/store';
 import { Loader2 } from 'lucide-react';
+import { analytics } from '@/app/_lib/analytics';
 
 function TotValidationContent() {
   const router = useRouter();
@@ -82,6 +83,7 @@ function TotValidationContent() {
           result.name || 'Unknown',
           result.pin || 'Unknown'
         );
+        analytics.track('validation_success', { obligation_type: 'tot' });
         
         const nextUrl = `/nil-mri-tot/tot/verify${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`;
         router.push(nextUrl);

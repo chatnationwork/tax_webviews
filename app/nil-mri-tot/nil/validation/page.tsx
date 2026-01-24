@@ -8,6 +8,7 @@ import { Loader2 } from 'lucide-react';
 import { lookupById, getStoredPhone } from '@/app/actions/nil-mri-tot';
 import { IDInput } from '@/app/_components/KRAInputs';
 import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
+import { analytics } from '@/app/_lib/analytics';
 
 function NilValidationContent() {
   const router = useRouter();
@@ -92,6 +93,7 @@ function NilValidationContent() {
           yob: parseInt(yob),
         };
         taxpayerStore.setTaxpayerInfo(idNumber, parseInt(yob), taxpayer.fullName, taxpayer.pin);
+        analytics.track('validation_success', { obligation_type: 'nil' });
         const nextUrl = `/nil-mri-tot/nil/verify${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`;
         router.push(nextUrl);
       } else {

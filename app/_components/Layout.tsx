@@ -8,6 +8,7 @@ import { useSessionManager } from '../_lib/useSession';
 import { clearUserSession, getKnownPhone, isSessionValid } from '../_lib/session-store';
 
 import { sendConnectToAgentMessage } from '@/app/actions/auth';
+import { analytics } from '@/app/_lib/analytics';
 interface LayoutProps {
   children: ReactNode;
   title: string;
@@ -51,7 +52,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
   };
 
   const handleMenuClick = () => {
-   
+    analytics.track('main_menu_click');
     const basePage = getBasePage();
     router.push(basePage);
   };
@@ -69,6 +70,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
       const msisdn = (session ? JSON.parse(session)?.msisdn : null) || internalPhone || getKnownPhone();
 
       
+      analytics.track('logout_click');
       clearUserSession();
       sessionStorage.clear();
       
@@ -80,6 +82,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
 
   
   const handleConnectAgent = async () => {
+    analytics.track('connect_agent_click');
     const phoneToUse = phone || internalPhone || getKnownPhone();
     
     if (phoneToUse) {
@@ -117,7 +120,10 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
             <div className="flex items-center gap-2">
               {onBack && (
                 <button
-                  onClick={onBack}
+                  onClick={() => {
+                    analytics.track('back_click');
+                    onBack();
+                  }}
                   className="p-1.5 hover:bg-gray-800 rounded-lg transition-colors"
                   aria-label="Go back"
                 >

@@ -3,6 +3,7 @@
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { shouldUseConfirmation } from "@/app/_lib/services-config";
+import { analytics } from "@/app/_lib/analytics";
 
 // Service URL mappings - maps service names to their external URLs
 // {{phone}} will be replaced with the actual phone number of the user
@@ -122,6 +123,7 @@ function HomeContent() {
   const [toast, setToast] = useState<string | null>(null);
 
   const handleServiceClick = (serviceKey: string) => {
+    analytics.track('service_selected', { service_name: serviceKey });
     const urlTemplate = SERVICE_URLS[serviceKey];
     
     if (urlTemplate) {

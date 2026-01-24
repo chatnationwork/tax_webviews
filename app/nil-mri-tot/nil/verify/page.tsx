@@ -6,6 +6,7 @@ import { Layout, Button, Select, Card, IdentityStrip } from '../../../_component
 import { taxpayerStore } from '../../_lib/store';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { fileNilReturn, getFilingPeriods, getTaxpayerObligations, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
+import { analytics } from '@/app/_lib/analytics';
 
 function NilVerifyContent() {
   const router = useRouter();
@@ -149,6 +150,12 @@ function NilVerifyContent() {
         }
         // Clear any previous error
         taxpayerStore.setError('');
+        
+        analytics.track('return_filed', { 
+            return_type: 'nil', 
+            obligation: obligationName,
+            receipt_number: result.receiptNumber 
+        });
         
         router.push('/nil-mri-tot/nil/result');
       } else {

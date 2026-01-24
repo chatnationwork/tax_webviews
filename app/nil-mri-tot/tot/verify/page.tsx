@@ -6,6 +6,7 @@ import { Layout, IdentityStrip, Button, Input, Card, TotalsCard } from '../../..
 import { taxpayerStore } from '../../_lib/store';
 import { fileTotReturn, getTaxpayerObligations, getFilingPeriods, generatePrn, makePayment, getStoredPhone, sendWhatsAppMessage, calculateTax } from '@/app/actions/nil-mri-tot';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { analytics } from '@/app/_lib/analytics';
 
 function TotVerifyContent() {
   const router = useRouter();
@@ -207,13 +208,17 @@ function TotVerifyContent() {
       );
      
 
+
       if (!result.success) {
         taxpayerStore.setFilingPeriod(filingPeriod);
         taxpayerStore.setError(result.message || 'Failed to file TOT return');
+        analytics.track('form_submitted', { form_id: 'tot_filing', status: 'failure', error: result.message });
         router.push('/nil-mri-tot/tot/result');
         setLoading(false);
         return;
       }
+      
+      analytics.track('form_submitted', { form_id: 'tot_filing', status: 'success', amount: grandTotal });
 
       // If just filing (monthly only), redirect
       if (action === 'file_only') {
@@ -221,6 +226,12 @@ function TotVerifyContent() {
              taxpayerStore.setReceiptNumber(result.receiptNumber || '');
              taxpayerStore.setFilingPeriod(filingPeriod);
           } catch (e) {}
+
+          analytics.track('return_filed', { 
+            return_type: 'tot', 
+            receipt_number: result.receiptNumber 
+          });
+
           router.push('/nil-mri-tot/tot/result');
           setLoading(false);
           return;
@@ -271,6 +282,11 @@ function TotVerifyContent() {
              const payRes = await makePayment(storedPhone, prnValue);
              if (payRes.success) {
                 setPaymentStatus('Payment initiated. Check your phone.');
+                analytics.track('payment_initiated', { 
+                  amount: calculatedTax, 
+                  currency: 'KES', 
+                  prn: prnValue 
+                });
                 setTimeout(() => {
                    router.push('/nil-mri-tot/tot/result');
                 }, 2000);

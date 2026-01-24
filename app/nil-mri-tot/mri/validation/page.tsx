@@ -8,6 +8,7 @@ import { taxpayerStore } from '../../_lib/store';
 import { Layout, Card, Button, Input } from '../../../_components/Layout';
 import { IDInput } from '@/app/_components/KRAInputs';
 import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
+import { analytics } from '@/app/_lib/analytics';
 
 function MriValidationContent() {
   const router = useRouter();
@@ -87,6 +88,7 @@ function MriValidationContent() {
         };
         // Save to store
         taxpayerStore.setTaxpayerInfo(idNumber, parseInt(yob), taxpayer.fullName, taxpayer.pin);
+        analytics.track('validation_success', { obligation_type: 'mri' });
         
         // Direct redirect to rental income, skipping obligation check
         const nextUrl = `/nil-mri-tot/mri/rental-income${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`;
