@@ -7,6 +7,8 @@ import { WhatsAppButton, QuickMenu } from '../../../_components/QuickMenu';
 import { taxpayerStore } from '../../_lib/store';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 
+import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
+
 export default function TotResultPage() {
   const router = useRouter();
   const [taxpayerInfo, setTaxpayerInfo] = useState<any>(null);
@@ -15,8 +17,41 @@ export default function TotResultPage() {
   useEffect(() => {
     const info = taxpayerStore.getTaxpayerInfo();
     setTaxpayerInfo(info);
-    setMounted(true);
-  }, []);
+    
+    const sendNotification = async () => {
+      // Only send if success and not already sent
+      if (!info.error && info.pin) {
+         try {
+           const phone = taxpayerStore.getMsisdn() || await getStoredPhone() || localStorage.getItem('phone_Number');
+           if (phone) {
+             let message = `*Turnover Tax Return Filed Successfully*\n\nDear *${info.fullName}*,\nYour TOT Return for *${info.filingPeriod}* has been filed.\n\nTax Due: KES ${(info.taxAmount || 0).toLocaleString()}`;
+             
+             if (info.prn && info.paymentType !== 'file-and-pay') {
+                message += `\n\nPayment Reference Number (PRN): *${info.prn}*\nPlease pay via M-Pesa Paybill 222222, Account: ${info.prn}`;
+             }
+             
+             if (info.receiptNumber) {
+                message += `\nReceipt Number: ${info.receiptNumber}`;
+             } else if ((taxpayerStore as any).receiptNumber) {
+                message += `\nReceipt Number: ${(taxpayerStore as any).receiptNumber}`;
+             }
+
+             await sendWhatsAppMessage({
+               recipientPhone: phone,
+               message: message
+             });
+           }
+         } catch (err) {
+           console.error('Failed to send WhatsApp notification', err);
+         }
+      }
+    };
+
+    if (!mounted) {
+       setMounted(true);
+       sendNotification();
+    }
+  }, [mounted]);
 
   if (!mounted) {
     return null;

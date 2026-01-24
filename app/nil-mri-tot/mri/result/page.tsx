@@ -4,14 +4,61 @@ import { CheckCircle, MessageCircle, AlertCircle } from 'lucide-react';
 import { taxpayerStore } from '../../_lib/store';
 import { WhatsAppButton } from '../../../_components/QuickMenu';
 
+import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
+import { useState, useEffect } from 'react';
+
 export default function MriResultPage() {
   const router = useRouter();
-  const taxpayerInfo = taxpayerStore.getTaxpayerInfo();
+  const [taxpayerInfo, setTaxpayerInfo] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
 
-  if (!taxpayerInfo.rentalIncome) {
-    if (typeof window !== "undefined") {
-      router.push('/nil-mri-tot/mri/validation');
+  useEffect(() => {
+    const info = taxpayerStore.getTaxpayerInfo();
+    setTaxpayerInfo(info);
+    
+    // Redirect if no data (handled in separate effect or logic, but keeping existing check)
+    if (!info.rentalIncome && typeof window !== "undefined") {
+       router.push('/nil-mri-tot/mri/validation');
+       return;
     }
+
+    const sendNotification = async () => {
+      // Only send if success and not already sent
+      if (!info.error && info.pin) {
+         try {
+           const phone = taxpayerStore.getMsisdn() || await getStoredPhone() || localStorage.getItem('phone_Number');
+           if (phone) {
+             const mriTax = ((info.rentalIncome || 0) * 0.1).toFixed(2);
+             let message = `*MRI Return Filed Successfully*\n\nDear *${info.fullName}*,\nYour Monthly Rental Income Return for *${info.filingPeriod}* has been filed.\n\nTax Due: KES ${mriTax}`;
+             
+             if (info.prn && info.paymentType !== 'file-and-pay') {
+                message += `\n\nPayment Reference Number (PRN): *${info.prn}*\nPlease pay via M-Pesa Paybill 222222, Account: ${info.prn}`;
+             }
+             
+             if (info.receiptNumber) {
+                message += `\nReceipt Number: ${info.receiptNumber}`;
+             } else if ((taxpayerStore as any).receiptNumber) {
+                message += `\nReceipt Number: ${(taxpayerStore as any).receiptNumber}`;
+             }
+
+             await sendWhatsAppMessage({
+               recipientPhone: phone,
+               message: message
+             });
+           }
+         } catch (err) {
+           console.error('Failed to send WhatsApp notification', err);
+         }
+      }
+    };
+
+    if (!mounted) {
+       setMounted(true);
+       sendNotification();
+    }
+  }, [mounted, router]);
+
+  if (!mounted || !taxpayerInfo) {
     return null;
   }
 

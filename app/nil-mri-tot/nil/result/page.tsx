@@ -6,6 +6,7 @@ import { Layout, Card, Button } from '../../../_components/Layout';
 import { WhatsAppButton, QuickMenu } from '../../../_components/QuickMenu';
 import { taxpayerStore } from '../../_lib/store';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
 
 export default function NilResultPage() {
   const router = useRouter();
@@ -15,13 +16,31 @@ export default function NilResultPage() {
   useEffect(() => {
     const info = taxpayerStore.getTaxpayerInfo();
     setTaxpayerInfo(info);
-    setMounted(true);
     
-    // Optional: redirect if no filing info
-    // if (!info.selectedNilType) {
-    //   router.push('/nil-mri-tot/nil/validation');
-    // }
-  }, []); // Empty dependency array to run only once on mount
+    const sendNotification = async () => {
+      // Only send if success and not already sent (we can use a flag or just run once on mount)
+      if (!info.error && info.pin) {
+         try {
+           const phone = taxpayerStore.getMsisdn() || await getStoredPhone() || localStorage.getItem('phone_Number');
+           if (phone) {
+             const message = `*NIL Return Filed Successfully*\n\nDear *${info.fullName}*,\nYour *${info.selectedNilType?.toUpperCase()} NIL Return* has been filed successfully.\n\nReceipt Number: *${(taxpayerStore as any).receiptNumber || 'N/A'}*\n\nThank you for using our service.`;
+             
+             await sendWhatsAppMessage({
+               recipientPhone: phone,
+               message: message
+             });
+           }
+         } catch (err) {
+           console.error('Failed to send WhatsApp notification', err);
+         }
+      }
+    };
+
+    if (!mounted) {
+       setMounted(true);
+       sendNotification();
+    }
+  }, [mounted]); // Run once when mounted state changes implies initial load handling
 
   if (!mounted) {
     return null;
