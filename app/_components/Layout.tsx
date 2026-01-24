@@ -86,7 +86,8 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
        // Send interactive message
        try {
          await sendConnectToAgentMessage(phoneToUse);
-         alert('A "Connect to Agent" request has been sent to your WhatsApp. Please check your phone.');
+         window.open(`https://wa.me/${whatsappNumber}`, '_blank');
+        
        } catch (error) {
          console.error('Failed to send connect agent message', error);
          // Fallback to direct link if API fails
