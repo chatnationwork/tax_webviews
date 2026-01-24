@@ -107,6 +107,13 @@ function ConfirmContent() {
         <div className="flex justify-center pt-2">
           <img src="/kra30.jpg" alt="KRA 30 Years" className="w-full max-w-sm rounded-lg shadow-md" />
         </div>
+
+        {/* Footer Helper Text */}
+        <div className="text-center pb-4">
+          <p className="text-xs text-gray-400">
+            Secure access to your {serviceConfig.name} services.
+          </p>
+        </div>
       </div>
     </Layout>
   );
