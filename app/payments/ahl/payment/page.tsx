@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { checkSession, getStoredPhone, generateAhlPayment, makePayment, sendWhatsAppMessage } from '@/app/actions/payments';
+import { getStoredPhone, generateAhlPayment, makePayment, sendWhatsAppMessage } from '@/app/actions/payments';
 import { taxpayerStore } from '../../_lib/store';
 import { Layout, Card, Button, Input } from '../../../_components/Layout';
 import { PINInput } from '@/app/_components/KRAInputs';
@@ -34,17 +34,6 @@ function AhlPaymentContent() {
   useEffect(() => {
     const initialize = async () => {
       try {
-        const hasSession = await checkSession();
-        if (!hasSession) {
-          const redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
-          if (phoneFromUrl) {
-            router.replace(`${redirectUrl}&phone=${encodeURIComponent(phoneFromUrl)}`);
-          } else {
-            router.push(redirectUrl);
-          }
-          return;
-        }
-
         // Prefill phone number
         if (phoneFromUrl) {
           setPhoneNumber(phoneFromUrl);

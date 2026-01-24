@@ -5,7 +5,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Layout, Card, Button } from '../../_components/Layout';
 import { IDInput } from '@/app/_components/KRAInputs';
 import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
-import { lookupById, checkSession, getStoredPhone } from '@/app/actions/tcc';
+import { lookupById, getStoredPhone } from '@/app/actions/tcc';
 import { taxpayerStore } from '../_lib/store';
 import { Loader2 } from 'lucide-react';
 
@@ -26,42 +26,30 @@ function TccValidationContent() {
   useEffect(() => {
     const performSessionCheck = async () => {
       try {
-        const hasSession = await checkSession();
-        if (!hasSession) {
-          // Redirect to OTP with current phone if available, or just path
-            const redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
-            if (phone) {
-               router.replace(`${redirectUrl}&phone=${encodeURIComponent(phone)}`);
-            } else {
-               router.push(redirectUrl);
-            }
-        } else {
-          // Session exists, check for phone
-          if (!phone) {
-            const storedPhone = await getStoredPhone();
-            if (storedPhone) {
-               const redirectUrl = `${pathname}?phone=${encodeURIComponent(storedPhone)}`;
-               router.replace(redirectUrl);
-            } else {
-               // Priority 2: Check client-side local storage
-               try {
-                 const localPhone = localStorage.getItem('phone_Number');
-                 if (localPhone) {
-                    const redirectUrl = `${pathname}?phone=${encodeURIComponent(localPhone)}`;
-                    router.replace(redirectUrl);
-                    return;
-                 }
-               } catch (e) {
-                 console.error('Error accessing local storage', e);
-               }
-               
-               // No phone found anywhere, redirect to OTP
-               router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
-            }
+        const hasSession = false; // Force no session for public access logic
+        
+        // Just check for phone preferences
+        if (!phone) {
+          const storedPhone = await getStoredPhone();
+          if (storedPhone) {
+             const redirectUrl = `${pathname}?phone=${encodeURIComponent(storedPhone)}`;
+             router.replace(redirectUrl);
           } else {
-            setCheckingSession(false);
+             // Priority 2: Check client-side local storage
+             try {
+               const localPhone = localStorage.getItem('phone_Number');
+               if (localPhone) {
+                  const redirectUrl = `${pathname}?phone=${encodeURIComponent(localPhone)}`;
+                  router.replace(redirectUrl);
+                  return;
+               }
+             } catch (e) {
+               console.error('Error accessing local storage', e);
+             }
           }
         }
+        
+        setCheckingSession(false);
       } catch (err) {
         console.error('Session check failed', err);
         setCheckingSession(false);

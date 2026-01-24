@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Loader2, AlertCircle, Receipt } from 'lucide-react';
-import { checkSession, getStoredPhone, makePayment } from '@/app/actions/payments';
+import { getStoredPhone, makePayment } from '@/app/actions/payments';
 import { taxpayerStore } from '../../_lib/store';
 import { Layout, Card, Button, Input } from '../../../_components/Layout';
 
@@ -23,37 +23,26 @@ function EslipPaymentContent() {
   useEffect(() => {
     const performSessionCheck = async () => {
       try {
-        const hasSession = await checkSession();
-        if (!hasSession) {
-          const redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
-          if (phone) {
-            router.replace(`${redirectUrl}&phone=${encodeURIComponent(phone)}`);
+        if (!phone) {
+          const storedPhone = await getStoredPhone();
+          if (storedPhone) {
+            const redirectUrl = `${pathname}?phone=${encodeURIComponent(storedPhone)}`;
+            router.replace(redirectUrl);
           } else {
-            router.push(redirectUrl);
-          }
-        } else {
-          if (!phone) {
-            const storedPhone = await getStoredPhone();
-            if (storedPhone) {
-              const redirectUrl = `${pathname}?phone=${encodeURIComponent(storedPhone)}`;
-              router.replace(redirectUrl);
-            } else {
-              try {
-                const localPhone = localStorage.getItem('phone_Number');
-                if (localPhone) {
-                  const redirectUrl = `${pathname}?phone=${encodeURIComponent(localPhone)}`;
-                  router.replace(redirectUrl);
-                  return;
-                }
-              } catch (e) {
-                console.error('Error accessing local storage', e);
+            try {
+              const localPhone = localStorage.getItem('phone_Number');
+              if (localPhone) {
+                const redirectUrl = `${pathname}?phone=${encodeURIComponent(localPhone)}`;
+                router.replace(redirectUrl);
+                return;
               }
-              router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
+            } catch (e) {
+              console.error('Error accessing local storage', e);
             }
-          } else {
-            setCheckingSession(false);
           }
         }
+        
+        setCheckingSession(false);
       } catch (err) {
         console.error('Session check failed', err);
         setCheckingSession(false);
