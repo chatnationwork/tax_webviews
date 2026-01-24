@@ -15,7 +15,7 @@ function TotVerifyContent() {
   const [mounted, setMounted] = useState(false);
 
   // Form State
-  const [filingMode, setFilingMode] = useState<'Daily' | 'Monthly'>('Monthly');
+  const [filingMode, setFilingMode] = useState<'Daily' | 'Monthly'>();
   const [grandTotal, setGrandTotal] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -193,6 +193,10 @@ function TotVerifyContent() {
     setPrn('');
     
     try {
+      if (!filingMode) {
+        setError('Select filing mode');
+        return;
+      }
       // 1. File Return
       const result = await fileTotReturn(
         taxpayerInfo.pin,
@@ -356,12 +360,16 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                  <IdentityStrip label="ID Number" value={taxpayerInfo?.idNumber || 'Unknown'} />
                  <IdentityStrip label="PIN" value={taxpayerInfo?.pin || 'Unknown'} />
                </div>
+
+               {!filingMode && (
+               
                <button 
                  onClick={handleBack}
                  className="text-[var(--kra-red)] text-xs font-medium mt-2 hover:underline text-left block"
                >
                  Not your profile? Go back to Edit your details
                </button>
+               )}
              </div>
           </Card>
 
@@ -404,12 +412,15 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                 <IdentityStrip label="ID Number" value={taxpayerInfo.idNumber} />
                 <IdentityStrip label="PIN" value={taxpayerInfo.pin} />
               </div>
+
+              {!filingMode && (
                <button 
                 onClick={handleBack}
                 className="text-[var(--kra-red)] text-xs font-medium mt-2 hover:underline text-left block"
               >
                 Not your profile? Go back to Edit your details
               </button>
+              )}
             </div>
          </Card>
 
