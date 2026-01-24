@@ -371,7 +371,7 @@ export async function sendConnectToAgentMessage(recipientPhone: string): Promise
         type: "button",
         header: {
             type: "text",
-            text: "Connect to agent?"
+            text: "Connect to Agent"
         },
         body: {
             text: "Do you want to speak with a customer support agent?"
@@ -384,14 +384,14 @@ export async function sendConnectToAgentMessage(recipientPhone: string): Promise
                 {
                     type: "reply",
                     reply: {
-                        id: "yes_connect",
-                        title: "Yes, Connect"
+                        id: "Connect to Agent",
+                        title: "Connect to Agent"
                     }
                 },
                 {
                     type: "reply",
                     reply: {
-                        id: "main_menu",
+                        id: "Main Menu",
                         title: "Main Menu"
                     }
                 }
