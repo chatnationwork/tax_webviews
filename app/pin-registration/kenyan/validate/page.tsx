@@ -51,7 +51,7 @@ Dear *${validatedData.name}*,
 
 Our records indicate that you *already have a KRA PIN* registered.
 
-📌 Your existing PIN: *${validatedData.pin}*
+ Your existing PIN: *${validatedData.pin}*
 
 No new registration is required. If you need to update your details, please visit the KRA iTax portal or contact KRA support.`;
         } else {
