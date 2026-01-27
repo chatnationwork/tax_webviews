@@ -1,16 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+// Non-Kenyan (Alien) identity verification page for PIN registration
+// Validates Alien ID, first name, and year of birth before proceeding
+
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Button, Input } from '../../../_components/Layout';
-import { getPhoneNumber, saveRegistrationData } from '../../_lib/store';
+import { getPhoneNumber, saveRegistrationData, savePhoneNumber } from '../../_lib/store';
 import { lookupById } from '../../../actions/pin-registration';
 import { Loader2 } from 'lucide-react';
 import { IDInput } from '@/app/_components/KRAInputs';
 import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
 
-export default function NonKenyanIdentityInput() {
+/**
+ * Inner content component that uses useSearchParams
+ * Must be wrapped in Suspense for Next.js SSR compatibility
+ */
+function NonKenyanIdentityContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlPhone = searchParams.get('phone') || '';
+  
   const [formData, setFormData] = useState({
     alienId: '',
     yearOfBirth: '',
@@ -19,16 +29,18 @@ export default function NonKenyanIdentityInput() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
-
   const [phoneNumber, setPhoneNumber] = useState('');
   
-      useEffect(() => {
-        // Get phone from URL or session
-        const storedPhone =  getPhoneNumber() || '';
-        setPhoneNumber(storedPhone);
-        
-      
-      }, []);
+  useEffect(() => {
+    // First check URL params, then fall back to stored phone
+    if (urlPhone) {
+      setPhoneNumber(urlPhone);
+      savePhoneNumber(urlPhone); // Persist for future use  
+    } else {
+      const storedPhone = getPhoneNumber() || '';
+      setPhoneNumber(storedPhone);
+    }
+  }, [urlPhone]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -79,9 +91,10 @@ export default function NonKenyanIdentityInput() {
       } else {
         setApiError(result.error || 'Validation failed. Please check your details.');
       }
-    } catch (err: any) {
-      console.error(err);
-      setApiError(err.message || 'An error occurred during validation');
+    } catch (err: unknown) {
+      const error = err as Error;
+      console.error(error);
+      setApiError(error.message || 'An error occurred during validation');
     } finally {
       setIsLoading(false);
     }
@@ -145,5 +158,16 @@ export default function NonKenyanIdentityInput() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+/**
+ * Main export wrapped in Suspense for useSearchParams compatibility
+ */
+export default function NonKenyanIdentityInput() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[var(--kra-red)]" /></div>}>
+      <NonKenyanIdentityContent />
+    </Suspense>
   );
 }

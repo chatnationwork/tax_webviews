@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { shouldUseConfirmation } from "@/app/_lib/services-config";
 import { analytics } from "@/app/_lib/analytics";
+import { saveKnownPhone } from "@/app/_lib/session-store";
 
 // Service URL mappings - maps service names to their external URLs
 // {{phone}} will be replaced with the actual phone number of the user
@@ -121,6 +122,13 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const phone = searchParams.get("phone") || "";
   const [toast, setToast] = useState<string | null>(null);
+
+  // Persist phone number from URL to localStorage for other pages to access
+  useEffect(() => {
+    if (phone) {
+      saveKnownPhone(phone);
+    }
+  }, [phone]);
 
   const handleServiceClick = (serviceKey: string) => {
     analytics.track('service_selected', { service_name: serviceKey });

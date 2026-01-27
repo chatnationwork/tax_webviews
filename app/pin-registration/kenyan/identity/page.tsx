@@ -1,16 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+// Kenyan identity verification page for PIN registration
+// Validates National ID, first name, and year of birth before proceeding
+
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Button, Input } from '../../../_components/Layout';
 import { IDInput } from '@/app/_components/KRAInputs';
-import { getPhoneNumber, saveRegistrationData } from '../../_lib/store';
+import { getPhoneNumber, saveRegistrationData, savePhoneNumber } from '../../_lib/store';
 import { lookupById } from '../../../actions/pin-registration';
 import { Loader2 } from 'lucide-react';
 import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
 
-export default function KenyanIdentityInput() {
+/**
+ * Inner content component that uses useSearchParams
+ * Must be wrapped in Suspense for Next.js SSR compatibility
+ */
+function KenyanIdentityContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlPhone = searchParams.get('phone') || '';
+  
   const [formData, setFormData] = useState({
     nationalId: '',
     yearOfBirth: '',
@@ -22,13 +32,16 @@ export default function KenyanIdentityInput() {
   const [apiError, setApiError] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
 
-    useEffect(() => {
-      // Get phone from URL or session
-      const storedPhone =  getPhoneNumber() || '';
+  useEffect(() => {
+    // First check URL params, then fall back to stored phone
+    if (urlPhone) {
+      setPhoneNumber(urlPhone);
+      savePhoneNumber(urlPhone); // Persist for future use
+    } else {
+      const storedPhone = getPhoneNumber() || '';
       setPhoneNumber(storedPhone);
-      
-    
-    }, []);
+    }
+  }, [urlPhone]);
   
 
   const validateForm = () => {
@@ -81,8 +94,9 @@ export default function KenyanIdentityInput() {
       } else {
         setApiError(result.error || 'Invalid ID number. Please check and try again.');
       }
-    } catch (err: any) {
-      setApiError(err.message || 'Failed to validate ID. Please try again.');
+    } catch (err: unknown) {
+      const error = err as Error;
+      setApiError(error.message || 'Failed to validate ID. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -144,5 +158,16 @@ export default function KenyanIdentityInput() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+/**
+ * Main export wrapped in Suspense for useSearchParams compatibility
+ */
+export default function KenyanIdentityInput() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[var(--kra-red)]" /></div>}>
+      <KenyanIdentityContent />
+    </Suspense>
   );
 }

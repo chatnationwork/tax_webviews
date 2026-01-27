@@ -118,7 +118,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   const payload = {
     id_number: idNumber.trim(),
     msisdn: cleanNumber,
-    id_type: type,
+    type: type,
   };
 
   console.log(`${BASE_URL}/id-lookup`);
