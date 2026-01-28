@@ -13,26 +13,26 @@ const SERVICE_URLS: Record<string, string> = {
   "Sales Invoice": "/etims/auth?phone={{phone}}",
   "Credit Note": "/etims/auth?phone={{phone}}",
   "Buyer-Initiated Invoices": "/etims/auth?phone={{phone}}",
-  
+
   // Return Filing
   "NIL Filing": "/nil-mri-tot/nil/validation?phone={{phone}}",
-  "MRI": "/nil-mri-tot/mri/validation?phone={{phone}}",
-  "TOT": "/nil-mri-tot/tot/validation?phone={{phone}}",
-  
+  MRI: "/nil-mri-tot/mri/validation?phone={{phone}}",
+  TOT: "/nil-mri-tot/tot/validation?phone={{phone}}",
+
   // PIN Services
   "PIN Registration": "/pin-registration/select-type?phone={{phone}}",
-  
+
   // Customs Services
   "F88 Declaration": "/f88?phone={{phone}}",
-  "eSlip": "/payments/eslip/payment?phone={{phone}}",
-  "NITA": "/payments/nita/payment?phone={{phone}}",
-  "AHL": "/payments/ahl/payment?phone={{phone}}",
+  eSlip: "/payments/eslip/payment?phone={{phone}}",
+  NITA: "/payments/nita/payment?phone={{phone}}",
+  AHL: "/payments/ahl/payment?phone={{phone}}",
   "TCC Application": "/tcc/validation?phone={{phone}}",
   "PIN Check": "/checkers/pin-checker?phone={{phone}}",
   "Invoice Check": "/checkers/invoice-checker?phone={{phone}}",
   "TCC Check": "/checkers/tcc-checker?phone={{phone}}",
   "Staff Check": "/checkers/staff-checker?phone={{phone}}",
-  "Station": "/checkers/know-your-station?phone={{phone}}",
+  Station: "/checkers/know-your-station?phone={{phone}}",
   "Import Check": "/checkers/import-certificate?phone={{phone}}",
 };
 
@@ -131,9 +131,9 @@ function HomeContent() {
   }, [phone]);
 
   const handleServiceClick = (serviceKey: string) => {
-    analytics.track('service_selected', { service_name: serviceKey });
+    analytics.track("service_selected", { service_name: serviceKey });
     const urlTemplate = SERVICE_URLS[serviceKey];
-    
+
     if (urlTemplate) {
       // Check if this service should use the confirmation page
       if (shouldUseConfirmation(serviceKey)) {
@@ -153,7 +153,7 @@ function HomeContent() {
   const isAvailable = (key: string) => key in SERVICE_URLS;
 
   return (
-    <Layout title="KRA Services">
+    <Layout title="KRA Services" phone={phone}>
       {/* Toast */}
       {toast && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
@@ -173,7 +173,7 @@ function HomeContent() {
               <span className="text-[10px] font-semibold text-gray-700 min-w-[90px] pt-1">
                 {category.title}
               </span>
-              
+
               {/* Service items */}
               <div className="flex flex-wrap gap-1.5 flex-1">
                 {category.items.map((item, itemIndex) => (
@@ -200,7 +200,13 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-sm">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen text-sm">
+          Loading...
+        </div>
+      }
+    >
       <HomeContent />
     </Suspense>
   );
