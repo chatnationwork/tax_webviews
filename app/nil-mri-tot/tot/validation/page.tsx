@@ -9,6 +9,7 @@ import { lookupById, getStoredPhone } from '@/app/actions/nil-mri-tot';
 import { taxpayerStore } from '../../_lib/store';
 import { Loader2 } from 'lucide-react';
 import { analytics } from '@/app/_lib/analytics';
+import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
 
 function TotValidationContent() {
   const router = useRouter();
@@ -31,9 +32,9 @@ function TotValidationContent() {
         let currentPhone = phone;
         
         if (!currentPhone) {
-          // Try localStorage first
+          // Try localStorage first (using shared store)
           try {
-            const localPhone = localStorage.getItem('phone_Number');
+            const localPhone = getKnownPhone();
             if (localPhone) {
               currentPhone = localPhone;
             }
@@ -50,9 +51,12 @@ function TotValidationContent() {
           }
         }
         
-        // If we found a phone, update URL if needed
-        if (currentPhone && currentPhone !== phone) {
-          router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
+        // If we found a phone, update URL if needed and persist it
+        if (currentPhone) {
+          if (currentPhone !== phone) {
+            router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
+          }
+          saveKnownPhone(currentPhone);
         }
         
         setCheckingSession(false);
