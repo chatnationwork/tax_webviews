@@ -117,6 +117,7 @@ const SERVICE_CATEGORIES = [
 ];
 
 import { Layout } from "@/app/_components/Layout";
+import { sendServiceAgentConnectMessage } from "@/app/actions/auth";
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -130,7 +131,7 @@ function HomeContent() {
     }
   }, [phone]);
 
-  const handleServiceClick = (serviceKey: string) => {
+  const handleServiceClick = async (serviceKey: string) => {
     analytics.track("service_selected", { service_name: serviceKey });
     const urlTemplate = SERVICE_URLS[serviceKey];
 
@@ -148,8 +149,23 @@ function HomeContent() {
        // Connect to Agent logic for unmapped services
        analytics.track("service_agent_connect", { service_name: serviceKey });
        const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '254745050238';
-       const message = `I need help with ${serviceKey}`;
-       window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+       
+       if (phone) {
+         try {
+           await sendServiceAgentConnectMessage(phone, serviceKey);
+           // Open WhatsApp chat without pre-filled text (since we sent context via API)
+           window.open(`https://wa.me/${whatsappNumber}`, '_blank');
+         } catch (error) {
+           console.error("Failed to send agent message", error);
+           // Fallback: Open with text
+           const message = `I need help with ${serviceKey}`;
+           window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+         }
+       } else {
+         // No phone number: Open with text
+         const message = `I need help with ${serviceKey}`;
+         window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+       }
     }
   };
 
