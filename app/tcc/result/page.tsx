@@ -170,7 +170,7 @@ export default function TccResultPage() {
             Apply for Another TCC
           </button>
 
-          <ResultActions />
+          <ResultActions journey="TCC Application" />
         </div>
 
      

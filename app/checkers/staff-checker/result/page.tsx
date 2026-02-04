@@ -116,7 +116,7 @@ function StaffResultContent() {
             Check Another
           </Button>
 
-          <ResultActions phone={phone} />
+          <ResultActions phone={phone} journey="Staff Checker" />
       </div>
     </Layout>
   );

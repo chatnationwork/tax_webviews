@@ -91,7 +91,7 @@ function PinResultContent() {
             Check Another
           </Button>
 
-          <ResultActions phone={phone} />
+          <ResultActions phone={phone} journey="PIN Checker" />
       </div>
     </Layout>
   );

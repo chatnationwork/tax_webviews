@@ -125,7 +125,7 @@ export default function EslipResultPage() {
             </Button>
           )}
           
-          <ResultActions />
+          <ResultActions journey="E-Slip Payment" />
         </div>
       </div>
     </Layout>

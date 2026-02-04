@@ -11,9 +11,9 @@ import { saveKnownPhone } from "@/app/_lib/session-store";
 const SERVICE_URLS: Record<string, string> = {
   // https://ecitizen-test.kra.go.ke/etims/?phone=254702438822
   // eTIMS Invoicing
-  "Sales Invoice": "https://ecitizen-test.kra.go.ke/etims/?phone={{phone}}",
-  "Credit Note": "https://ecitizen-test.kra.go.ke/etims/?phone={{phone}}",
-  "Buyer-Initiated Invoices": "https://ecitizen-test.kra.go.ke/etims/?phone={{phone}}",
+  "Sales Invoice": "/etims/sales-invoice/buyer?phone={{phone}}",
+  "Credit Note": "/etims/credit-note/search?phone={{phone}}",
+  "Buyer-Initiated Invoices": "/etims/buyer-initiated/buyer/create?phone={{phone}}",
 
   // Return Filing
   "NIL Filing": "/nil-mri-tot/nil/validation?phone={{phone}}",

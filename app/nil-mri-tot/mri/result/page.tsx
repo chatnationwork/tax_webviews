@@ -156,7 +156,7 @@ export default function MriResultPage() {
               Rental Income
             </button>
 
-            <ResultActions />
+            <ResultActions journey="MRI Filing" />
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ import { taxpayerStore } from '../../_lib/store';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
 import { getKnownPhone } from '@/app/_lib/session-store';
+import { JourneyCompletionTracker } from './JourneyCompletionTracker';
 
 export default function NilResultPage() {
   const router = useRouter();
@@ -101,12 +102,16 @@ export default function NilResultPage() {
                 )}
               </div>
 
-              <p className="text-xs text-green-700 bg-green-100/50 px-4 py-2 rounded-full">
+              <p className="text-xs text-blue-800 bg-blue-100/50 px-4 py-2 rounded-full mt-4">
                 Confirmation sent to your registered number
               </p>
             </div>
           </Card>
         )}
+
+        {/* Journey Completion Tracking */}
+        <JourneyCompletionTracker success={!taxpayerInfo?.error} />
+
 
         {/* WhatsApp Button */}
         {/* Action Buttons */}
@@ -122,7 +127,7 @@ export default function NilResultPage() {
             File Another Return
           </button>
 
-          <ResultActions />
+          <ResultActions journey="NIL Filing" />
         </div>
       </div>
     </Layout>

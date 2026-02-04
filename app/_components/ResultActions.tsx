@@ -8,9 +8,10 @@ import { getKnownPhone } from '../_lib/session-store';
 
 interface ResultActionsProps {
   phone?: string; // Optional: can be passed or retrieved from session
+  journey?: string; // Optional: identifies the journey for CSAT tracking
 }
 
-export function ResultActions({ phone }: ResultActionsProps) {
+export function ResultActions({ phone, journey }: ResultActionsProps) {
   const router = useRouter();
 
   const handleHome = () => {
@@ -27,7 +28,14 @@ export function ResultActions({ phone }: ResultActionsProps) {
       {/* Submit Feedback */}
       <Button 
         variant="secondary" 
-        onClick={() => router.push('/csat')}
+        onClick={() => {
+          const phoneToUse = phone || getKnownPhone();
+          const params = new URLSearchParams();
+          if (phoneToUse) params.set('phone', phoneToUse);
+          if (journey) params.set('journey', journey);
+          const queryString = params.toString();
+          router.push(`/csat${queryString ? `?${queryString}` : ''}`);
+        }}
         className="!bg-purple-50 !text-purple-700 hover:!bg-purple-100 !border-purple-200"
       >
         <div className="flex items-center justify-center gap-2">

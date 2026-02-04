@@ -52,7 +52,7 @@ export default function KenyanSuccess() {
           </div>
         </button>
         
-        <ResultActions />
+        <ResultActions journey="PIN Registration (Kenyan)" />
       </div>
 
       <div className="mt-6 p-4 bg-gray-50 rounded-lg">

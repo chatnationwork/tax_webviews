@@ -89,7 +89,7 @@ function ImportCertResultContent() {
             Check Another
           </Button>
 
-          <ResultActions phone={phone} />
+          <ResultActions phone={phone} journey="Import Certificate" />
       </div>
     </Layout>
   );

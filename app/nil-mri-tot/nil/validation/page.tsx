@@ -97,7 +97,7 @@ function NilValidationContent() {
           yob: parseInt(yob),
         };
         taxpayerStore.setTaxpayerInfo(idNumber, parseInt(yob), taxpayer.fullName, taxpayer.pin);
-        analytics.track('validation_success', { obligation_type: 'nil' });
+        analytics.track('nil_validation_success', { obligation_type: 'nil' }, { journey_start: true });
         const nextUrl = `/nil-mri-tot/nil/verify${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`;
         router.push(nextUrl);
       } else {

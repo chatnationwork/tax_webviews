@@ -116,7 +116,7 @@ function InvoiceResultContent() {
             Check Another
           </Button>
           
-          <ResultActions phone={phone} />
+          <ResultActions phone={phone} journey="Invoice Checker" />
       </div>
     </Layout>
   );

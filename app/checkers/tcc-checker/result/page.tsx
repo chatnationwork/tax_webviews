@@ -107,7 +107,7 @@ function TccResultContent() {
           Check Another
         </Button>
 
-        <ResultActions phone={phone} />
+        <ResultActions phone={phone} journey="TCC Checker" />
       </div>
     </Layout>
   );

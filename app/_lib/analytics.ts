@@ -9,6 +9,8 @@ export interface AnalyticsEvent {
   anonymous_id: string;
   user_id?: string;
   session_id: string;
+  journey_start?: boolean;
+  journey_end?: boolean;
   context: {
     page: {
       path: string;
@@ -30,6 +32,11 @@ export interface AnalyticsBatch {
   batch: AnalyticsEvent[];
   sent_at: string;
   write_key?: string;
+}
+
+export interface TrackOptions {
+  journey_start?: boolean;
+  journey_end?: boolean;
 }
 
 class AnalyticsClient {
@@ -78,7 +85,7 @@ class AnalyticsClient {
   public identify(userId: string, traits?: Record<string, any>) {
     this.userId = userId;
     // We could send an identify event here
-    this.track('identify', traits, 'identify');
+    this.track('identify', traits, { eventType: 'identify' });
   }
 
   public page(name?: string, properties?: Record<string, any>) {
@@ -91,17 +98,44 @@ class AnalyticsClient {
     });
   }
 
-  public track(eventName: string, properties?: Record<string, any>, eventType: 'track' | 'identify' = 'track') {
+  public track(eventName: string, properties?: Record<string, any>, options?: 'track' | 'identify' | TrackOptions | { eventType?: 'track' | 'identify' } & TrackOptions) {
     if (typeof window === 'undefined') return;
+
+    let eventType: 'track' | 'identify' = 'track';
+    let journeyStart = false;
+    let journeyEnd = false;
+
+    // Handle legacy signature (third arg is eventType string)
+    if (typeof options === 'string') {
+        eventType = options as 'track' | 'identify';
+    } else if (typeof options === 'object') {
+        if ('eventType' in options && options.eventType) {
+            eventType = options.eventType;
+        }
+        if ('journey_start' in options && options.journey_start) {
+            journeyStart = true;
+        }
+        if ('journey_end' in options && options.journey_end) {
+            journeyEnd = true;
+        }
+    }
 
     this.sendEvent({
       event_name: eventName,
       event_type: eventType,
-      properties: properties
+      properties: properties,
+      journey_start: journeyStart,
+      journey_end: journeyEnd
     });
   }
 
-  private async sendEvent(baseData: { event_name: string, event_type: 'page' | 'track' | 'identify', properties?: Record<string, any> }) {
+  private async sendEvent(baseData: { 
+    event_name: string, 
+    event_type: 'page' | 'track' | 'identify', 
+    properties?: Record<string, any>,
+    journey_start?: boolean,
+    journey_end?: boolean
+  }) {
     if (!this.initialized && !this.writeKey) {
         // Warn or silently fail? Silent fail for now or auto-init if env var exists
         console.warn('Analytics not initialized with write key');
@@ -129,7 +163,9 @@ class AnalyticsClient {
           version: '1.0.0'
         }
       },
-      properties: baseData.properties
+      properties: baseData.properties,
+      journey_start: baseData.journey_start,
+      journey_end: baseData.journey_end
     };
 
     const batch: AnalyticsBatch = {

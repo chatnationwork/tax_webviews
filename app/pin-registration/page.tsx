@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { FileText } from 'lucide-react';
 import { Layout, Button, Card } from '../_components/Layout';
+import { analytics } from '../_lib/analytics';
 import { savePhoneNumber, getPhoneNumber } from './_lib/store';
 import { getKnownPhone, saveKnownPhone } from '../_lib/session-store';
 
@@ -40,6 +41,9 @@ function PinRegistrationContent() {
         router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
         return;
       }
+      
+      // Identify the user
+      analytics.identify(currentPhone);
     }
     
     setIsReady(true);

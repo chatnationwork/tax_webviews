@@ -144,7 +144,7 @@ export default function NitaResultPage() {
             </Button>
           )}
           
-          <ResultActions />
+          <ResultActions journey="NITA Payment" />
         </div>
       </div>
     </Layout>

@@ -146,7 +146,7 @@ export default function TotResultPage() {
             Turn Over Tax
           </button>
 
-          <ResultActions />
+          <ResultActions journey="TOT Filing" />
         </div>
 
       </div>

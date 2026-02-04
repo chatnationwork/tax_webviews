@@ -144,7 +144,7 @@ export default function AhlResultPage() {
             </Button>
           )}
           
-          <ResultActions />
+          <ResultActions journey="AHL Payment" />
         </div>
       </div>
     </Layout>

@@ -95,7 +95,7 @@ function KnowYourStationResultContent() {
             Search Again
           </Button>
 
-          <ResultActions phone={phone} />
+          <ResultActions phone={phone} journey="Know Your Station" />
       </div>
     </Layout>
   );
