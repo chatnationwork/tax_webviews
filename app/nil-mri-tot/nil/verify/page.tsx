@@ -343,7 +343,7 @@ No action is required at this time.`;
                   <p className="text-xs text-red-600">{error}</p>
                 </div>
                 <a
-                  href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '254745050238'}?xtext=${encodeURIComponent('Main menu')}`}
+                  href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER }?xtext=${encodeURIComponent('Main menu')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-medium rounded-lg transition-colors"

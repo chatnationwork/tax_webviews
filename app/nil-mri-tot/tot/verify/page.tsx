@@ -528,7 +528,7 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                 {error}
               </div>
               <a
-                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '254745050238'}?text=${encodeURIComponent('Main menu')}`}
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER }?text=${encodeURIComponent('Main menu')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-medium rounded-lg transition-colors"

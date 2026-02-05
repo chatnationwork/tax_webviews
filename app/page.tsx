@@ -149,7 +149,7 @@ function HomeContent() {
     } else {
        // Connect to Agent logic for unmapped services
        analytics.track("service_agent_connect", { service_name: serviceKey });
-       const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '254745050238';
+       const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
        
        if (phone) {
          try {
