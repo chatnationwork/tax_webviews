@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../_components/Layout';
+import { analytics } from '@/app/_lib/analytics';
 import { Star, CheckCircle, MessageSquare } from 'lucide-react';
-import { analytics } from '../_lib/analytics';
 
 export default function CsatPage() {
   const router = useRouter();
@@ -23,12 +23,15 @@ export default function CsatPage() {
   }
 
   const handleSubmit = async () => {
-    // Track the CSAT event
-    analytics.track('csat_submitted', {
+    // Track feedback submission
+    analytics.track('csat_feedback_submitted', {
       rating,
       feedback,
       journey: journey || 'Unknown'
     });
+    
+    // Here we would typically send the data to the backend
+    // await submitFeedback({ rating, feedback });
     
     // For now, just show success state
     setSubmitted(true);
