@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Layout, Card, Button } from '../_components/Layout';
+import { analytics } from '@/app/_lib/analytics';
 import { Star, CheckCircle, MessageSquare } from 'lucide-react';
 
 export default function CsatPage() {
@@ -13,6 +14,12 @@ export default function CsatPage() {
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async () => {
+    // Track feedback submission
+    analytics.track('csat_feedback_submitted', {
+      rating,
+      feedback
+    });
+    
     // Here we would typically send the data to the backend
     // await submitFeedback({ rating, feedback });
     
