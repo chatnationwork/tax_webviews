@@ -18,6 +18,7 @@ export interface AnalyticsEvent {
   event_id: string;
   event_name: string; // "message.sent"
   event_type: 'track';
+  session_id: string;
   timestamp: string;
   user_id: string; // The phone number
   anonymous_id: string; // effectively the same for server-side mostly
@@ -82,7 +83,7 @@ export async function trackMessageSent(props: WhatsAppAnalyticsProps): Promise<v
     // Construct properties
     const properties: any = {
       message_id: message_id || `temp-${uuidv4()}`, // Fallback if regular ID missing (e.g. error case or mock)
-      from: 'ChatNation-Tax', // Identifier for our system
+      from: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER,
       to: cleanPhone,
       type: message_type,
     };
@@ -112,6 +113,7 @@ export async function trackMessageSent(props: WhatsAppAnalyticsProps): Promise<v
       event_name: 'message.sent',
       event_type: 'track',
       timestamp: new Date().toISOString(),
+      session_id: uuidv4(),
       user_id: cleanPhone,
       anonymous_id: cleanPhone, // Using phone as stable identifier
       context: {
@@ -123,12 +125,12 @@ export async function trackMessageSent(props: WhatsAppAnalyticsProps): Promise<v
     const payload: AnalyticsBatch = {
       batch: [event],
       sent_at: new Date().toISOString(),
-      write_key: process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY
+   
     };
 
     // Fire and forget - minimal await needed? 
     // We await to ensuring it fires before server action closes, but we catch errors.
-    console.log('[Analytics] Sending message.sent event:', event.event_id);
+    console.log('[Analytics] Sending message.sent event:', event.event_id,JSON.stringify(payload));
     
     await axios.post(ANALYTICS_ENDPOINT, payload, {
       headers: {
