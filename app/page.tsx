@@ -35,6 +35,7 @@ const SERVICE_URLS: Record<string, string> = {
   "Staff Check": "/checkers/staff-checker?phone={{phone}}",
   Station: "/checkers/know-your-station?phone={{phone}}",
   "Import Check": "/checkers/import-certificate?phone={{phone}}",
+  Payroll: "https://payroll-tan.vercel.app/?phone={{phone}}",
 };
 
 // Service categories with clearer labels
@@ -113,6 +114,7 @@ const SERVICE_CATEGORIES = [
       { label: "Refund Application", key: "Refund" },
       { label: "Report Fraud", key: "Report Fraud" },
       { label: "View All", key: "More" },
+      {label:"Payroll", key:"Payroll"}
     ],
   },
 ];
