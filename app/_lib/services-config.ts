@@ -1,6 +1,6 @@
 /**
  * Service Configuration
- * 
+ *
  * This file contains metadata for all services that use the confirmation page flow.
  * Services not listed here (e.g., eTIMS, F88) will use direct navigation.
  */
@@ -105,6 +105,13 @@ export const SERVICES_CONFIG: Record<string, ServiceConfig> = {
     name: "PIN Registration",
     description: "Register for a new KRA PIN.",
     targetUrl: "/pin-registration/select-type",
+  },
+  "PIN Retrieve": {
+    key: "PIN Retrieve",
+    name: "PIN Retrieval",
+    description:
+      "Retrieve your forgotten KRA PIN using your National ID number.",
+    targetUrl: "/pin-retrieval",
   },
 };
 
