@@ -866,3 +866,69 @@ export async function sendWhatsAppMessage(
 ): Promise<SendWhatsAppMessageResult> {
   return sharedSendWhatsAppMessage(params);
 }
+
+// ============= Liabilities =============
+
+export interface Liability {
+  FineAmount: string;
+  InterestAmount: string;
+  PenaltyAmount: string;
+  PrincipalAmount: string;
+  TaxPeriodFrom: string;
+  TaxPeriodTo: string;
+  TotalAmount: string;
+}
+
+export interface LiabilitiesResult {
+  success: boolean;
+  liabilities?: Liability[];
+  message?: string;
+  pin?: string;
+  obligationId?: string;
+}
+
+/**
+ * Get taxpayer liabilities
+ */
+export async function getTaxPayerLiabilities(
+  pin: string,
+  obligationId: string
+): Promise<LiabilitiesResult> {
+  try {
+    const headers = await getApiHeaders(true);
+    const response = await axios.get(
+      `${BASE_URL}/tax-payer-liabilities`,
+      {
+        params: {
+          obligation_id: obligationId,
+          tax_payer_pin: pin,
+        },
+        headers
+      }
+    );
+
+    const data = response.data;
+    console.log('Get Liabilities Response:', data);
+
+    if (data.Status === 'OK' || data.ResponseCode === '30000') {
+      return {
+        success: true,
+        liabilities: data.LiabilitiesList || [],
+        message: data.ResponseMsg || 'Liabilities retrieved successfully',
+        pin: data.PinNo,
+        obligationId: data.ObligationId
+      };
+    }
+
+    return {
+      success: false,
+      message: data.ResponseMsg || data.message || 'Failed to retrieve liabilities'
+    };
+  } catch (error: any) {
+    console.error('Get Liabilities Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to retrieve liabilities'
+    };
+  }
+}
