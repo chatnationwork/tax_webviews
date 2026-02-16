@@ -67,11 +67,6 @@ export default function MriResultPage() {
   const mriTax = (taxpayerInfo.rentalIncome * 0.1).toFixed(2);
   const isPayment = taxpayerInfo.paymentType === 'file-and-pay';
 
-  const handleReturnHome = () => {
-    const phone = taxpayerStore.getMsisdn() || getKnownPhone();
-    taxpayerStore.clear();
-    router.push(`/?msisdn=${phone || ''}`);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-4 flex items-center justify-center">

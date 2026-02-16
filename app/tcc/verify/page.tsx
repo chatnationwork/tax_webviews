@@ -48,9 +48,22 @@ export default function TccVerifyPage() {
         return;
       }
 
+      // Ensure PIN is available (use GUI lookup result if local info is missing PIN)
+      let pinToUse = taxpayerInfo.pin;
+      if (!pinToUse && guiResult.pin) {
+         pinToUse = guiResult.pin;
+         // Update store with retrieved PIN to keep it consistent
+         taxpayerStore.setTaxpayerInfo(
+            taxpayerInfo.idNumber,
+            taxpayerInfo.yob,
+            taxpayerInfo.fullName,
+            pinToUse
+         );
+      }
+
       // 2. Submit TCC Application
       const result = await submitTccApplication(
-        taxpayerInfo.pin,
+        pinToUse,
         selectedReason as TccReasonKey
       );
 
