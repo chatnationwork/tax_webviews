@@ -29,6 +29,7 @@ const SERVICE_URLS: Record<string, string> = {
   NITA: "/payments/nita/payment?phone={{phone}}",
   AHL: "/payments/ahl/payment?phone={{phone}}",
   "TCC Application": "/tcc/validation?phone={{phone}}",
+  "PIN Retrieve":"/pin-retrieval?phone={{phone}}",
   "PIN Check": "/checkers/pin-checker?phone={{phone}}",
   "Invoice Check": "/checkers/invoice-checker?phone={{phone}}",
   "TCC Check": "/checkers/tcc-checker?phone={{phone}}",
