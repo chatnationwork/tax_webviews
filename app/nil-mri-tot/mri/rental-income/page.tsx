@@ -341,7 +341,7 @@ If you have rental income in the future, please contact *KRA* to update your tax
              '33', // MRI Obligation
              from,
              to,
-             taxPayable
+             `${calculatedTax}`
           );
 
           if (!prnRes.success || !prnRes.prn) {

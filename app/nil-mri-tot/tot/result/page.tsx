@@ -28,7 +28,7 @@ export default function TotResultPage() {
              let message = `*Turnover Tax Return Filed Successfully*\n\nDear *${info.fullName}*,\nYour TOT Return for *${info.filingPeriod}* has been filed.\n\nTax Due: KES ${(info.taxAmount || 0).toLocaleString()}`;
              
              if (info.prn && info.paymentType !== 'file-and-pay') {
-                message += `\n\nPayment Reference Number (PRN): *${info.prn}*\nPlease pay via M-Pesa Paybill 222222, Account: ${info.prn}`;
+                message += `\n\nPayment Reference Number (PRN): *${info.prn}*`;
              }
              
              if (info.receiptNumber) {

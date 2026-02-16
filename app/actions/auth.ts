@@ -226,6 +226,25 @@ export async function getStoredPhoneServer(): Promise<string | null> {
     return cookieStore.get('phone_Number')?.value || null;
 }
 
+/**
+ * Save phone number to cookie (server-side)
+ * called when user lands with ?phone=xxx or updates it
+ */
+export async function savePhoneToCookie(phone: string): Promise<void> {
+    const cookieStore = await cookies();
+    const cleanNumber = cleanPhoneNumber(phone);
+    
+    // Store phone number
+    cookieStore.set({
+        name: 'phone_Number', 
+        value: cleanNumber,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: '/',
+    });
+}
+
 // ============= WhatsApp Actions =============
 
 /**

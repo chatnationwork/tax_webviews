@@ -247,14 +247,14 @@ function TotVerifyContent() {
           // Check if PRN was returned from filing (only for file_and_pay and if it was a file action)
           if (action === 'file_and_pay' || action === 'pay_only'){
               const [from, to] = filingPeriod.split(' - ');
-              const taxPayable = (Number(grandTotal) * 0.03).toFixed(2);
+              const taxPayable = `${Number(grandTotal)}`;
     
               const prnRes = await generatePrn(
                  taxpayerInfo.pin,
                  '8', // TOT Obligation
                  from,
                  to,
-                 taxPayable
+                 `${calculatedTax}`
               );
     
              
@@ -299,7 +299,7 @@ function TotVerifyContent() {
                 // Send WhatsApp message with PRN
                 await sendWhatsAppMessage({
                   recipientPhone: storedPhone,
-                  message: `*TOT Return Filed*\n\nYour Turnover Tax return has been filed.\n\nPRN: *${prnValue}*\nAmount: KES ${calculatedTax}\n\nPlease pay via M-Pesa Paybill 222222, Account: ${prnValue}`
+                  message: `*TOT Return Filed*\n\nYour Turnover Tax return has been filed.\n\nPRN: *${prnValue}*\nAmount: KES ${calculatedTax}`
                 });
 
                 router.push('/nil-mri-tot/tot/result');

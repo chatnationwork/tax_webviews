@@ -34,7 +34,7 @@ export default function MriResultPage() {
              let message = `*MRI Return Filed Successfully*\n\nDear *${info.fullName}*,\nYour Monthly Rental Income Return for *${info.filingPeriod}* has been filed.\n\nTax Due: KES ${mriTax}`;
              
              if (info.prn && info.paymentType !== 'file-and-pay') {
-                message += `\n\nPayment Reference Number (PRN): *${info.prn}*\nPlease pay via M-Pesa Paybill 222222, Account: ${info.prn}`;
+                message += `\n\nPayment Reference Number (PRN): *${info.prn}*`;
              }
              
              if (info.receiptNumber) {

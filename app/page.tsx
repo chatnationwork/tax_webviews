@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { shouldUseConfirmation } from "@/app/_lib/services-config";
 import { analytics } from "@/app/_lib/analytics";
 import { saveKnownPhone } from "@/app/_lib/session-store";
+import { savePhoneToCookie } from "@/app/actions/auth";
 
 // Service URL mappings - maps service names to their external URLs
 // {{phone}} will be replaced with the actual phone number of the user
@@ -132,6 +133,7 @@ function HomeContent() {
   useEffect(() => {
     if (phone) {
       saveKnownPhone(phone);
+      savePhoneToCookie(phone);
     }
   }, [phone]);
 
