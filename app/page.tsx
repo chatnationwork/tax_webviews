@@ -9,7 +9,7 @@ import { saveKnownPhone } from "@/app/_lib/session-store";
 // Service URL mappings - maps service names to their external URLs
 // {{phone}} will be replaced with the actual phone number of the user
 const SERVICE_URLS: Record<string, string> = {
-  // https://ecitizen-test.kra.go.ke/etims/?phone=254702438822
+  // //https://ecitizen-test.kra.go.ke/etims/?phone=254702438822
   // eTIMS Invoicing
   "Sales Invoice": "/etims/auth?phone={{phone}}",
   "Credit Note": "/etims/auth?phone={{phone}}",
