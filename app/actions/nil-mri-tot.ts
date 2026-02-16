@@ -482,6 +482,18 @@ export async function fileMriReturn(
     );
 
     const data = response.data;
+    console.log('File MRI Return Response:', data);
+
+
+    if (data.response && (data.response.Status === 'OK' || data.response.ResponseCode === '87000')) {
+        return {
+            success: true,
+            code: 200,
+            message: data.response.Message || 'MRI Return filed successfully',
+            receiptNumber: data.response.AckNumber || data.kra_account_number,
+            prn: data.response.PRN || data.prn
+        };
+    }
     
     return {
       success: data.code === 1 || data.code === 200 || data.success === true,
