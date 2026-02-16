@@ -485,13 +485,14 @@ export async function fileMriReturn(
     console.log('File MRI Return Response:', data);
 
 
-    if (data.response && (data.response.Status === 'OK' || data.response.ResponseCode === '87000')) {
+    if (data.response && (data.response.Status === 'OK' || data.response.ResponseCode === '88000')) {
         return {
             success: true,
             code: 200,
             message: data.response.Message || 'MRI Return filed successfully',
             receiptNumber: data.response.AckNumber || data.kra_account_number,
-            prn: data.response.PRN || data.prn
+            prn: data.response.PRN || data.prn,
+            taxDue: data.tax_due || data.response.TaxPayable
         };
     }
     
@@ -500,6 +501,7 @@ export async function fileMriReturn(
       code: data.code || 200,
       message: data.message || 'MRI Return filed successfully',
       receiptNumber: data.receipt_number || data.receiptNumber || `MRI-${Date.now()}`,
+      taxDue: data.tax_due
     };
   } catch (error: any) {
     console.error('File MRI Return Error:', error.response?.data || error.message);
