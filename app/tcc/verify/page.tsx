@@ -29,18 +29,12 @@ export default function TccVerifyPage() {
     }
   }, [router]);
 
-  const handleSubmit = async () => {
-    if (!selectedReason) {
-      setError('Please select a reason for application');
-      return;
-    }
-    
-    setLoading(true);
-    setError('');
-    
-    try {
-      // 1. GUI Lookup for verification
-      const guiResult = await guiLookup(taxpayerInfo.idNumber);
+  useEffect(() => {
+    getGUIPin();
+  }, [taxpayerInfo]);
+
+  const getGUIPin = async () => {
+     const guiResult = await guiLookup(taxpayerInfo.idNumber);
       
       if (!guiResult.success) {
         setError(guiResult.error || 'Taxpayer verification failed');
@@ -53,17 +47,27 @@ export default function TccVerifyPage() {
       if (!pinToUse && guiResult.pin) {
          pinToUse = guiResult.pin;
          // Update store with retrieved PIN to keep it consistent
-         taxpayerStore.setTaxpayerInfo(
-            taxpayerInfo.idNumber,
-            taxpayerInfo.yob,
-            taxpayerInfo.fullName,
-            pinToUse
-         );
+         setTaxpayerInfo({
+            ...taxpayerInfo,
+            pin: pinToUse
+         });
       }
+    
+  }
 
+  const handleSubmit = async () => {
+    if (!selectedReason) {
+      setError('Please select a reason for application');
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+    
+    try {
       // 2. Submit TCC Application
       const result = await submitTccApplication(
-        pinToUse,
+        taxpayerInfo.pin,
         selectedReason as TccReasonKey
       );
 
