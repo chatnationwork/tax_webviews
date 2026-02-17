@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import { Layout, IdentityStrip, Button, Input, Card, TotalsCard } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { fileTotReturn, getTaxpayerObligations, getFilingPeriods, generatePrn, makePayment, getStoredPhone, sendWhatsAppMessage, calculateTax } from '@/app/actions/nil-mri-tot';
+import { fileTotReturn, getTaxpayerObligations, getFilingPeriods, generatePrn, makePayment, getStoredPhone, sendWhatsAppMessage, calculateTax, getTaxPayerLiabilities } from '@/app/actions/nil-mri-tot';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { analytics } from '@/app/_lib/analytics';
 import { getKnownPhone } from '@/app/_lib/session-store';
@@ -158,6 +158,27 @@ function TotVerifyContent() {
 
     checkObligationAndFetchPeriods();
   }, [taxpayerInfo?.pin, mounted, filingMode]);
+
+  const handleGetLiabilities = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+       const result = await getTaxPayerLiabilities(taxpayerInfo.pin, totObligationCode); 
+       
+       if (result.success && result.liabilities) {
+           (taxpayerStore as any).setLiabilities(result.liabilities);
+           router.push('/nil-mri-tot/liabilities/result');
+       } else {
+           setError(result.message || 'Failed to fetch payment summary');
+       }
+    } catch (e: any) {
+        console.error(e);
+        setError(e.message || 'An error occurred while fetching liabilities');
+    } finally {
+        setLoading(false);
+    }
+  };
 
   // Set filing period based on mode
   useEffect(() => {
@@ -599,6 +620,16 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                   </Button>
                </div>
              ) : null}
+
+              <Button
+                  onClick={handleGetLiabilities}
+                  disabled={loading}
+                  variant="secondary"
+                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 mt-2"
+              >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Get Payment Summary
+              </Button>
           </div>
       </div>
     </Layout>

@@ -18,6 +18,7 @@ class TaxpayerStore {
     filingPeriod?: string;
     error?: string;
     successMessage?: string;
+    liabilities?: any[];
   } = {
     msisdn: '',
     idNumber: '',
@@ -99,7 +100,16 @@ class TaxpayerStore {
       fullName: '',
       pin: '',
       filingYear: new Date().getFullYear(),
+      liabilities: [],
     };
+  }
+  
+  setLiabilities(liabilities: any[]) {
+      this.data.liabilities = liabilities;
+  }
+
+  getLiabilities() {
+      return this.data.liabilities;
   }
 }
 

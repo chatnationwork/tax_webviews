@@ -14,7 +14,8 @@ import {
   makePayment, 
   getStoredPhone,
   sendWhatsAppMessage,
-  calculateTax
+  calculateTax,
+  getTaxPayerLiabilities
 } from '@/app/actions/nil-mri-tot';
 import { Layout, Card, IdentityStrip, Input, Button, TotalsCard } from '@/app/_components/Layout';
 import { analytics } from '@/app/_lib/analytics';
@@ -173,6 +174,27 @@ function MriRentalIncomeContent() {
 
     checkObligationAndFetchData();
   }, [taxpayerInfo?.pin, mounted]);
+
+  const handleGetLiabilities = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+       const result = await getTaxPayerLiabilities(taxpayerInfo.pin, '8'); // Using 8 (TOT) as per request
+       
+       if (result.success && result.liabilities) {
+           (taxpayerStore as any).setLiabilities(result.liabilities);
+           router.push('/nil-mri-tot/liabilities/result');
+       } else {
+           setError(result.message || 'Failed to fetch payment summary');
+       }
+    } catch (e: any) {
+        console.error(e);
+        setError(e.message || 'An error occurred while fetching liabilities');
+    } finally {
+        setLoading(false);
+    }
+  };
 
   const handleBack = () => {
     const targetUrl = `/nil-mri-tot/mri/validation${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`;
@@ -602,6 +624,16 @@ If you have rental income in the future, please contact *KRA* to update your tax
                 )}
               </>
             )}
+            
+            <Button
+                onClick={handleGetLiabilities}
+                disabled={loading}
+                variant="secondary"
+                className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 mt-2"
+            >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                Get Payment Summary
+            </Button>
         </div>
       </div>
     </Layout>

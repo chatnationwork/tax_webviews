@@ -483,15 +483,17 @@ export async function fileMriReturn(
 
     const data = response.data;
     console.log('File MRI Return Response:', data);
+  
 
 
-    if (data.response && (data.response.Status === 'OK' || data.response.ResponseCode === '87000')) {
+    if (data.response && (data.response.Status === 'OK' || data.response.ResponseCode === '88000')) {
         return {
             success: true,
             code: 200,
             message: data.response.Message || 'MRI Return filed successfully',
             receiptNumber: data.response.AckNumber || data.kra_account_number,
-            prn: data.response.PRN || data.prn
+            prn: data.response.PRN || data.prn,
+            taxDue: data.tax_due || data.response.TaxPayable
         };
     }
     
@@ -500,6 +502,7 @@ export async function fileMriReturn(
       code: data.code || 200,
       message: data.message || 'MRI Return filed successfully',
       receiptNumber: data.receipt_number || data.receiptNumber || `MRI-${Date.now()}`,
+      taxDue: data.tax_due
     };
   } catch (error: any) {
     console.error('File MRI Return Error:', error.response?.data || error.message);
@@ -863,4 +866,70 @@ export async function sendWhatsAppMessage(
   params: SendWhatsAppMessageParams
 ): Promise<SendWhatsAppMessageResult> {
   return sharedSendWhatsAppMessage(params);
+}
+
+// ============= Liabilities =============
+
+export interface Liability {
+  FineAmount: string;
+  InterestAmount: string;
+  PenaltyAmount: string;
+  PrincipalAmount: string;
+  TaxPeriodFrom: string;
+  TaxPeriodTo: string;
+  TotalAmount: string;
+}
+
+export interface LiabilitiesResult {
+  success: boolean;
+  liabilities?: Liability[];
+  message?: string;
+  pin?: string;
+  obligationId?: string;
+}
+
+/**
+ * Get taxpayer liabilities
+ */
+export async function getTaxPayerLiabilities(
+  pin: string,
+  obligationId: string
+): Promise<LiabilitiesResult> {
+  try {
+    const headers = await getApiHeaders(true);
+    const response = await axios.get(
+      `${BASE_URL}/tax-payer-liabilities`,
+      {
+        params: {
+          obligation_id: obligationId,
+          tax_payer_pin: pin,
+        },
+        headers
+      }
+    );
+
+    const data = response.data;
+    console.log('Get Liabilities Response:', data);
+
+    if (data.Status === 'OK' || data.ResponseCode === '30000') {
+      return {
+        success: true,
+        liabilities: data.LiabilitiesList || [],
+        message: data.ResponseMsg || 'Liabilities retrieved successfully',
+        pin: data.PinNo,
+        obligationId: data.ObligationId
+      };
+    }
+
+    return {
+      success: false,
+      message: data.ResponseMsg || data.message || 'Failed to retrieve liabilities'
+    };
+  } catch (error: any) {
+    console.error('Get Liabilities Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to retrieve liabilities'
+    };
+  }
 }

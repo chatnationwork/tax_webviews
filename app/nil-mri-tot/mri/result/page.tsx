@@ -1,12 +1,12 @@
 'use client';
-import { useRouter } from 'next/navigation';
-import { CheckCircle, MessageCircle, AlertCircle } from 'lucide-react';
-import { taxpayerStore } from '../../_lib/store';
-import { WhatsAppButton } from '../../../_components/QuickMenu';
-import { ResultActions } from '../../../_components/ResultActions';
 
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Layout, Card } from '../../../_components/Layout';
+import { ResultActions } from '../../../_components/ResultActions';
+import { taxpayerStore } from '../../_lib/store';
+import { CheckCircle, AlertCircle } from 'lucide-react';
 import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
-import { useState, useEffect } from 'react';
 import { getKnownPhone } from '@/app/_lib/session-store';
 
 export default function MriResultPage() {
@@ -18,7 +18,7 @@ export default function MriResultPage() {
     const info = taxpayerStore.getTaxpayerInfo();
     setTaxpayerInfo(info);
     
-    // Redirect if no data (handled in separate effect or logic, but keeping existing check)
+    // Redirect if no data
     if (!info.rentalIncome && typeof window !== "undefined") {
        router.push('/nil-mri-tot/mri/validation');
        return;
@@ -67,94 +67,94 @@ export default function MriResultPage() {
   const mriTax = (taxpayerInfo.rentalIncome * 0.1).toFixed(2);
   const isPayment = taxpayerInfo.paymentType === 'file-and-pay';
 
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-4 flex items-center justify-center">
-      <div className="max-w-lg w-full">
-        <div className="bg-white rounded-xl p-8 shadow-lg">
-          
-          {taxpayerInfo.error ? (
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <AlertCircle className="w-10 h-10 text-red-600" />
-                </div>
-                <h1 className="text-red-900 mb-4 text-xl font-bold">Filing Failed</h1>
-                <p className="text-red-800 bg-red-50 p-4 rounded-lg border border-red-200 text-sm">
+    <Layout title={taxpayerInfo?.error ? "Filing Error" : "Success"} showHeader={false}>
+      <div className="space-y-4">
+        {taxpayerInfo.error ? (
+           <Card className="bg-red-50 border-red-200 text-center py-8">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center shadow-sm">
+                <AlertCircle className="w-10 h-10 text-red-600" />
+              </div>
+              
+              <div>
+                <h2 className="text-red-900 text-xl font-bold mb-2">Filing Failed</h2>
+                <p className="text-sm text-red-800 px-4">
                   {taxpayerInfo.error}
                 </p>
+              </div>
             </div>
-          ) : (
-             <>
-                <div className="text-center mb-6">
-                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle className="w-10 h-10 text-green-600" />
-                    </div>
-
-                    <h1 className="text-green-900 text-xl font-bold mb-2">
-                    Monthly Rental Income Return Submitted Successfully
-                    </h1>
-                </div>
-
-                <div className="p-6 bg-green-50 border border-green-200 rounded-lg mb-6">
-                    <div className="space-y-3">
-                    <div className="flex justify-between">
-                        <span className="text-gray-600">Taxpayer:</span>
-                        <span className="text-gray-900 font-semibold text-right">{taxpayerInfo.fullName}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-gray-600">Period:</span>
-                        <span className="text-gray-900 font-semibold">{taxpayerInfo.filingPeriod || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between pt-3 border-t border-green-200">
-                        <span className="text-gray-900 font-bold">Tax Due:</span>
-                        <span className="text-[var(--kra-red)] font-bold">KES {mriTax}</span>
-                    </div>
-                    {isPayment && (
-                        <div className="flex justify-between">
-                        <span className="text-green-800">Amount Paid:</span>
-                        <span className="text-green-800 font-bold">KES {mriTax}</span>
-                        </div>
-                    )}
-                    </div>
-                </div>
-
-                {/* PRN Display for File Only */}
-                {taxpayerInfo.prn && !isPayment && (
-                     <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-6 text-center">
-                        <p className="text-xs text-yellow-800 uppercase font-bold mb-1">Payment Reference Number (PRN)</p>
-                        <p className="text-xl font-mono text-gray-900 font-bold tracking-wider">{taxpayerInfo.prn}</p>
-                        <p className="text-sm text-yellow-700 mt-2">Please pay KES {mriTax} using this PRN</p>
-                     </div>
-                )}
-             </>
-          )}
-
-
-          {!taxpayerInfo.error && (
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-6 flex items-center gap-3">
-               
-                    <MessageCircle className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                    <p className="text-blue-800">WhatsApp confirmation sent to your number</p>
+          </Card>
+        ) : (
+          <Card className="bg-green-50 border-green-200 text-center py-8">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center shadow-sm">
+                <CheckCircle className="w-10 h-10 text-green-600" />
+              </div>
               
+              <div>
+                <h2 className="text-green-900 text-xl font-bold mb-4">Monthly Rental Income Return Submitted Successfully</h2>
+                
+                <div className="w-full text-left space-y-3 bg-white/60 p-4 rounded-lg border border-green-100">
+                  <div className="flex justify-between items-start border-b border-green-100 pb-2">
+                    <span className="text-sm text-gray-600">Taxpayer</span>
+                    <span className="text-sm font-semibold text-gray-900 text-right">{taxpayerInfo.fullName}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-start border-b border-green-100 pb-2">
+                     <span className="text-sm text-gray-600">Period</span>
+                     <span className="text-sm font-semibold text-gray-900 text-right">{taxpayerInfo.filingPeriod || 'N/A'}</span>
+                  </div>
+                  
+                   <div className="flex justify-between items-start border-b border-green-100 pb-2">
+                     <span className="text-sm text-gray-600">Tax Due</span>
+                     <span className="text-sm font-bold text-[var(--kra-red)] text-right">KES {mriTax}</span>
+                  </div>
+
+                  {isPayment && (
+                    <div className="flex justify-between items-start">
+                      <span className="text-sm text-green-800">Amount Paid</span>
+                      <span className="text-sm font-bold text-green-800 text-right">KES {mriTax}</span>
+                    </div>
+                  )}
+                </div>
+  
+                {/* PRN Display */}
+                {taxpayerInfo.prn && !isPayment && (
+                  <div className="mt-4 block">
+                      <div className="bg-yellow-50 px-4 py-3 rounded-lg border border-yellow-200">
+                          <p className="text-xs text-yellow-800 uppercase font-bold mb-1">Payment Reference Number (PRN)</p>
+                          <p className="text-xl font-mono text-gray-900 font-bold tracking-wider">{taxpayerInfo.prn}</p>
+                          <p className="text-xs text-yellow-700 mt-2">Please pay KES {mriTax} using this PRN</p>
+                      </div>
+                  </div>
+                )}
+              </div>
+  
+              <p className="text-xs text-green-700 bg-green-100/50 px-4 py-2 rounded-full">
+                Confirmation sent to whatsapp
+              </p>
             </div>
-          )}
+          </Card>
+        )}
 
-          {/* Action Buttons */}
-          <div className="space-y-3 pt-2">
-            <button
-              onClick={() => {
-                const phone = taxpayerStore.getMsisdn() || getKnownPhone();
-                router.push(`/nil-mri-tot/mri/validation${phone ? `?phone=${phone}` : ''}`);
-              }}
-              className="w-full py-3 text-white bg-[var(--kra-red)] hover:bg-red-700 rounded-lg text-sm font-medium transition-colors shadow-sm"
-            >
-              Rental Income
-            </button>
+        {/* Action Buttons */}
+        <div className="space-y-3 pt-2">
+          
+          <button 
+            onClick={() => {
+               const phone = taxpayerStore.getMsisdn() || getKnownPhone();
+               router.push(`/nil-mri-tot/mri/validation${phone ? `?phone=${phone}` : ''}`);
+            }}
+            className="w-full py-3 text-white bg-[var(--kra-red)] hover:bg-red-700 rounded-lg text-sm font-medium transition-colors shadow-sm"
+          >
+            Rental Income
+          </button>
 
-            <ResultActions journey="MRI Filing" />
-          </div>
+          <ResultActions journey="MRI Filing" />
         </div>
+
       </div>
-    </div>
+    </Layout>
   );
 }
