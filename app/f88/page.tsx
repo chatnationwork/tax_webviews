@@ -383,6 +383,10 @@ const DeclarationModal = ({ isOpen, onClose, declarationType, onSave }: any) => 
         newErrors[field] = 'Required';
       }
     });
+
+    if (config.fields.includes('file') && !formData.file) {
+      newErrors.file = 'Attachment is required';
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -626,7 +630,7 @@ const DeclarationModal = ({ isOpen, onClose, declarationType, onSave }: any) => 
             {config.fields.includes('file') && (
               <div>
                 <label className="block text-xs font-medium mb-1">Attachment</label>
-                <div className="border border-dashed border-gray-300 rounded p-3 text-center">
+                <div className={`border border-dashed rounded p-3 text-center ${errors.file ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}>
                   <input
                     type="file"
                     id="file-upload"
@@ -635,12 +639,13 @@ const DeclarationModal = ({ isOpen, onClose, declarationType, onSave }: any) => 
                     accept=".pdf,.jpg,.jpeg,.png"
                   />
                   <label htmlFor="file-upload" className="cursor-pointer">
-                    <Upload className="w-6 h-6 mx-auto text-gray-400 mb-1" />
+                    <Upload className={`w-6 h-6 mx-auto mb-1 ${errors.file ? 'text-red-400' : 'text-gray-400'}`} />
                     <p className="text-xs text-gray-500">
                       {file ? <span className="text-green-600">{file.name}</span> : 'Click to upload'}
                     </p>
                   </label>
                 </div>
+                {errors.file && <p className="text-red-500 text-xs mt-1">{errors.file}</p>}
               </div>
             )}
           </div>
@@ -691,6 +696,7 @@ const PassengerInformation = () => {
     if (!formData.phone) newErrors.phone = 'Required';
     if (!formData.email) newErrors.email = 'Required';
     if (!formData.physicalAddress) newErrors.physicalAddress = 'Required';
+    if (!formData.hotelResidence) newErrors.hotelResidence = 'Required';
     
     // KRA PIN OTP validation - if OTP was sent, it must be verified
     if (formData.citizenship === 'Kenyan' && formData.kraPin && otpSent && !otpVerified) {
@@ -947,7 +953,7 @@ const PassengerInformation = () => {
                   <input
                     type="text"
                     value={otpValue}
-                    onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    onChange={(e) => setOtpValue(e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6))}
                     placeholder="Enter 6-digit OTP"
                     className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
                     maxLength={6}
@@ -1012,13 +1018,14 @@ const PassengerInformation = () => {
             {errors.email && <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>}
           </div>
           <div>
-            <label className="block text-xs font-medium mb-1">Hotel/Residence</label>
+            <label className="block text-xs font-medium mb-1">Hotel/Residence <span className="text-red-500">*</span></label>
             <input
               type="text"
               value={formData.hotelResidence}
               onChange={(e) => updateFormData({ hotelResidence: e.target.value })}
               className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
             />
+            {errors.hotelResidence && <p className="text-red-500 text-xs mt-0.5">{errors.hotelResidence}</p>}
           </div>
           <div>
             <label className="block text-xs font-medium mb-1">Address in Kenya <span className="text-red-500">*</span></label>
