@@ -37,7 +37,7 @@ const SERVICE_URLS: Record<string, string> = {
   "Staff Check": "/checkers/staff-checker?phone={{phone}}",
   Station: "/checkers/know-your-station?phone={{phone}}",
   "Import Check": "/checkers/import-certificate?phone={{phone}}",
-  Payroll: "https://payroll-tan.vercel.app/?phone={{phone}}",
+  Payroll: "/payroll?phone={{phone}}",
 };
 
 // Service categories with clearer labels

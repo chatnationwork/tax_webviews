@@ -65,11 +65,6 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
          return;
       }
 
-      // Get msisdn before clearing so user can easily re-login
-      const session = typeof window !== 'undefined' ? sessionStorage.getItem('etims_user_session') : null;
-      
-
-      
       analytics.track('logout_click');
       clearUserSession();
       sessionStorage.clear();

@@ -14,9 +14,13 @@ const isPathPublic = (pathname: string | null) => {
   if (pathname.startsWith('/etims') && 
       !pathname.startsWith('/etims/auth') && 
       !pathname.startsWith('/etims/help')
+      
   ) {
     return false;
   }
+
+  if (pathname.startsWith('/payroll')) return false;
+  
   
   return true;
 };
