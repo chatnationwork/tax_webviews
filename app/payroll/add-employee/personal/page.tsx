@@ -7,6 +7,7 @@ import { Layout, Card, Button, Input, Select } from '../../../_components/Layout
 import {payrollStore } from '../../../_lib/payroll-store';
 import { getStoredPhoneServer } from '@/app/actions/auth';
 import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
+import { lookupById } from '@/app/actions/payroll';
 
 function PersonalInfoContent() {
   const router = useRouter();
@@ -73,7 +74,7 @@ function PersonalInfoContent() {
     setError('');
   };
 
-  const handleContinue = () => {
+  const handleContinue = async() => {
     // Validation
     if (!formData.idNumber.trim()) {
       setError('ID/Passport number is required');
@@ -85,6 +86,14 @@ function PersonalInfoContent() {
     }
     if (!formData.firstName.trim()) {
       setError('First name is required');
+      return;
+    }
+
+    //lookup the user 
+    const response= await lookupById(formData.idNumber,formData.kraPin,formData.firstName,phone)
+
+    if (!response.success) {
+      setError(response.error || "Information mismatch");
       return;
     }
 

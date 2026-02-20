@@ -2,6 +2,8 @@
 
 import axios from 'axios';
 import { cookies } from 'next/headers';
+import { cleanPhoneNumber } from '../_lib/utils';
+import { guiLookup, LookupByIdResult } from './nil-mri-tot';
 
 const BASE_URL = process.env.API_URL;
 const WEBHOOK_URL = 'https://webhook.chatnation.co.ke/webhook/6937dc3730946fd02503d6e9';
@@ -174,6 +176,100 @@ export interface ExportReportResult {
   password: string;
   template: string;
   error?: string;
+}
+
+
+
+/**
+ * Lookup user details by ID number using lookup API
+ */
+export async function lookupById(idNumber: string, given_pin:string,name:string,phoneNumber:string): Promise<LookupByIdResult> {
+  if (!idNumber || idNumber.trim().length < 6) {
+    return { success: false, error: 'ID number must be at least 6 characters' };
+  }
+  if (!given_pin) {
+    return { success: false, error: 'Pin number is required' };
+  }
+  if (!name) {
+    return { success: false, error: 'Name is required' };
+  }
+
+  // Clean phone number
+  const cleanNumber = cleanPhoneNumber(phoneNumber);
+
+  console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber);
+ const token = await getAuthToken();
+  try {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    };
+    const response = await axios.post(
+      `${BASE_URL}/id-lookup`,
+      { 
+        id_number: idNumber.trim(),
+        msisdn: cleanNumber
+      },
+      { 
+        headers, 
+        timeout: 30000 
+      }
+    );
+
+    console.log('ID lookup response:', JSON.stringify(response.data, null, 2));
+
+    // Check if we got a valid response with data
+    if (response.data && response.data.name && response.data.yob) {
+      
+      // Validate name
+  const returnedName = response.data.name
+      const firstName=returnedName.split(' ')[0];
+
+      if (name && (firstName.toLowerCase() !== name.toLowerCase())) {
+        return {
+          success: false,
+          error: `Some of your information didnt match. Please check your details and try again`
+        };
+      }
+
+      let pin = response.data.pin;
+      
+      // FALLBACK: If PIN is missing, try GUI lookup
+      if (!pin) {
+        console.log('PIN missing in primary lookup, attempting GUI lookup fallback...');
+        const guiResult = await guiLookup(idNumber.trim());
+        if (guiResult.success && guiResult.pin) {
+           pin = guiResult.pin;
+           console.log('PIN retrieved via GUI lookup');
+        } else {
+           console.warn('GUI lookup fallback failed:', guiResult.error);
+        }
+      }
+
+      if (pin !== given_pin) {
+        return {
+          success: false,
+          error: `Some of your information didnt match. Please check your details and try again`
+        };
+      }
+
+      return {
+        success: true,
+        idNumber: response.data.id_number || idNumber.trim(),
+        name: response.data.name,
+        pin: pin,
+      };
+    } else {
+      return { 
+        success: false, 
+        error: response.data.message || 'ID lookup failed or invalid response' 
+      };
+    }
+  } catch (error: any) {
+    console.error('ID lookup error:', error.response?.data || error.message);
+    return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
+  }
 }
 
 // ============= Employee Management =============
