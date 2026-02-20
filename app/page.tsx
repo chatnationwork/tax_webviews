@@ -12,9 +12,9 @@ import { savePhoneToCookie } from "@/app/actions/auth";
 const SERVICE_URLS: Record<string, string> = {
   // https://ecitizen-test.kra.go.ke/etims/?phone=254702438822
   // eTIMS Invoicing
-  "Sales Invoice": "/etims/auth?phone={{phone}}",
-  "Credit Note": "/etims/auth?phone={{phone}}",
-  "Buyer-Initiated Invoices": "/etims/auth?phone={{phone}}",
+  "Sales Invoice": "https://ecitizen-test.kra.go.ke/etims/auth?phone={{phone}}",
+  "Credit Note": "https://ecitizen-test.kra.go.ke/etims/auth?phone={{phone}}",
+  "Buyer-Initiated Invoices": "https://ecitizen-test.kra.go.ke/etims/auth?phone={{phone}}",
 
   // Return Filing
   "NIL Filing": "/nil-mri-tot/nil/validation?phone={{phone}}",
