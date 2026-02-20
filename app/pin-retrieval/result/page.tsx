@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Info,
 } from "lucide-react";
+import { analytics } from "@/app/_lib/analytics";
 
 interface PinRetrievalData {
   name: string;
@@ -30,6 +31,8 @@ function PinRetrievalResultContent() {
     const storedResult = sessionStorage.getItem("pinRetrievalResult");
     if (storedResult) {
       setResult(JSON.parse(storedResult));
+      if (phone) analytics.setUserId(phone);
+      analytics.track('pin_retrieval_completed', { success: true }, { journey_end: true });
     } else {
       router.push("/pin-retrieval");
     }

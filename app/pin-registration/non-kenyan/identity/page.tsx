@@ -11,6 +11,7 @@ import { lookupById } from '../../../actions/pin-registration';
 import { Loader2 } from 'lucide-react';
 import { IDInput } from '@/app/_components/KRAInputs';
 import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
+import { analytics } from '@/app/_lib/analytics';
 
 /**
  * Inner content component that uses useSearchParams
@@ -87,6 +88,8 @@ function NonKenyanIdentityContent() {
           firstName: formData.firstName,
           yob: result.yob,
         }));
+        if (phoneNumber) analytics.setUserId(phoneNumber);
+        analytics.track('non_kenyan_pin_registration_started', { id_type: 'alien_id' }, { journey_start: true });
         router.push('/pin-registration/non-kenyan/validate');
       } else {
         setApiError(result.error || 'Validation failed. Please check your details.');

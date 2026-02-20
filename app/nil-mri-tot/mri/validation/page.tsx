@@ -92,7 +92,8 @@ function MriValidationContent() {
         };
         // Save to store
         taxpayerStore.setTaxpayerInfo(idNumber, parseInt(yob), taxpayer.fullName, taxpayer.pin);
-        analytics.track('validation_success', { obligation_type: 'mri' });
+        if (phone) analytics.setUserId(phone);
+        analytics.track('mri_validation_success', { obligation_type: 'mri' }, { journey_start: true });
         
         // Direct redirect to rental income, skipping obligation check
         const nextUrl = `/nil-mri-tot/mri/rental-income${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`;

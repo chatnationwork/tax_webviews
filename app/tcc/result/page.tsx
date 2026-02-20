@@ -8,6 +8,8 @@ import { ResultActions } from '../../_components/ResultActions';
 import { taxpayerStore } from '../_lib/store';
 import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/tcc';
 import { AlertCircle, CheckCircle } from 'lucide-react';
+import { analytics } from '@/app/_lib/analytics';
+import { getKnownPhone } from '@/app/_lib/session-store';
 
 export default function TccResultPage() {
   const router = useRouter();
@@ -45,7 +47,17 @@ export default function TccResultPage() {
 
     if (!mounted) {
        setMounted(true);
-       sendNotification();
+       
+       const runAfterMount = async () => {
+         await sendNotification();
+
+         // Fire journey end event for TCC application
+         const phone = await getStoredPhone() || getKnownPhone();
+         if (phone) analytics.setUserId(phone);
+         analytics.track('tcc_application_completed', { success: !tcc.error }, { journey_end: true });
+       };
+
+       runAfterMount();
     }
   }, [mounted]);
 

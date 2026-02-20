@@ -7,6 +7,7 @@ import { Loader2, UserCheck } from 'lucide-react';
 import { checkSession, getStoredPhone, initSession, checkStaff } from '@/app/actions/checkers';
 import { IDInput } from '@/app/_components/KRAInputs';
 import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
+import { analytics } from '@/app/_lib/analytics';
 
 function StaffCheckerContent() {
   const router = useRouter();
@@ -74,6 +75,8 @@ function StaffCheckerContent() {
       
       if (result.success && result.data) {
         sessionStorage.setItem('staffCheckerResult', JSON.stringify(result.data));
+        if (phone) analytics.setUserId(phone);
+        analytics.track('staff_checker_started', { national_id: nationalId }, { journey_start: true });
         router.push(`/checkers/staff-checker/result?phone=${encodeURIComponent(phone)}`);
       } else {
         setError(result.error || 'Staff validation failed');

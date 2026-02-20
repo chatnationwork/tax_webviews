@@ -6,6 +6,7 @@ import { Layout, Card, Button, Input } from '../../_components/Layout';
 import { Loader2, FileCheck } from 'lucide-react';
 import { checkSession, getStoredPhone, initSession, checkImportCertificate } from '@/app/actions/checkers';
 import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
+import { analytics } from '@/app/_lib/analytics';
 
 function ImportCertificateContent() {
   const router = useRouter();
@@ -73,6 +74,8 @@ function ImportCertificateContent() {
       
       if (result.success && result.data) {
         sessionStorage.setItem('importCertResult', JSON.stringify(result.data));
+        if (phone) analytics.setUserId(phone);
+        analytics.track('import_certificate_checker_started', { certificate_no: certificateNo.trim() }, { journey_start: true });
         router.push(`/checkers/import-certificate/result?phone=${encodeURIComponent(phone)}`);
       } else {
         setError(result.error || 'Import certificate validation failed');

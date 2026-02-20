@@ -7,6 +7,7 @@ import { Loader2, Search } from 'lucide-react';
 import { checkSession, getStoredPhone, initSession, checkPin } from '@/app/actions/checkers';
 import { PINInput } from '@/app/_components/KRAInputs';
 import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
+import { analytics } from '@/app/_lib/analytics';
 
 function PinCheckerContent() {
   const router = useRouter();
@@ -78,8 +79,9 @@ function PinCheckerContent() {
       const result = await checkPin(pinNumber);
       
       if (result.success && result.data) {
-        // Store result and navigate to result page
         sessionStorage.setItem('pinCheckerResult', JSON.stringify(result.data));
+        if (phone) analytics.setUserId(phone);
+        analytics.track('pin_checker_started', { pin: pinNumber }, { journey_start: true });
         router.push(`/checkers/pin-checker/result?phone=${encodeURIComponent(phone)}`);
       } else {
         setError(result.error || 'PIN validation failed');

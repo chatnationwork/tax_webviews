@@ -7,6 +7,7 @@ import { Loader2, Shield } from 'lucide-react';
 import { checkSession, getStoredPhone, initSession, checkTcc } from '@/app/actions/checkers';
 import { PINInput } from '@/app/_components/KRAInputs';
 import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
+import { analytics } from '@/app/_lib/analytics';
 
 function TccCheckerContent() {
   const router = useRouter();
@@ -76,6 +77,8 @@ function TccCheckerContent() {
       
       if (result.success && result.data) {
         sessionStorage.setItem('tccCheckerResult', JSON.stringify(result.data));
+        if (phone) analytics.setUserId(phone);
+        analytics.track('tcc_checker_started', { pin: kraPin, tcc_number: tccNumber.trim() }, { journey_start: true });
         router.push(`/checkers/tcc-checker/result?phone=${encodeURIComponent(phone)}`);
       } else {
         setError(result.error || 'TCC validation failed');

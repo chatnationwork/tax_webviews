@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { ResultActions } from '../../../_components/ResultActions';
 import { Loader2, CheckCircle, User, IdCard, MapPin, Building, Activity } from 'lucide-react';
+import { analytics } from '@/app/_lib/analytics';
 
 interface StaffResult {
   otherNames: string;
@@ -26,6 +27,8 @@ function StaffResultContent() {
     const storedResult = sessionStorage.getItem('staffCheckerResult');
     if (storedResult) {
       setResult(JSON.parse(storedResult));
+      if (phone) analytics.setUserId(phone);
+      analytics.track('staff_checker_completed', { success: true }, { journey_end: true });
     } else {
       router.push('/checkers/staff-checker');
     }

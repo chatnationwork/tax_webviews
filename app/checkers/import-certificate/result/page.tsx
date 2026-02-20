@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { ResultActions } from '../../../_components/ResultActions';
 import { Loader2, CheckCircle, FileText, Calendar, Activity } from 'lucide-react';
+import { analytics } from '@/app/_lib/analytics';
 
 interface ImportCertResult {
   certificateNo: string;
@@ -23,6 +24,8 @@ function ImportCertResultContent() {
     const storedResult = sessionStorage.getItem('importCertResult');
     if (storedResult) {
       setResult(JSON.parse(storedResult));
+      if (phone) analytics.setUserId(phone);
+      analytics.track('import_certificate_checker_completed', { success: true }, { journey_end: true });
     } else {
       router.push('/checkers/import-certificate');
     }

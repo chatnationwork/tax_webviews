@@ -7,6 +7,7 @@ import { getStoredPhone, generateNitaPayment, makePayment, sendWhatsAppMessage }
 import { taxpayerStore } from '../../_lib/store';
 import { Layout, Card, Button, Input } from '../../../_components/Layout';
 import { PINInput } from '@/app/_components/KRAInputs';
+import { analytics } from '@/app/_lib/analytics';
 
 function NitaPaymentContent() {
   const router = useRouter();
@@ -158,6 +159,9 @@ function NitaPaymentContent() {
         
         setPaymentStatus('Payment initiated. Check your phone for M-Pesa prompt.');
         
+        analytics.setUserId(formattedPhone);
+        analytics.track('nita_payment_started', { amount: amountNum, prn: prnRes.prn }, { journey_start: true });
+
         setTimeout(() => {
           router.push('/payments/nita/result');
         }, 2000);

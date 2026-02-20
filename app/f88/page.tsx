@@ -23,6 +23,7 @@ import {
 import { Layout } from '../_components/Layout';
 import { PINInput } from '../_components/KRAInputs';
 import { DateInput } from '../_components/YearOfBirthInput';
+import { analytics } from '../_lib/analytics';
 
 // Form Context
 const FormContext = createContext<any>(null);
@@ -102,6 +103,9 @@ const FormProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (newRefNo) {
         setFormData((prev: any) => ({ ...prev, ref_no: newRefNo }));
+        const phone = formData.phone || formData.phoneNumber;
+        if (phone) analytics.setUserId(phone);
+        analytics.track('f88_declaration_started', { ref_no: newRefNo }, { journey_start: true });
         setCurrentStep(1); // Move to Step 1
       } else {
         setGlobalError("Could not generate a reference number. Please try again.");
@@ -1720,6 +1724,13 @@ const CompletionScreen = () => {
   const [sendingSlip, setSendingSlip] = useState(false);
   const [formSent, setFormSent] = useState(false);
   const [slipSent, setSlipSent] = useState(false);
+
+  // Fire journey end event on mount
+  useEffect(() => {
+    const phone = formData.phone || formData.phoneNumber;
+    if (phone) analytics.setUserId(phone);
+    analytics.track('f88_declaration_completed', { ref_no: formData.ref_no }, { journey_end: true });
+  }, []);
 
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '254780aborx';
 

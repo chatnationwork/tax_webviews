@@ -152,7 +152,8 @@ function NilVerifyContent() {
         // Clear any previous error
         taxpayerStore.setError('');
         
-        analytics.track('return_filed', { 
+        if (phone) analytics.setUserId(phone);
+        analytics.track('nil_return_filed', { 
             return_type: 'nil', 
             obligation: obligationName,
             receipt_number: result.receiptNumber 

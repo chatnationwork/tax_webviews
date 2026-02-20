@@ -88,6 +88,10 @@ class AnalyticsClient {
     this.track('identify', traits, { eventType: 'identify' });
   }
 
+  public setUserId(userId: string) {
+    this.userId = userId;
+  }
+
   public page(name?: string, properties?: Record<string, any>) {
     if (typeof window === 'undefined') return;
 

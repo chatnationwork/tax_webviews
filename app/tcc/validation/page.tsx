@@ -9,6 +9,7 @@ import { lookupById, getStoredPhone } from '@/app/actions/tcc';
 import { taxpayerStore } from '../_lib/store';
 import { Loader2 } from 'lucide-react';
 import { getKnownPhone } from '@/app/_lib/session-store';
+import { analytics } from '@/app/_lib/analytics';
 
 function TccValidationContent() {
   const router = useRouter();
@@ -78,7 +79,8 @@ function TccValidationContent() {
           result.name || '',
           result.pin || ''
         );
-        
+        if (phone) analytics.setUserId(phone);
+        analytics.track('tcc_application_started', { obligation_type: 'tcc' }, { journey_start: true });
         router.push('/tcc/verify');
       } else {
         setError(result.error || 'Validation failed. Please check your details.');

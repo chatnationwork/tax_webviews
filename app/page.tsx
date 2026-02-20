@@ -138,6 +138,7 @@ function HomeContent() {
   }, [phone]);
 
   const handleServiceClick = async (serviceKey: string) => {
+    if (phone) analytics.setUserId(phone);
     analytics.track("service_selected", { service_name: serviceKey });
     const urlTemplate = SERVICE_URLS[serviceKey];
 
@@ -153,6 +154,7 @@ function HomeContent() {
       }
     } else {
        // Connect to Agent logic for unmapped services
+       if (phone) analytics.setUserId(phone);
        analytics.track("service_agent_connect", { service_name: serviceKey });
        const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
        

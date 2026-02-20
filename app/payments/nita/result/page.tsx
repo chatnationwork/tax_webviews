@@ -6,6 +6,8 @@ import { CheckCircle, XCircle, Copy, Check, ExternalLink } from 'lucide-react';
 import { taxpayerStore } from '../../_lib/store';
 import { Layout, Card, Button, IdentityStrip } from '../../../_components/Layout';
 import { ResultActions } from '../../../_components/ResultActions';
+import { analytics } from '@/app/_lib/analytics';
+import { getKnownPhone } from '@/app/_lib/session-store';
 
 export default function NitaResultPage() {
   const router = useRouter();
@@ -16,6 +18,9 @@ export default function NitaResultPage() {
   useEffect(() => {
     const info = taxpayerStore.getTaxpayerInfo();
     setTaxpayerInfo(info);
+    const phone = getKnownPhone();
+    if (phone) analytics.setUserId(phone);
+    analytics.track('nita_payment_completed', { success: info?.paymentStatus === 'success' }, { journey_end: true });
     setMounted(true);
   }, []);
 

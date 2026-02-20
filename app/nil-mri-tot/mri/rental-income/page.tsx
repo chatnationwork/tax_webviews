@@ -322,13 +322,15 @@ If you have rental income in the future, please contact *KRA* to update your tax
         taxpayerStore.setRentalIncome(Number(rentalIncome));
         taxpayerStore.setFilingPeriod(filingPeriod);
         taxpayerStore.setError(result.message || 'Failed to file MRI return');
-        analytics.track('form_submitted', { form_id: 'mri_filing', status: 'failure', error: result.message });
+        if (phone) analytics.setUserId(phone);
+        analytics.track('mri_form_submitted', { form_id: 'mri_filing', status: 'failure', error: result.message });
         router.push('/nil-mri-tot/mri/result');
         setLoading(false);
         return;
       }
 
-      analytics.track('form_submitted', { form_id: 'mri_filing', status: 'success', amount: rentalIncome });
+      if (phone) analytics.setUserId(phone);
+      analytics.track('mri_form_submitted', { form_id: 'mri_filing', status: 'success', amount: rentalIncome });
 
       // If file-only, redirect
       if (!withPayment) {
@@ -340,7 +342,8 @@ If you have rental income in the future, please contact *KRA* to update your tax
              (taxpayerStore as any).setReceiptNumber(result.receiptNumber || '');
           } catch (e) {}
 
-          analytics.track('return_filed', { 
+          if (phone) analytics.setUserId(phone);
+          analytics.track('mri_return_filed', { 
             return_type: 'mri', 
             receipt_number: result.receiptNumber 
           });
@@ -397,11 +400,12 @@ If you have rental income in the future, please contact *KRA* to update your tax
              const payRes = await makePayment(phone, prnRes.prn);
              if (payRes.success) {
                 setPaymentStatus('Payment initiated. Check your phone.');
-                analytics.track('payment_initiated', { 
-                  amount: taxPayable, 
-                  currency: 'KES', 
-                  prn: prnRes.prn 
-                });
+                 if (phone) analytics.setUserId(phone);
+                 analytics.track('mri_payment_initiated', { 
+                   amount: taxPayable, 
+                   currency: 'KES', 
+                   prn: prnRes.prn 
+                 });
                 setTimeout(() => {
                    router.push('/nil-mri-tot/mri/result');
                 }, 2000);

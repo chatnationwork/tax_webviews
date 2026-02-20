@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Layout, Button, SuccessState } from '../../../_components/Layout';
 import { ResultActions } from '../../../_components/ResultActions';
 import { FileDown, Menu, Plus } from 'lucide-react';
+import { analytics } from '@/app/_lib/analytics';
+import { getKnownPhone } from '@/app/_lib/session-store';
 
 export default function KenyanSuccess() {
   const router = useRouter();
@@ -15,6 +17,10 @@ export default function KenyanSuccess() {
     if (stored) {
       setResult(JSON.parse(stored));
     }
+    // Fire journey end event
+    const phone = getKnownPhone();
+    if (phone) analytics.setUserId(phone);
+    analytics.track('kenyan_pin_registration_completed', { success: true }, { journey_end: true });
   }, []);
 
  

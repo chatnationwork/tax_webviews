@@ -8,6 +8,7 @@ import { retrievePinById } from "@/app/actions/pin-retrieval";
 import { IDInput } from "@/app/_components/KRAInputs";
 import { getKnownPhone, saveKnownPhone } from "@/app/_lib/session-store";
 import { getStoredPhone } from "@/app/actions/checkers";
+import { analytics } from "@/app/_lib/analytics";
 
 function PinRetrievalContent() {
   const router = useRouter();
@@ -85,6 +86,8 @@ function PinRetrievalContent() {
           "pinRetrievalResult",
           JSON.stringify(result.data),
         );
+        if (phone) analytics.setUserId(phone);
+        analytics.track('pin_retrieval_started', { id_number: idNumber }, { journey_start: true });
         router.push(`/pin-retrieval/result?phone=${encodeURIComponent(phone)}`);
       } else {
         setError(result.error || "PIN retrieval failed");

@@ -11,6 +11,7 @@ import { getPhoneNumber, saveRegistrationData, savePhoneNumber } from '../../_li
 import { lookupById } from '../../../actions/pin-registration';
 import { Loader2 } from 'lucide-react';
 import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
+import { analytics } from '@/app/_lib/analytics';
 
 /**
  * Inner content component that uses useSearchParams
@@ -90,6 +91,8 @@ function KenyanIdentityContent() {
           }));
         }
         
+        if (phoneNumber) analytics.setUserId(phoneNumber);
+        analytics.track('kenyan_pin_registration_started', { id_type: 'national_id' }, { journey_start: true });
         router.push('/pin-registration/kenyan/validate');
       } else {
         setApiError(result.error || 'Invalid ID number. Please check and try again.');

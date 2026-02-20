@@ -7,6 +7,7 @@ import { getStoredPhone, makePayment } from '@/app/actions/payments';
 import { taxpayerStore } from '../../_lib/store';
 import { Layout, Card, Button, Input } from '../../../_components/Layout';
 import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
+import { analytics } from '@/app/_lib/analytics';
 
 function EslipPaymentContent() {
   const router = useRouter();
@@ -84,6 +85,9 @@ function EslipPaymentContent() {
         
         setPaymentStatus('Payment initiated. Check your phone for M-Pesa prompt.');
         
+        if (phone) analytics.setUserId(phone);
+        analytics.track('eslip_payment_started', { prn: prn.trim() }, { journey_start: true });
+
         setTimeout(() => {
           router.push('/payments/eslip/result');
         }, 2000);

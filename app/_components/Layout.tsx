@@ -52,6 +52,8 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
   };
 
   const handleMenuClick = () => {
+    const phoneToUse = phone || internalPhone || getKnownPhone();
+    if (phoneToUse) analytics.setUserId(phoneToUse);
     analytics.track('main_menu_click');
     const basePage = getBasePage();
     router.push(basePage);
@@ -65,6 +67,8 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
          return;
       }
 
+      const phoneToUse = phone || internalPhone || getKnownPhone();
+      if (phoneToUse) analytics.setUserId(phoneToUse);
       analytics.track('logout_click');
       clearUserSession();
       sessionStorage.clear();
@@ -77,13 +81,15 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
 
   
   const handleConnectAgent = async () => {
-    analytics.track('connect_agent_click');
     const phoneToUse = phone || internalPhone || getKnownPhone();
+    if (phoneToUse) analytics.setUserId(phoneToUse);
+    analytics.track('connect_agent_click');
+    const phoneForConnect = phoneToUse;
     
-    if (phoneToUse) {
+    if (phoneForConnect) {
        // Send interactive message
        try {
-         await sendConnectToAgentMessage(phoneToUse);
+         await sendConnectToAgentMessage(phoneForConnect);
          window.open(`https://wa.me/${whatsappNumber}`, '_blank');
         
        } catch (error) {
@@ -116,8 +122,8 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
               {onBack && (
                 <button
                   onClick={() => {
-                    analytics.track('back_click');
-                    onBack();
+        analytics.track('back_click');
+            onBack();
                   }}
                   className="p-1.5 hover:bg-gray-800 rounded-lg transition-colors"
                   aria-label="Go back"

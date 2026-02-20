@@ -7,6 +7,7 @@ import { Loader2, MapPin } from 'lucide-react';
 import { checkSession, getStoredPhone, initSession, checkPin } from '@/app/actions/checkers';
 import { PINInput } from '@/app/_components/KRAInputs';
 import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
+import { analytics } from '@/app/_lib/analytics';
 
 function KnowYourStationContent() {
   const router = useRouter();
@@ -74,6 +75,8 @@ function KnowYourStationContent() {
       
       if (result.success && result.data) {
         sessionStorage.setItem('knowYourStationResult', JSON.stringify(result.data));
+        if (phone) analytics.setUserId(phone);
+        analytics.track('know_your_station_started', { pin: pinNumber }, { journey_start: true });
         router.push(`/checkers/know-your-station/result?phone=${encodeURIComponent(phone)}`);
       } else {
         setError(result.error || 'Could not find station information');

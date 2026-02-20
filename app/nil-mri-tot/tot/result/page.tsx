@@ -8,6 +8,7 @@ import { taxpayerStore } from '../../_lib/store';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
 import { getKnownPhone } from '@/app/_lib/session-store';
+import { analytics } from '@/app/_lib/analytics';
 
 export default function TotResultPage() {
   const router = useRouter();
@@ -50,6 +51,11 @@ export default function TotResultPage() {
     if (!mounted) {
        setMounted(true);
        sendNotification();
+
+       // Fire journey end event for TOT filing
+       const phone = taxpayerStore.getMsisdn() || getKnownPhone();
+       if (phone) analytics.setUserId(phone);
+       analytics.track('tot_submission_completed', { success: !info.error }, { journey_end: true });
     }
   }, [mounted]);
 

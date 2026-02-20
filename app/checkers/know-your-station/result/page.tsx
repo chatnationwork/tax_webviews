@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { ResultActions } from '../../../_components/ResultActions';
 import { Loader2, CheckCircle, User, MapPin, IdCard } from 'lucide-react';
+import { analytics } from '@/app/_lib/analytics';
 
 interface StationResult {
   taxpayerName: string;
@@ -23,6 +24,8 @@ function KnowYourStationResultContent() {
     const storedResult = sessionStorage.getItem('knowYourStationResult');
     if (storedResult) {
       setResult(JSON.parse(storedResult));
+      if (phone) analytics.setUserId(phone);
+      analytics.track('know_your_station_completed', { success: true }, { journey_end: true });
     } else {
       router.push('/checkers/know-your-station');
     }

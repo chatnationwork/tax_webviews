@@ -110,7 +110,7 @@ export default function NilResultPage() {
         )}
 
         {/* Journey Completion Tracking */}
-        <JourneyCompletionTracker success={!taxpayerInfo?.error} />
+        <JourneyCompletionTracker success={!taxpayerInfo?.error} phone={taxpayerStore.getMsisdn() || getKnownPhone() || undefined} />
 
 
         {/* WhatsApp Button */}

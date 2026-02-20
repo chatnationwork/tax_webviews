@@ -6,6 +6,7 @@ import { Layout, Card, Button, Input } from '../../_components/Layout';
 import { Loader2, FileText } from 'lucide-react';
 import { checkSession, getStoredPhone, initSession, checkInvoice } from '@/app/actions/checkers';
 import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
+import { analytics } from '@/app/_lib/analytics';
 
 function InvoiceCheckerContent() {
   const router = useRouter();
@@ -73,6 +74,8 @@ function InvoiceCheckerContent() {
       
       if (result.success && result.data) {
         sessionStorage.setItem('invoiceCheckerResult', JSON.stringify(result.data));
+        if (phone) analytics.setUserId(phone);
+        analytics.track('invoice_checker_started', { invoice_number: invoiceNumber.trim() }, { journey_start: true });
         router.push(`/checkers/invoice-checker/result?phone=${encodeURIComponent(phone)}`);
       } else {
         setError(result.error || 'Invoice validation failed');

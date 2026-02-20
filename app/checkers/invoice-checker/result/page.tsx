@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { ResultActions } from '../../../_components/ResultActions';
 import { Loader2, CheckCircle, FileText, Calendar, User, DollarSign } from 'lucide-react';
+import { analytics } from '@/app/_lib/analytics';
 
 interface InvoiceResult {
   invoiceNumber: string;
@@ -26,6 +27,8 @@ function InvoiceResultContent() {
     const storedResult = sessionStorage.getItem('invoiceCheckerResult');
     if (storedResult) {
       setResult(JSON.parse(storedResult));
+      if (phone) analytics.setUserId(phone);
+      analytics.track('invoice_checker_completed', { success: true }, { journey_end: true });
     } else {
       router.push('/checkers/invoice-checker');
     }

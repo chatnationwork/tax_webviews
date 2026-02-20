@@ -87,7 +87,8 @@ function TotValidationContent() {
           result.name || 'Unknown',
           result.pin || 'Unknown'
         );
-        analytics.track('validation_success', { obligation_type: 'tot' });
+        if (phone) analytics.setUserId(phone);
+        analytics.track('tot_validation_success', { obligation_type: 'tot' }, { journey_start: true });
         
         const nextUrl = `/nil-mri-tot/tot/verify${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`;
         router.push(nextUrl);
