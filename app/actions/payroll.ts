@@ -206,7 +206,7 @@ export async function lookupById(idNumber: string, given_pin:string,name:string,
       'Authorization': `Bearer ${token}`,
     };
     const response = await axios.post(
-      `${BASE_URL}/id-lookup`,
+      `${BASE_URL}/ussd/id-lookup`,
       { 
         id_number: idNumber.trim(),
         msisdn: cleanNumber
