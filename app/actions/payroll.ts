@@ -4,6 +4,7 @@ import axios from 'axios';
 import { cookies } from 'next/headers';
 import { cleanPhoneNumber } from '../_lib/utils';
 import { guiLookup, LookupByIdResult } from './nil-mri-tot';
+import { sendWhatsAppDocument } from './auth';
 
 const BASE_URL = process.env.API_URL;
 const WEBHOOK_URL = 'https://webhook.chatnation.co.ke/webhook/6937dc3730946fd02503d6e9';
@@ -498,20 +499,26 @@ export async function getEmployeeTemplateUrl(): Promise<string> {
 export async function sendTemplateToWhatsApp(
   whatsappNumber: string
 ): Promise<{ success: boolean; error?: string }> {
+  /*
+   * Sends the employee upload template Excel file to the user's WhatsApp
+   */
   const templateUrl = await getEmployeeTemplateUrl();
   
   try {
-    await axios.get(WEBHOOK_URL, {
-      params: {
-        download_url: templateUrl,
-        password: '',
-        number: whatsappNumber,
-        message: 'Here is the Employee Upload Template. Fill it out and upload it back.'
-      }
+    const result = await sendWhatsAppDocument({
+      recipientPhone: whatsappNumber,
+      documentUrl: templateUrl,
+      caption: 'Here is the Employee Upload Template. Fill it out and upload it back.',
+      filename: 'Employee Upload Template.xlsx'
     });
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to send WhatsApp document');
+    }
+
     return { success: true };
   } catch (error: any) {
-    console.error('Webhook error:', error);
+    console.error('WhatsApp document error:', error);
     return { success: false, error: 'Failed to send template to WhatsApp' };
   }
 }
