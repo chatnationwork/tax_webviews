@@ -356,10 +356,11 @@ If you have rental income in the future, please contact *KRA* to update your tax
       // 2. Generate PRN (File & Pay)
       if (withPayment) {
           setPaymentStatus('Generating PRN...');
+
+          let prn=result.prn; 
           
+          if (!prn){
           const [from, to] = filingPeriod.split(' - ');
-          // MRI Rate: 10%
-          const taxPayable = (Number(rentalIncome) * 0.1).toFixed(2);
 
           const prnRes = await generatePrn(
              taxpayerInfo.pin,
@@ -378,8 +379,9 @@ If you have rental income in the future, please contact *KRA* to update your tax
              setLoading(false);
              return;
           }
-
-          setPrn(prnRes.prn);
+          prn=prnRes.prn;
+        }
+          setPrn(prn);
           setPaymentStatus('Initiating Payment...');
 
           // 3. Make Payment
@@ -389,22 +391,22 @@ If you have rental income in the future, please contact *KRA* to update your tax
           taxpayerStore.setRentalIncome(Number(rentalIncome));
           taxpayerStore.setFilingPeriod(filingPeriod);
           taxpayerStore.setPaymentType('file-and-pay');
-          taxpayerStore.setPrn(prnRes.prn);
-          taxpayerStore.setTaxAmount(Number(taxPayable));
+          taxpayerStore.setPrn(prn);
+          taxpayerStore.setTaxAmount(calculatedTax);
           taxpayerStore.setError('');
            try {
              (taxpayerStore as any).setReceiptNumber(result.receiptNumber || '');
           } catch (e) {}
 
           if (phone) {
-             const payRes = await makePayment(phone, prnRes.prn);
+             const payRes = await makePayment(phone, prn);
              if (payRes.success) {
                 setPaymentStatus('Payment initiated. Check your phone.');
                  if (phone) analytics.setUserId(phone);
                  analytics.track('mri_payment_initiated', { 
-                   amount: taxPayable, 
+                   amount: calculatedTax, 
                    currency: 'KES', 
-                   prn: prnRes.prn 
+                   prn: prn 
                  });
                 setTimeout(() => {
                    router.push('/nil-mri-tot/mri/result');

@@ -267,12 +267,12 @@ function TotVerifyContent() {
       if (action === 'file_and_pay' || action === 'pay_only') {
           setPaymentStatus('Generating PRN...');
           
-          let prnValue = '';
+          let prnValue = result.prn;
           // Check if PRN was returned from filing (only for file_and_pay and if it was a file action)
           if (action === 'file_and_pay' || action === 'pay_only'){
               const [from, to] = filingPeriod.split(' - ');
-              const taxPayable = `${Number(grandTotal)}`;
-    
+             
+              if(!prnValue){
               const prnRes = await generatePrn(
                  taxpayerInfo.pin,
                  '8', // TOT Obligation
@@ -291,6 +291,13 @@ function TotVerifyContent() {
                  return;
               }
               prnValue = prnRes.prn;
+            }
+          }
+
+          if (!prnValue) {
+            setError('Failed to generate PRN');
+            setLoading(false);
+            return;
           }
 
           setPrn(prnValue);

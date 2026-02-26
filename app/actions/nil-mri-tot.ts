@@ -775,12 +775,15 @@ export async function generatePrn(
   try {
     const headers = await getApiHeaders(true);
 
+    // Round amount up to a whole number since the API requires integer amounts
+    const roundedAmount = Math.ceil(parseFloat(amount)).toString();
+
     const payload= {
         tax_payer_pin: taxPayerPin,
         obligation_id: obligationId,
         tax_period_from: taxPeriodFrom,
         tax_period_to: taxPeriodTo,
-        amount: amount,
+        amount: roundedAmount,
       }
 
       console.log(`${BASE_URL}/generate-prn`)
