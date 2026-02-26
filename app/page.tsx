@@ -10,11 +10,11 @@ import { savePhoneToCookie } from "@/app/actions/auth";
 // Service URL mappings - maps service names to their external URLs
 // {{phone}} will be replaced with the actual phone number of the user
 const SERVICE_URLS: Record<string, string> = {
-  // https://ecitizen-test.kra.go.ke/etims/?phone=254702438822
+  // https://wa-etims-test.kra.go.ke/etims/?phone=254702438822
   // eTIMS Invoicing
-  "Sales Invoice": "https://ecitizen-test.kra.go.ke/etims/auth?phone={{phone}}",
-  "Credit Note": "https://ecitizen-test.kra.go.ke/etims/auth?phone={{phone}}",
-  "Buyer-Initiated Invoices": "https://ecitizen-test.kra.go.ke/etims/auth?phone={{phone}}",
+  "Sales Invoice": "https://wa-etims-test.kra.go.ke/etims/auth?phone={{phone}}",
+  "Credit Note": "https://wa-etims-test.kra.go.ke/etims/auth?phone={{phone}}",
+  "Buyer-Initiated Invoices": "https://wa-etims-test.kra.go.ke/etims/auth?phone={{phone}}",
 
   // Return Filing
   "NIL Filing": "/nil-mri-tot/nil/validation?phone={{phone}}",
