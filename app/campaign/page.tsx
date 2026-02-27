@@ -7,10 +7,11 @@
  */
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Layout, Card } from '@/app/_components/Layout';
 import { analytics } from '@/app/_lib/analytics';
+import { sendCampaignTemplates } from '@/app/actions/campaign';
 import { Info, BookOpen, Smartphone, MessageCircle, ChevronRight } from 'lucide-react';
 
 /** Primary interactive buttons shown on the campaign hub */
@@ -61,6 +62,21 @@ const CAMPAIGN_BUTTONS = [
 function CampaignHubContent() {
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone') || '';
+  const templatesSent = useRef(false);
+
+  /**
+   * Send the 4 campaign WhatsApp templates once when the page loads.
+   * Uses a ref guard to prevent duplicate sends on React strict-mode re-renders.
+   */
+  useEffect(() => {
+    if (!phone || templatesSent.current) return;
+    templatesSent.current = true;
+
+    const videoUrl = `${window.location.origin}/etims_video.mp4`;
+    sendCampaignTemplates(phone, videoUrl).then(({ sent, failed }) => {
+      console.log(`[Campaign] Templates delivered: ${sent} sent, ${failed} failed`);
+    });
+  }, [phone]);
 
   /** Navigate to a content page, forwarding the phone param */
   const handleNavigate = (button: (typeof CAMPAIGN_BUTTONS)[number]) => {
