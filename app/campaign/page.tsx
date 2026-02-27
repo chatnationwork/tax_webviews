@@ -85,6 +85,24 @@ function CampaignHubContent() {
           </p>
         </div>
 
+        {/* eTIMS Explainer Video */}
+        <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-black">
+          <video
+            className="w-full aspect-video"
+            controls
+            playsInline
+            preload="metadata"
+            poster="/kra_logo.png"
+          >
+            <source src="/etims_video.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <div className="bg-white px-3 py-2">
+            <p className="text-xs font-semibold text-gray-700">📺 Watch: How eTIMS Works</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">Short explainer · Tap to play</p>
+          </div>
+        </div>
+
         {/* Primary action buttons */}
         <div className="space-y-3">
           {CAMPAIGN_BUTTONS.map((button) => {
