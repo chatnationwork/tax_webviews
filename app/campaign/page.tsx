@@ -7,7 +7,7 @@
  */
 'use client';
 
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Layout, Card } from '@/app/_components/Layout';
 import { analytics } from '@/app/_lib/analytics';
@@ -62,15 +62,18 @@ const CAMPAIGN_BUTTONS = [
 function CampaignHubContent() {
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone') || '';
-  const templatesSent = useRef(false);
-
   /**
-   * Send the 4 campaign WhatsApp templates once when the page loads.
-   * Uses a ref guard to prevent duplicate sends on React strict-mode re-renders.
+   * Send the 4 campaign WhatsApp templates only on the very first visit.
+   * A localStorage flag keyed by phone ensures templates are never re-sent
+   * across page reloads or re-visits.
    */
   useEffect(() => {
-    if (!phone || templatesSent.current) return;
-    templatesSent.current = true;
+    if (!phone) return;
+
+    const storageKey = `campaign_sent_${phone}`;
+    if (localStorage.getItem(storageKey)) return;
+
+    localStorage.setItem(storageKey, new Date().toISOString());
 
     const videoUrl = `${window.location.origin}/etims_video.mp4`;
     sendCampaignTemplates(phone, videoUrl).then(({ sent, failed }) => {
