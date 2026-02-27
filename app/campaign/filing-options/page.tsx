@@ -1,0 +1,151 @@
+/**
+ * "Simplified Filing Options" content page.
+ *
+ * Lists all channels a taxpayer can use to file returns or get help:
+ * USSD, WhatsApp Shuru, iTax Portal, eCitizen, and KRA Service Centres.
+ * Includes a MicroFeedback widget at the bottom.
+ */
+'use client';
+
+import { Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { Layout, Card } from '@/app/_components/Layout';
+import MicroFeedback from '@/app/campaign/_components/MicroFeedback';
+import { Hash, MessageCircle, Globe, Landmark, ExternalLink } from 'lucide-react';
+
+/** Available filing channels */
+const CHANNELS = [
+  {
+    icon: Hash,
+    label: 'USSD',
+    detail: '*222*5#',
+    description: 'Dial from any phone — no internet required',
+    color: 'bg-orange-50',
+    iconColor: 'text-orange-600',
+    action: 'tel:*222*5#',
+    actionLabel: 'Dial',
+  },
+  {
+    icon: MessageCircle,
+    label: 'WhatsApp Shuru',
+    detail: '0711 099 999',
+    description: 'Chat with our AI assistant on WhatsApp',
+    color: 'bg-green-50',
+    iconColor: 'text-green-600',
+    action: 'https://wa.me/254711099999',
+    actionLabel: 'Chat',
+  },
+  {
+    icon: Globe,
+    label: 'iTax Portal',
+    detail: 'itax.kra.go.ke',
+    description: 'File directly on the iTax web portal',
+    color: 'bg-blue-50',
+    iconColor: 'text-blue-600',
+    action: 'https://itax.kra.go.ke',
+    actionLabel: 'Open',
+  },
+  {
+    icon: Globe,
+    label: 'eCitizen',
+    detail: 'ecitizen.kra.go.ke',
+    description: 'Access KRA services via the eCitizen portal',
+    color: 'bg-indigo-50',
+    iconColor: 'text-indigo-600',
+    action: 'https://ecitizen.kra.go.ke',
+    actionLabel: 'Open',
+  },
+  {
+    icon: Landmark,
+    label: 'KRA Service Centre',
+    detail: 'Visit in person',
+    description: 'Walk into your nearest KRA office for assistance',
+    color: 'bg-gray-50',
+    iconColor: 'text-gray-600',
+    action: null,
+    actionLabel: null,
+  },
+] as const;
+
+/** Inner component that reads search params */
+function FilingOptionsContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const phone = searchParams.get('phone') || '';
+
+  return (
+    <Layout
+      title="Filing Options"
+      phone={phone}
+      showFooter={false}
+      onBack={() => router.push(`/campaign?phone=${encodeURIComponent(phone)}`)}
+    >
+      <div className="space-y-5">
+        {/* Title */}
+        <div className="space-y-1">
+          <h2 className="text-base font-bold text-gray-900">
+            Ways to File or Get Help
+          </h2>
+          <p className="text-xs text-gray-500">
+            Choose the channel that works best for you.
+          </p>
+        </div>
+
+        {/* Channel cards */}
+        <div className="space-y-2.5">
+          {CHANNELS.map((channel, index) => {
+            const Icon = channel.icon;
+            return (
+              <Card key={index} className="flex items-start gap-3">
+                <div className={`shrink-0 w-10 h-10 rounded-xl ${channel.color} flex items-center justify-center`}>
+                  <Icon className={`w-5 h-5 ${channel.iconColor}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {channel.label}
+                    </p>
+                    {channel.action && (
+                      <a
+                        href={channel.action}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold rounded-full bg-[var(--kra-red)] text-white hover:bg-[var(--kra-red-dark)] transition-colors"
+                      >
+                        {channel.actionLabel}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                  <p className="text-xs font-mono text-[var(--kra-red)] mt-0.5">
+                    {channel.detail}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {channel.description}
+                  </p>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Micro-feedback widget */}
+        <MicroFeedback pageId="filing-options" />
+      </div>
+    </Layout>
+  );
+}
+
+export default function FilingOptionsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen text-sm">
+          Loading...
+        </div>
+      }
+    >
+      <FilingOptionsContent />
+    </Suspense>
+  );
+}
