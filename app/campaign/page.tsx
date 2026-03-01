@@ -67,19 +67,19 @@ function CampaignHubContent() {
    * A localStorage flag keyed by phone ensures templates are never re-sent
    * across page reloads or re-visits.
    */
-  useEffect(() => {
-    if (!phone) return;
+  // useEffect(() => {
+  //   if (!phone) return;
 
-    const storageKey = `campaign_sent_${phone}`;
-    if (localStorage.getItem(storageKey)) return;
+  //   const storageKey = `campaign_sent_${phone}`;
+  //   if (localStorage.getItem(storageKey)) return;
 
-    localStorage.setItem(storageKey, new Date().toISOString());
+  //   localStorage.setItem(storageKey, new Date().toISOString());
 
-    const videoUrl = `${window.location.origin}/etims_video.mp4`;
-    sendCampaignTemplates(phone, videoUrl).then(({ sent, failed }) => {
-      console.log(`[Campaign] Templates delivered: ${sent} sent, ${failed} failed`);
-    });
-  }, [phone]);
+  //   const videoUrl = `${window.location.origin}/etims_video.mp4`;
+  //   sendCampaignTemplates(phone, videoUrl).then(({ sent, failed }) => {
+  //     console.log(`[Campaign] Templates delivered: ${sent} sent, ${failed} failed`);
+  //   });
+  // }, [phone]);
 
   /** Navigate to a content page, forwarding the phone param */
   const handleNavigate = (button: (typeof CAMPAIGN_BUTTONS)[number]) => {
