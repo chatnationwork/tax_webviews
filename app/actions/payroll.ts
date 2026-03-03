@@ -1,5 +1,7 @@
 'use server';
 
+import logger from '@/lib/logger';
+
 import axios from 'axios';
 import { cookies } from 'next/headers';
 import { cleanPhoneNumber } from '../_lib/utils';
@@ -12,7 +14,7 @@ const WEBHOOK_URL = 'https://webhook.chatnation.co.ke/webhook/6937dc3730946fd025
 // ============= Error Handler =============
 
 const handleApiError = (error: any) => {
-  console.error('API Error:', error.response?.data || error.message);
+  logger.error('API Error:', error.response?.data || error.message);
   throw new Error(
     error.response?.data?.message || 
     error.response?.data?.error || 
@@ -198,7 +200,7 @@ export async function lookupById(idNumber: string, given_pin:string,name:string,
   // Clean phone number
   const cleanNumber = cleanPhoneNumber(phoneNumber);
 
-  console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber);
+  logger.info('Looking up ID:', idNumber, 'Phone:', cleanNumber);
  const token = await getAuthToken();
   try {
     const headers = {
@@ -218,7 +220,7 @@ export async function lookupById(idNumber: string, given_pin:string,name:string,
       }
     );
 
-    console.log('ID lookup response:', JSON.stringify(response.data, null, 2));
+    logger.info('ID lookup response:', JSON.stringify(response.data, null, 2));
 
     // Check if we got a valid response with data
     if (response.data && response.data.name && response.data.yob) {
@@ -238,13 +240,13 @@ export async function lookupById(idNumber: string, given_pin:string,name:string,
       
       // FALLBACK: If PIN is missing, try GUI lookup
       if (!pin) {
-        console.log('PIN missing in primary lookup, attempting GUI lookup fallback...');
+        logger.info('PIN missing in primary lookup, attempting GUI lookup fallback...');
         const guiResult = await guiLookup(idNumber.trim());
         if (guiResult.success && guiResult.pin) {
            pin = guiResult.pin;
-           console.log('PIN retrieved via GUI lookup');
+           logger.info('PIN retrieved via GUI lookup');
         } else {
-           console.warn('GUI lookup fallback failed:', guiResult.error);
+           logger.warn('GUI lookup fallback failed:', guiResult.error);
         }
       }
 
@@ -268,7 +270,7 @@ export async function lookupById(idNumber: string, given_pin:string,name:string,
       };
     }
   } catch (error: any) {
-    console.error('ID lookup error:', error.response?.data || error.message);
+    logger.error('ID lookup error:', error.response?.data || error.message);
     return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
   }
 }
@@ -518,7 +520,7 @@ export async function sendTemplateToWhatsApp(
 
     return { success: true };
   } catch (error: any) {
-    console.error('WhatsApp document error:', error);
+    logger.error('WhatsApp document error:', error);
     return { success: false, error: 'Failed to send template to WhatsApp' };
   }
 }
@@ -743,7 +745,7 @@ export async function sendReportToWhatsApp(
     });
     return { success: true };
   } catch (error) {
-    console.error('Webhook error:', error);
+    logger.error('Webhook error:', error);
     throw new Error('Failed to send report to WhatsApp');
   }
 }

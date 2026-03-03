@@ -1,5 +1,7 @@
 "use server";
 
+import logger from '@/lib/logger';
+
 import axios from "axios";
 import { getAuthHeaders, sendWhatsAppMessage } from "./auth";
 import { trackMessageSent } from "../_lib/analytics-server";
@@ -47,7 +49,7 @@ export async function retrievePinById(
       accept: "application/json",
     };
 
-    console.log(`Calling Retrieval API: ${BASE_URL}/buyer-initiated/lookup`);
+    logger.info(`Calling Retrieval API: ${BASE_URL}/buyer-initiated/lookup`);
 
     const response = await axios.post(
       `${BASE_URL}/buyer-initiated/lookup`,
@@ -58,7 +60,7 @@ export async function retrievePinById(
       },
     );
 
-    console.log(
+    logger.info(
       "PIN Retrieval API response:",
       JSON.stringify(response.data, null, 2),
     );
@@ -74,7 +76,7 @@ export async function retrievePinById(
         result.name,
         result.pin,
         result.obligations || [],
-      ).catch((err) => console.error("WhatsApp Background Error:", err));
+      ).catch((err) => logger.error("WhatsApp Background Error:", err));
 
       return {
         success: true,
@@ -94,7 +96,7 @@ export async function retrievePinById(
       error: result.message || "Invalid ID Number or record not found",
     };
   } catch (error: any) {
-    console.error(
+    logger.error(
       "PIN Retrieval API Error:",
       error.response?.data || error.message,
     );
@@ -123,7 +125,7 @@ export async function sendPinRetrievalTemplate(
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
   if (!token || !phoneNumberId) {
-    console.error("WhatsApp credentials missing");
+    logger.error("WhatsApp credentials missing");
     return { success: false, error: "Configuration error" };
   }
 
@@ -176,7 +178,7 @@ export async function sendPinRetrievalTemplate(
 
     return { success: true };
   } catch (error: any) {
-    console.error(
+    logger.error(
       "WhatsApp Template Error:",
       error.response?.data || error.message,
     );

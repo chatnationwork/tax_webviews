@@ -1,5 +1,7 @@
 'use server';
 
+import logger from '@/lib/logger';
+
 import axios from 'axios';
 import { cleanPhoneNumber } from '../_lib/utils';
 
@@ -68,6 +70,7 @@ async function getApiHeaders(requiresAuth: boolean = true) {
         return {
             'Content-Type': 'application/json',
             'x-source-for': 'whatsapp',
+            'x-forwarded-for': 'whatsapp'
         };
     }
     return getAuthHeaders();
@@ -139,7 +142,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
   else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
 
-  console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth);
+  logger.info('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth);
 
   try {
     const headers = await getApiHeaders(true);
@@ -155,7 +158,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       }
     );
 
-    console.log('ID lookup response:', JSON.stringify(response.data, null, 2));
+    logger.info('ID lookup response:', JSON.stringify(response.data, null, 2));
 
     // Check if we got a valid response with data
     if (response.data && response.data.name && response.data.yob) {
@@ -183,7 +186,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       };
     }
   } catch (error: any) {
-    console.error('ID lookup error:', error.response?.data || error.message);
+    logger.error('ID lookup error:', error.response?.data || error.message);
     return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
   }
 }
@@ -214,7 +217,7 @@ export async function generatePrn(
       { headers }
     );
 
-    console.log('Generate PRN Response:', response.data);
+    logger.info('Generate PRN Response:', response.data);
 
     // API returns PaymentRegNo field for the PRN
     const prn = response.data.PaymentRegNo || response.data.prn;
@@ -235,7 +238,7 @@ export async function generatePrn(
       data: response.data
     };
   } catch (error: any) {
-    console.error('Generate PRN Error:', error.response?.data || error.message);
+    logger.error('Generate PRN Error:', error.response?.data || error.message);
     return {
       success: false,
       message: error.response?.data?.message || error.response?.data?.ResponseMsg || error.message || 'Failed to generate PRN',
@@ -261,7 +264,7 @@ export async function makePayment(
       { headers }
     );
 
-    console.log('Make Payment Response:', response.data);
+    logger.info('Make Payment Response:', response.data);
 
     // API returns status: 200 and desc: "ok" for success
     if (response.data.status === 200 || response.data.desc === 'ok') {
@@ -281,7 +284,7 @@ export async function makePayment(
       data: response.data
     };
   } catch (error: any) {
-    console.error('Make Payment Error:', error.response?.data || error.message);
+    logger.error('Make Payment Error:', error.response?.data || error.message);
     return {
       success: false,
       message: error.response?.data?.message || error.message || 'Failed to initiate payment',

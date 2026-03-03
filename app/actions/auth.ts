@@ -1,5 +1,7 @@
 'use server';
 
+import logger from '@/lib/logger';
+
 import axios from 'axios';
 import { cookies } from 'next/headers';
 
@@ -55,6 +57,7 @@ export async function getAuthHeaders() {
   return {
     'Content-Type': 'application/json',
     'x-source-for': 'whatsapp',
+    'x-forwarded-for': 'whatsapp',
     ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
 }
@@ -81,7 +84,7 @@ export async function generateOTP(msisdn: string): Promise<OTPResult> {
       }
     );
 
-    console.log('Generate OTP response:', response.data);
+    logger.info('Generate OTP response:', response.data);
 
     return {
       success: true,
@@ -89,7 +92,7 @@ export async function generateOTP(msisdn: string): Promise<OTPResult> {
       code: response.data.code,
     };
   } catch (error: any) {
-    console.error('Generate OTP error:', error.response?.data || error.message);
+    logger.error('Generate OTP error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -122,7 +125,7 @@ export async function validateOTP(msisdn: string, otp: string): Promise<OTPResul
       }
     );
 
-    console.log('Validate OTP response:', response.data);
+    logger.info('Validate OTP response:', response.data);
 
     // Check for success (varies by API, sometimes success: false, sometimes code: 0)
     const isSuccess = response.data.success !== false && response.data.code !== 0;
@@ -171,7 +174,7 @@ export async function validateOTP(msisdn: string, otp: string): Promise<OTPResul
       token: response.data.token
     };
   } catch (error: any) {
-    console.error('Validate OTP error:', error.response?.data || error.message);
+    logger.error('Validate OTP error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -189,7 +192,7 @@ export async function checkServerSession(): Promise<boolean> {
     const token = cookieStore.get('etims_auth_token') || cookieStore.get('auth_token');
     
     if (token) {
-      console.log('Token found:', token.value);
+      logger.info('Token found:', token.value);
       // Sliding expiration: refresh cookies
       const options = {
         httpOnly: true,
@@ -220,9 +223,9 @@ export async function logout(): Promise<void> {
  * Get the stored phone number from session (server-side)
  */
 export async function getStoredPhoneServer(): Promise<string | null> {
-  console.log('getStoredPhoneServer');
+  logger.info('getStoredPhoneServer');
     const cookieStore = await cookies();
-    console.log('Stored phone number:', cookieStore.get('phone_Number')?.value );
+    logger.info('Stored phone number:', cookieStore.get('phone_Number')?.value );
     return cookieStore.get('phone_Number')?.value || null;
 }
 
@@ -265,7 +268,7 @@ export async function sendWhatsAppMessage(
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   
   if (!token || !phoneNumberId) {
-    console.error('WhatsApp API credentials not configured');
+    logger.error('WhatsApp API credentials not configured');
     return { success: false, error: 'WhatsApp sending not configured' };
   }
 
@@ -282,7 +285,7 @@ export async function sendWhatsAppMessage(
     }
   };
 
-  console.log('Sending WhatsApp message to:', finalNumber);
+  logger.info('Sending WhatsApp message to:', finalNumber);
 
   try {
     const response = await axios.post(url, payload, {
@@ -306,7 +309,7 @@ export async function sendWhatsAppMessage(
       messageId: response.data.messages?.[0]?.id
     };
   } catch (error: any) {
-    console.error('Error sending WhatsApp message:', error.response?.data || error.message);
+    logger.error('Error sending WhatsApp message:', error.response?.data || error.message);
     return {
       success: false,
       error: error.response?.data?.error?.message || 'Failed to send message via WhatsApp'
@@ -371,7 +374,7 @@ export async function sendWhatsAppDocument(
       messageId: response.data.messages?.[0]?.id
     };
   } catch (error: any) {
-    console.error('Error sending WhatsApp document:', error.response?.data || error.message);
+    logger.error('Error sending WhatsApp document:', error.response?.data || error.message);
     return {
       success: false,
       error: error.response?.data?.error?.message || 'Failed to send document'
@@ -394,7 +397,7 @@ export async function sendConnectToAgentMessage(recipientPhone: string): Promise
   const version = 'v21.0';
   
   if (!token || !phoneNumberId) {
-    console.error('WhatsApp API credentials not configured');
+    logger.error('WhatsApp API credentials not configured');
     return { success: false, error: 'WhatsApp sending not configured' };
   }
 
@@ -461,7 +464,7 @@ export async function sendConnectToAgentMessage(recipientPhone: string): Promise
       messageId: response.data.messages?.[0]?.id
     };
   } catch (error: any) {
-    console.error('Error sending Connect Agent message:', error.response?.data || error.message);
+    logger.error('Error sending Connect Agent message:', error.response?.data || error.message);
     return {
       success: false,
       error: error.response?.data?.error?.message || 'Failed to send message'
@@ -480,7 +483,7 @@ export async function sendServiceAgentConnectMessage(recipientPhone: string, ser
   const version = 'v21.0';
   
   if (!token || !phoneNumberId) {
-    console.error('WhatsApp API credentials not configured');
+    logger.error('WhatsApp API credentials not configured');
     return { success: false, error: 'WhatsApp sending not configured' };
   }
 
@@ -547,7 +550,7 @@ export async function sendServiceAgentConnectMessage(recipientPhone: string, ser
       messageId: response.data.messages?.[0]?.id
     };
   } catch (error: any) {
-    console.error('Error sending Service Agent message:', error.response?.data || error.message);
+    logger.error('Error sending Service Agent message:', error.response?.data || error.message);
     return {
       success: false,
       error: error.response?.data?.error?.message || 'Failed to send message'

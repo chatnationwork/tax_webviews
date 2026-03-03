@@ -1,5 +1,7 @@
 'use server';
 
+import logger from '@/lib/logger';
+
 import axios from 'axios';
 import { cookies } from 'next/headers';
 import { 
@@ -113,7 +115,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
   else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
 
-  console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth, 'id type:', type, 'name:', name);
+  logger.info('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth, 'id type:', type, 'name:', name);
 
   const payload = {
     id_number: idNumber.trim(),
@@ -121,8 +123,8 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
     type: type,
   };
 
-  console.log(`${BASE_URL}/id-lookup`);
-  console.log('ID lookup payload:', JSON.stringify(payload, null, 2));
+  logger.info(`${BASE_URL}/id-lookup`);
+  logger.info('ID lookup payload:', JSON.stringify(payload, null, 2));
 
   try {
     const headers = await getAuthHeaders();
@@ -135,7 +137,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       }
     );
 
-    console.log('ID lookup response:', JSON.stringify(response.data, null, 2));
+    logger.info('ID lookup response:', JSON.stringify(response.data, null, 2));
 
     // Check if we got a valid response with data
     if (response.data && response.data.name && response.data.yob) {
@@ -173,7 +175,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       };
     }
   } catch (error: any) {
-    console.error('ID lookup error:', error.response?.data || error.message);
+    logger.error('ID lookup error:', error.response?.data || error.message);
     return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
   }
 }
@@ -191,7 +193,7 @@ export async function submitPinRegistration(
   const cleanNumber = cleanPhoneNumber(msisdn);
   const headers = await getAuthHeaders();
 
-  console.log('Submitting PIN registration:', {
+  logger.info('Submitting PIN registration:', {
     type,
     id_number: idNumber,
     email,
@@ -213,7 +215,7 @@ export async function submitPinRegistration(
       }
     );
 
-    console.log('PIN Registration response:', JSON.stringify(response.data, null, 2));
+    logger.info('PIN Registration response:', JSON.stringify(response.data, null, 2));
 
     const data = response.data;
     
@@ -233,12 +235,12 @@ export async function submitPinRegistration(
       sharedSendWhatsAppMessage({
         recipientPhone: cleanNumber,
         message: waMessage
-      }).catch(err => console.error('Failed to send successful registration WhatsApp:', err));
+      }).catch(err => logger.error('Failed to send successful registration WhatsApp:', err));
     }
 
     return result;
   } catch (error: any) {
-    console.error('PIN Registration error:', error.response?.data || error.message);
+    logger.error('PIN Registration error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -273,7 +275,7 @@ export async function initiateSession(
       }
     );
 
-    console.log('Initiate session response:', response.data);
+    logger.info('Initiate session response:', response.data);
 
     return {
       success: true,
@@ -281,7 +283,7 @@ export async function initiateSession(
       sessionId: response.data.session_id,
     };
   } catch (error: any) {
-    console.error('Initiate session error:', error.response?.data || error.message);
+    logger.error('Initiate session error:', error.response?.data || error.message);
     
     return {
       success: false,

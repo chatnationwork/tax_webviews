@@ -1,13 +1,14 @@
 'use server';
 
+import logger from '@/lib/logger';
+
 import axios from 'axios';
-import { trackMessageSent } from '../_lib/analytics-server';
 
 const BASE_URL = process.env.API_URL;
 
 // Helper to handle API errors
 const handleApiError = (error: any) => {
-  console.error('API Error:', error.response?.data || error.message);
+  logger.error('API Error:', error.response?.data || error.message);
   
   // Extract error message - handle both string and object formats
   let errorMessage = 'An error occurred while communicating with the server';
@@ -47,13 +48,13 @@ export async function submitTravelInfo(data: any) {
 
 export async function submitDeclarationItems(data: any) {
   // 
-  console.log('Submitting items:', JSON.stringify(data, null, 2));
-  console.log(`${BASE_URL}/customs/passenger-declaration`);
+  logger.info('Submitting items:', JSON.stringify(data, null, 2));
+  logger.info(`${BASE_URL}/customs/passenger-declaration`);
 
   try {
     const response = await axios.post(`${BASE_URL}/customs/passenger-declaration`, data);
 
-    console.log(response.data);
+    logger.info(response.data);
     
     // Check for error in response body explicitly
     if (response.data && (response.data.errorCode || response.data.errorMessage)) {
@@ -131,11 +132,11 @@ export async function sendOtp(pin: string) {
   try {
     const response = await axios.post(`${BASE_URL}/customs/passenger-declaration/send-otp`, { pin });
 
-    console.log(response.data);
+    logger.info(response.data);
     
     return { success: true, data: response.data };
   } catch (error: any) {
-    console.error('Send OTP Error:', error.response?.data || error.message);
+    logger.error('Send OTP Error:', error.response?.data || error.message);
     return { 
       success: false, 
       error: error.response?.data?.message || error.message || 'Failed to send OTP' 
@@ -147,11 +148,11 @@ export async function verifyOtp(otp: string) {
   try {
     const response = await axios.post(`${BASE_URL}/customs/passenger-declaration/verify-otp`, { otp });
 
-    console.log(response.data);
+    logger.info(response.data);
     
     return { success: true, data: response.data };
   } catch (error: any) {
-    console.error('Verify OTP Error:', error.response?.data || error.message);
+    logger.error('Verify OTP Error:', error.response?.data || error.message);
     return { 
       success: false, 
       error: error.response?.data?.message || error.message || 'Failed to verify OTP' 
@@ -192,7 +193,7 @@ export async function sendWhatsappNotification(payload: {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   
   if (!token || !phoneNumberId) {
-    console.error('WhatsApp API credentials not configured');
+    logger.error('WhatsApp API credentials not configured');
     // Don't break the flow if notification fails
     return { success: false, error: 'WhatsApp sending not configured' };
   }
@@ -215,7 +216,7 @@ export async function sendWhatsappNotification(payload: {
   };
 
   try {
-    console.log('Sending WhatsApp notification:', JSON.stringify(requestPayload, null, 2));
+    logger.info('Sending WhatsApp notification:', JSON.stringify(requestPayload, null, 2));
     
     const response = await axios.post(url, requestPayload, {
       headers: {
@@ -230,7 +231,7 @@ export async function sendWhatsappNotification(payload: {
       messageId: response.data.messages?.[0]?.id 
     };
   } catch (error: any) {
-    console.error('Error sending WhatsApp notification:', error.response?.data || error.message);
+    logger.error('Error sending WhatsApp notification:', error.response?.data || error.message);
     // Don't break the flow if notification fails
     return { 
       success: false, 
@@ -262,7 +263,7 @@ export async function initializeDeclaration() {
     // Assuming the API returns { ref_no: "..." } or similar structure
     return data.ref_no; 
   } catch (error) {
-    console.error('Error initializing declaration:', error);
+    logger.error('Error initializing declaration:', error);
     return null;
   }
 }
@@ -302,7 +303,7 @@ export async function sendDocumentViaWhatsapp(payload: {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   
   if (!token || !phoneNumberId) {
-    console.error('WhatsApp API credentials not configured');
+    logger.error('WhatsApp API credentials not configured');
     return { success: false, error: 'WhatsApp sending not configured' };
   }
 
@@ -329,7 +330,7 @@ export async function sendDocumentViaWhatsapp(payload: {
   };
 
   try {
-    console.log('Sending WhatsApp document:', JSON.stringify(requestPayload, null, 2));
+    logger.info('Sending WhatsApp document:', JSON.stringify(requestPayload, null, 2));
     
     const response = await axios.post(url, requestPayload, {
       headers: {
@@ -354,7 +355,7 @@ export async function sendDocumentViaWhatsapp(payload: {
       messageId: response.data.messages?.[0]?.id 
     };
   } catch (error: any) {
-    console.error('Error sending WhatsApp document:', error.response?.data || error.message);
+    logger.error('Error sending WhatsApp document:', error.response?.data || error.message);
     return { 
       success: false, 
       error: error.response?.data?.error?.message || 'Failed to send document via WhatsApp' 

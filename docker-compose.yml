@@ -1,0 +1,24 @@
+services:
+  tax-app:
+    container_name: tax-app
+    image: tax-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "${HOST_PORT:-3000}:3000"
+    environment:
+      - LOG_LEVEL=debug
+    env_file:
+      - .env.production
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--spider", "http://localhost:3000" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

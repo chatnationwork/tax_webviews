@@ -1,5 +1,7 @@
 'use server';
 
+import logger from '@/lib/logger';
+
 import { trackCsatSubmitted } from '../_lib/analytics-server';
 
 export interface SubmitCsatFeedbackParams {
@@ -24,7 +26,7 @@ export async function submitCsatFeedback(params: SubmitCsatFeedbackParams) {
     
     return { success: true };
   } catch (error) {
-    console.error('Failed to submit CSAT feedback:', error);
+    logger.error('Failed to submit CSAT feedback:', error);
     return { success: false, error: 'Failed to submit feedback' };
   }
 }

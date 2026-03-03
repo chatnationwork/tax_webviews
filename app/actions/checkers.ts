@@ -1,5 +1,7 @@
 'use server';
 
+import logger from '@/lib/logger';
+
 import axios from 'axios';
 import { 
   getAuthHeaders, 
@@ -98,6 +100,7 @@ async function getApiHeaders(requiresAuth: boolean = true) {
     return {
       'Content-Type': 'application/json',
       'x-source-for': 'whatsapp',
+      'x-forwarded-for': 'whatsapp'
     };
   }
   return getAuthHeaders();
@@ -155,7 +158,7 @@ export async function initSession(msisdn: string): Promise<{ success: boolean; e
     );
     return { success: true };
   } catch (error: any) {
-    console.error('Init session error:', error.response?.data || error.message);
+    logger.error('Init session error:', error.response?.data || error.message);
     return { 
       success: false, 
       error: error.response?.data?.message || 'Failed to initialize session' 
@@ -184,7 +187,7 @@ export async function checkPin(pinNumber: string): Promise<PinCheckerResult> {
       }
     );
 
-    console.log('PIN Checker response:', JSON.stringify(response.data, null, 2));
+    logger.info('PIN Checker response:', JSON.stringify(response.data, null, 2));
 
     const result = response.data;
     
@@ -204,7 +207,7 @@ export async function checkPin(pinNumber: string): Promise<PinCheckerResult> {
       };
     }
   } catch (error: any) {
-    console.error('PIN Checker error:', error.response?.data || error.message);
+    logger.error('PIN Checker error:', error.response?.data || error.message);
     return { 
       success: false, 
       error: error.response?.data?.message || 'Failed to check PIN' 
@@ -231,7 +234,7 @@ export async function checkStaff(nationalId: string): Promise<StaffCheckerResult
       }
     );
 
-    console.log('Staff Checker response:', JSON.stringify(response.data, null, 2));
+    logger.info('Staff Checker response:', JSON.stringify(response.data, null, 2));
 
     const result = response.data;
     
@@ -254,7 +257,7 @@ export async function checkStaff(nationalId: string): Promise<StaffCheckerResult
       };
     }
   } catch (error: any) {
-    console.error('Staff Checker error:', error.response?.data || error.message);
+    logger.error('Staff Checker error:', error.response?.data || error.message);
     return { 
       success: false, 
       error: error.response?.data?.message || 'Failed to check staff' 
@@ -284,7 +287,7 @@ export async function checkTcc(kraPin: string, tccNumber: string): Promise<TccCh
       }
     );
 
-    console.log('TCC Checker response:', JSON.stringify(response.data, null, 2));
+    logger.info('TCC Checker response:', JSON.stringify(response.data, null, 2));
 
     const result = response.data;
     
@@ -307,7 +310,7 @@ export async function checkTcc(kraPin: string, tccNumber: string): Promise<TccCh
       };
     }
   } catch (error: any) {
-    console.error('TCC Checker error:', error.response?.data || error.message);
+    logger.error('TCC Checker error:', error.response?.data || error.message);
     return { 
       success: false, 
       error: error.response?.data?.message || 'Failed to check TCC' 
@@ -334,7 +337,7 @@ export async function checkImportCertificate(certificateNo: string): Promise<Imp
       }
     );
 
-    console.log('Import Certificate response:', JSON.stringify(response.data, null, 2));
+    logger.info('Import Certificate response:', JSON.stringify(response.data, null, 2));
 
     const result = response.data;
     
@@ -355,7 +358,7 @@ export async function checkImportCertificate(certificateNo: string): Promise<Imp
       };
     }
   } catch (error: any) {
-    console.error('Import Certificate error:', error.response?.data || error.message);
+    logger.error('Import Certificate error:', error.response?.data || error.message);
     return { 
       success: false, 
       error: error.response?.data?.message || 'Failed to check import certificate' 
@@ -382,7 +385,7 @@ export async function checkInvoice(invoiceNumber: string): Promise<InvoiceChecke
       }
     );
 
-    console.log('Invoice Checker response:', JSON.stringify(response.data, null, 2));
+    logger.info('Invoice Checker response:', JSON.stringify(response.data, null, 2));
 
     const result = response.data;
     
@@ -406,7 +409,7 @@ export async function checkInvoice(invoiceNumber: string): Promise<InvoiceChecke
       };
     }
   } catch (error: any) {
-    console.error('Invoice Checker error:', error.response?.data || error.message);
+    logger.error('Invoice Checker error:', error.response?.data || error.message);
     return { 
       success: false, 
       error: error.response?.data?.message || 'Failed to check invoice' 

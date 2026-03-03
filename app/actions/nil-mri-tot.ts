@@ -1,5 +1,7 @@
 'use server';
 
+import logger from '@/lib/logger';
+
 import axios from 'axios';
 import { 
   getAuthHeaders, 
@@ -85,6 +87,7 @@ async function getApiHeaders(requiresAuth: boolean = true) {
         return {
             'Content-Type': 'application/json',
             'x-source-for': 'whatsapp',
+            'x-forwarded-for': 'whatsapp'
         };
     }
     return getAuthHeaders();
@@ -154,7 +157,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   // Clean phone number
   const cleanNumber = cleanPhoneNumber(phoneNumber);
 
-  console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth);
+  logger.info('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth);
 
   try {
     const headers = await getApiHeaders(true);
@@ -170,7 +173,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       }
     );
 
-    console.log('ID lookup response:', JSON.stringify(response.data, null, 2));
+    logger.info('ID lookup response:', JSON.stringify(response.data, null, 2));
 
     // Check if we got a valid response with data
     if (response.data && response.data.name && response.data.yob) {
@@ -189,13 +192,13 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       
       // FALLBACK: If PIN is missing, try GUI lookup
       if (!pin) {
-        console.log('PIN missing in primary lookup, attempting GUI lookup fallback...');
+        logger.info('PIN missing in primary lookup, attempting GUI lookup fallback...');
         const guiResult = await guiLookup(idNumber.trim());
         if (guiResult.success && guiResult.pin) {
            pin = guiResult.pin;
-           console.log('PIN retrieved via GUI lookup');
+           logger.info('PIN retrieved via GUI lookup');
         } else {
-           console.warn('GUI lookup fallback failed:', guiResult.error);
+           logger.warn('GUI lookup fallback failed:', guiResult.error);
         }
       }
 
@@ -212,7 +215,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       };
     }
   } catch (error: any) {
-    console.error('ID lookup error:', error.response?.data || error.message);
+    logger.error('ID lookup error:', error.response?.data || error.message);
     return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
   }
 }
@@ -234,7 +237,7 @@ export async function guiLookup(idNumber: string): Promise<{ success: boolean; p
       }
     );
 
-    console.log('GUI Lookup Response:', response.data);
+    logger.info('GUI Lookup Response:', response.data);
 
     const pin = response.data.pin || response.data.PIN;
     const name = response.data.name || response.data.TaxpayerName;
@@ -249,7 +252,7 @@ export async function guiLookup(idNumber: string): Promise<{ success: boolean; p
     
     return { success: false, error: 'PIN not found in GUI lookup' };
   } catch (error: any) {
-    console.error('GUI Lookup Error:', error.message);
+    logger.error('GUI Lookup Error:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -294,14 +297,14 @@ export async function getTaxpayerObligations(
       )
     );
 
-    console.log('Obligations:', obligations);
+    logger.info('Obligations:', obligations);
 
     return {
       success: true,
       obligations: obligations,
     };
   } catch (error: any) {
-    console.error('Get Obligations Error:', error.response?.data || error.message);
+    logger.error('Get Obligations Error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -335,7 +338,7 @@ export async function getFilingPeriods(
       }
     );
 
-    console.log('Filing periods response:', response.data);
+    logger.info('Filing periods response:', response.data);
 
     const data = response.data;
     
@@ -357,7 +360,7 @@ export async function getFilingPeriods(
       message: data.description || data.message,
     };
   } catch (error: any) {
-    console.error('Filing Period Error:', error.response?.data || error.message);
+    logger.error('Filing Period Error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -387,7 +390,7 @@ export async function fileNilReturn(
       tax_payer_pin: taxPayerPin,
     };
 
-    console.log('Filing NIL Return:', payload);
+    logger.info('Filing NIL Return:', payload);
 
 
     const headers = await getApiHeaders(true);
@@ -400,7 +403,7 @@ export async function fileNilReturn(
     );
 
     const data = response.data;
-    console.log('File NIL Return Response:', data);
+    logger.info('File NIL Return Response:', data);
     // Check for various success formats
     // 1. Standard format: code=1/200 or success=true
     // 2. Nested response format: response.Status='OK' (common in KRA APIs)
@@ -427,7 +430,7 @@ export async function fileNilReturn(
       taxDue: data.tax_due,
     };
   } catch (error: any) {
-    console.error('File NIL Return Error:', error.response?.data || error.message);
+    logger.error('File NIL Return Error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -471,7 +474,7 @@ export async function fileMriReturn(
       taxable_amount: `${rentalIncome}`,
     };
 
-    console.log('Filing MRI Return:', payload);
+    logger.info('Filing MRI Return:', payload);
 
     const response = await axios.post(
       `${BASE_URL}/file-return`,
@@ -482,7 +485,7 @@ export async function fileMriReturn(
     );
 
     const data = response.data;
-    console.log('File MRI Return Response:', data);
+    logger.info('File MRI Return Response:', data);
   
 
 
@@ -505,7 +508,7 @@ export async function fileMriReturn(
       taxDue: data.tax_due
     };
   } catch (error: any) {
-    console.error('File MRI Return Error:', error.response?.data || error.message);
+    logger.error('File MRI Return Error:', error.response?.data || error.message);
     
     const errorData = error.response?.data;
     // API returns ErrorCode with the user-friendly message
@@ -553,7 +556,7 @@ export async function fileTotReturn(
       taxable_amount: `${grossSales}`,
     };
 
-    console.log('Filing TOT Return:', payload);
+    logger.info('Filing TOT Return:', payload);
 
     const response = await axios.post(
       `${BASE_URL}/file-return`,
@@ -565,7 +568,7 @@ export async function fileTotReturn(
 
     const data = response.data;
 
-    console.log(data)
+    logger.info(data)
     
     // Check for TOT specific nested response structure
     if (data.response && (data.response.Status === 'OK' || data.response.ResponseCode === '87000')) {
@@ -596,7 +599,7 @@ export async function fileTotReturn(
       receiptNumber: data.receipt_number || data.receiptNumber || `TOT-${Date.now()}`,
     };
   } catch (error: any) {
-    console.error('File TOT Return Error:', error.response?.data || error.message);
+    logger.error('File TOT Return Error:', error.response?.data || error.message);
     
     const errorData = error.response?.data;
     // API returns ErrorCode with the user-friendly message
@@ -656,7 +659,7 @@ export async function calculateTax(
         calc_only: "true"
     };
 
-    console.log('Calculating Tax Payload:', payload);
+    logger.info('Calculating Tax Payload:', payload);
 
     const response = await axios.post(
       `${BASE_URL}/file-return`,
@@ -667,7 +670,7 @@ export async function calculateTax(
     );
 
     const data = response.data;
-    console.log('Calculate Tax Response:', data);
+    logger.info('Calculate Tax Response:', data);
 
     // Assuming the API returns the calculated tax in a specific field, 
     // or we might need to inspect the response structure for "calc_only" requests.
@@ -702,7 +705,7 @@ export async function calculateTax(
     };
 
   } catch (error: any) {
-    console.error('Calculate Tax Error:', error.response?.data || error.message);
+    logger.error('Calculate Tax Error:', error.response?.data || error.message);
     return {
       success: false,
       message: error.response?.data?.message || 'Failed to calculate tax'
@@ -746,7 +749,7 @@ export async function getProperties(pin: string): Promise<PropertiesResult> {
       message: data.ResponseMsg
     };
   } catch (error: any) {
-    console.error('Get Properties Error:', error.response?.data || error.message);
+    logger.error('Get Properties Error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -786,8 +789,8 @@ export async function generatePrn(
         amount: roundedAmount,
       }
 
-      console.log(`${BASE_URL}/generate-prn`)
-      console.log('Generate PRN Payload:', payload);
+      logger.info(`${BASE_URL}/generate-prn`)
+      logger.info('Generate PRN Payload:', payload);
 
     const response = await axios.post(
       `${BASE_URL}/generate-prn`,
@@ -797,7 +800,7 @@ export async function generatePrn(
     );
 
     const data = response.data;
-    console.log('Generate PRN Response:', data);
+    logger.info('Generate PRN Response:', data);
 
     // Handle PascalCase response (PaymentRegNo) and standard response (prn)
     const prn = data.PaymentRegNo || data.prn;
@@ -811,7 +814,7 @@ export async function generatePrn(
       data: data
     };
   } catch (error: any) {
-    console.error('Generate PRN Error:', error.response?.data || error.message);
+    logger.error('Generate PRN Error:', error.response?.data || error.message);
     return {
       success: false,
       message: error.response?.data?.message || error.message || 'Failed to generate PRN',
@@ -831,13 +834,13 @@ export async function makePayment(
 ): Promise<MakePaymentResult> {
   try {
     const headers = await getApiHeaders(true);
-    console.log(`${BASE_URL}/make-payment`)
+    logger.info(`${BASE_URL}/make-payment`)
  const payload={
         msisdn: msisdn,
         prn: prn,
       }
 
-    console.log('Make Payment Payload:', payload);
+    logger.info('Make Payment Payload:', payload);
 
     const response = await axios.post(
       `${BASE_URL}/make-payment`,
@@ -846,7 +849,7 @@ export async function makePayment(
       { headers }
     );
 
-    console.log('Make Payment Response:', response.data);
+    logger.info('Make Payment Response:', response.data);
 
     return {
       success: true,
@@ -854,7 +857,7 @@ export async function makePayment(
       data: response.data
     };
   } catch (error: any) {
-    console.error('Make Payment Error:', error.response?.data || error.message);
+    logger.error('Make Payment Error:', error.response?.data || error.message);
     return {
       success: false,
       message: error.response?.data?.message || error.message || 'Failed to initiate payment',
@@ -912,7 +915,7 @@ export async function getTaxPayerLiabilities(
     );
 
     const data = response.data;
-    console.log('Get Liabilities Response:', data);
+    logger.info('Get Liabilities Response:', data);
 
     if (data.Status === 'OK' || data.ResponseCode === '30000') {
       return {
@@ -929,7 +932,7 @@ export async function getTaxPayerLiabilities(
       message: data.ResponseMsg || data.message || 'Failed to retrieve liabilities'
     };
   } catch (error: any) {
-    console.error('Get Liabilities Error:', error.response?.data || error.message);
+    logger.error('Get Liabilities Error:', error.response?.data || error.message);
     return {
       success: false,
       message: error.response?.data?.message || 'Failed to retrieve liabilities'

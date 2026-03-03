@@ -1,5 +1,7 @@
 'use server';
 
+import logger from '@/lib/logger';
+
 import axios from 'axios';
 import { 
   getAuthHeaders, 
@@ -146,7 +148,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
   else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
 
-  console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth);
+  logger.info('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth);
 
   try {
     const headers = await getApiHeaders(true);
@@ -162,7 +164,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       }
     );
 
-    console.log('ID lookup response:', JSON.stringify(response.data, null, 2));
+    logger.info('ID lookup response:', JSON.stringify(response.data, null, 2));
 
     // Check if we got a valid response with data
     if (response.data && response.data.name && response.data.yob) {
@@ -190,7 +192,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       };
     }
   } catch (error: any) {
-    console.error('ID lookup error:', error.response?.data || error.message);
+    logger.error('ID lookup error:', error.response?.data || error.message);
     return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
   }
 }
@@ -225,7 +227,7 @@ export async function guiLookup(idNumber: string): Promise<GuiLookupResult> {
     return { success: false, error: 'ID number must be at least 6 characters' };
   }
 
-  console.log('GUI Lookup for ID:', idNumber);
+  logger.info('GUI Lookup for ID:', idNumber);
 
   try {
     const headers = await getApiHeaders(true);
@@ -242,7 +244,7 @@ export async function guiLookup(idNumber: string): Promise<GuiLookupResult> {
       }
     );
 
-    console.log('GUI Lookup response:', JSON.stringify(response.data, null, 2));
+    logger.info('GUI Lookup response:', JSON.stringify(response.data, null, 2));
 
     // Check for success - API returns ResponseCode "30000" and Status "OK"
     if (response.data && (response.data.Status === 'OK' || response.data.ResponseCode === '30000')) {
@@ -258,7 +260,7 @@ export async function guiLookup(idNumber: string): Promise<GuiLookupResult> {
       };
     }
   } catch (error: any) {
-    console.error('GUI Lookup error:', error.response?.data || error.message);
+    logger.error('GUI Lookup error:', error.response?.data || error.message);
     return {
       success: false,
       error: error.response?.data?.message || 'GUI lookup failed',
@@ -281,7 +283,7 @@ export async function submitTccApplication(
     return { success: false, error: 'Reason for TCC is required' };
   }
 
-  console.log('Submitting TCC Application:', { taxPayerPin, reasonForTcc });
+  logger.info('Submitting TCC Application:', { taxPayerPin, reasonForTcc });
 
   try {
     const headers = await getApiHeaders(true);
@@ -297,7 +299,7 @@ export async function submitTccApplication(
       }
     );
 
-    console.log('TCC Application response:', JSON.stringify(response.data, null, 2));
+    logger.info('TCC Application response:', JSON.stringify(response.data, null, 2));
 
     // Check for success response - API returns Status "OK" for success
     if (response.data && (response.data.Status === 'OK' || response.data.TCCNumber || response.data.tcc_number || response.data.success)) {
@@ -315,7 +317,7 @@ export async function submitTccApplication(
       };
     }
   } catch (error: any) {
-    console.error('TCC Application error:', error.response?.data || error.message);
+    logger.error('TCC Application error:', error.response?.data || error.message);
     return {
       success: false,
       error: error.response?.data?.Message || error.response?.data?.message || 'TCC Application failed',
@@ -361,14 +363,14 @@ export async function getTaxpayerObligations(
       )
     );
 
-    console.log('Obligations:', obligations);
+    logger.info('Obligations:', obligations);
 
     return {
       success: true,
       obligations: obligations,
     };
   } catch (error: any) {
-    console.error('Get Obligations Error:', error.response?.data || error.message);
+    logger.error('Get Obligations Error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -410,7 +412,7 @@ export async function getFilingPeriods(
       message: data.message,
     };
   } catch (error: any) {
-    console.error('Filing Period Error:', error.response?.data || error.message);
+    logger.error('Filing Period Error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -455,7 +457,7 @@ export async function fileNilReturn(
       receiptNumber: data.receipt_number || data.receiptNumber,
     };
   } catch (error: any) {
-    console.error('File NIL Return Error:', error.response?.data || error.message);
+    logger.error('File NIL Return Error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -499,7 +501,7 @@ export async function fileMriReturn(
       receiptNumber: data.receipt_number || data.receiptNumber || `MRI-${Date.now()}`,
     };
   } catch (error: any) {
-    console.error('File MRI Return Error:', error.response?.data || error.message);
+    logger.error('File MRI Return Error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -558,7 +560,7 @@ export async function fileTotReturn(
       receiptNumber: data.receipt_number || data.receiptNumber || `TOT-${Date.now()}`,
     };
   } catch (error: any) {
-    console.error('File TOT Return Error:', error.response?.data || error.message);
+    logger.error('File TOT Return Error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -604,7 +606,7 @@ export async function getProperties(pin: string): Promise<PropertiesResult> {
       message: data.ResponseMsg
     };
   } catch (error: any) {
-    console.error('Get Properties Error:', error.response?.data || error.message);
+    logger.error('Get Properties Error:', error.response?.data || error.message);
     
     return {
       success: false,
@@ -644,7 +646,7 @@ export async function generatePrn(
       { headers }
     );
 
-    console.log('Generate PRN Response:', response.data);
+    logger.info('Generate PRN Response:', response.data);
 
     return {
       success: true,
@@ -653,7 +655,7 @@ export async function generatePrn(
       data: response.data
     };
   } catch (error: any) {
-    console.error('Generate PRN Error:', error.response?.data || error.message);
+    logger.error('Generate PRN Error:', error.response?.data || error.message);
     return {
       success: false,
       message: error.response?.data?.message || error.message || 'Failed to generate PRN',
@@ -682,7 +684,7 @@ export async function makePayment(
       { headers }
     );
 
-    console.log('Make Payment Response:', response.data);
+    logger.info('Make Payment Response:', response.data);
 
     return {
       success: true,
@@ -690,7 +692,7 @@ export async function makePayment(
       data: response.data
     };
   } catch (error: any) {
-    console.error('Make Payment Error:', error.response?.data || error.message);
+    logger.error('Make Payment Error:', error.response?.data || error.message);
     return {
       success: false,
       message: error.response?.data?.message || error.message || 'Failed to initiate payment',

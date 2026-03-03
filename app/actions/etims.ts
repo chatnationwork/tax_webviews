@@ -3,12 +3,11 @@
 import axios from 'axios';
 import { cookies } from 'next/headers';
 import { 
-  getAuthHeaders, 
+  getAuthHeaders as sharedGetAuthHeaders, 
   generateOTP as sharedGenerateOTP, 
   validateOTP as sharedValidateOTP,
   sendWhatsAppMessage as sharedSendWhatsAppMessage,
   sendWhatsAppDocument as sharedSendWhatsAppDocument,
-  OTPResult,
   SendWhatsAppMessageParams,
   SendWhatsAppMessageResult,
   SendWhatsAppDocumentParams,
@@ -30,17 +29,25 @@ import {
   SubmitBuyerInitiatedInvoiceRequest,
   SubmitBuyerInitiatedInvoiceResult
 } from '../etims/_lib/definitions';
+import logger from '@/lib/logger';
 
 const BASE_URL = `${process.env.API_URL}/ussd`;
+const ETIMS_APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+logger.info(`BASE_URL: ${BASE_URL}`);
 
-// getAuthHeaders is imported from ./auth
-
+const getAuthHeaders = async () => {
+  const sharedHeaders = await sharedGetAuthHeaders();
+  return {
+    ...sharedHeaders,
+    'x-forwarded-for': 'whatsapp'
+  };
+};
 
 /**
  * Logs detailed error on server, returns friendly message string
  */
 const getApiErrorMessage = (error: any, context: string = 'API'): string => {
-  console.error(`[${context}] API Error:`, {
+  logger.error(`[${context}] API Error:`, {
     status: error.response?.status,
     data: error.response?.data,
     message: error.message,
@@ -72,6 +79,38 @@ const getApiErrorMessage = (error: any, context: string = 'API'): string => {
 };
 
 /**
+ * Generates a proxy URL for authenticated PDF links.
+ * This allows WhatsApp to access protected documents by routing through our proxy.
+ */
+const getProxyUrl = (targetUrl: string, token: string | undefined): string => {
+  if (!targetUrl) return targetUrl;
+  if (!ETIMS_APP_URL) {
+    logger.warn('NEXT_PUBLIC_APP_URL not set, PDF proxy may not work for WhatsApp');
+    return targetUrl;
+  }
+
+  const proxyUrl = `${ETIMS_APP_URL}/api/proxy/pdf?url=${encodeURIComponent(targetUrl)}`;
+  const finalUrl = token ? `${proxyUrl}&token=${token}` : proxyUrl;
+  
+  logger.debug(`URL: ${finalUrl}`);
+  return finalUrl;
+};
+
+/**
+ * Check if a PDF URL requires an auth token by performing a HEAD request.
+ * Returns true if the URL responds with an error (401/403/etc), meaning a token is needed.
+ */
+async function doesPdfRequireAuth(url: string): Promise<boolean> {
+  try {
+    const response = await axios.head(url, { timeout: 5000 });
+    return response.status !== 200;
+  } catch {
+    // Any error (403, 401, timeout, network error) means it requires auth token (or is unreachable)
+    return true;
+  }
+}
+
+/**
  * Lookup customer by PIN or ID
  */
 export async function lookupCustomer(pinOrId: string): Promise<CustomerLookupResult> {
@@ -84,7 +123,8 @@ export async function lookupCustomer(pinOrId: string): Promise<CustomerLookupRes
     return { success: false, error: 'Please enter a valid PIN or ID number' };
   }
 
-  console.log('Looking up customer:', pinOrId);
+  logger.info(`Looking up customer: ${pinOrId}`);
+  logger.debug(`URL: ${BASE_URL}/buyer-initiated/lookup`);
 
   try {
     const response = await axios.post(
@@ -98,7 +138,7 @@ export async function lookupCustomer(pinOrId: string): Promise<CustomerLookupRes
       }
     );
 
-    console.log('Lookup response:', JSON.stringify(response.data, null, 2));
+    logger.info('Lookup response:', { data: response.data });
 
     // The API returns { code: 3, message: "Valid ID Number", name: "...", pin: "..." } on success
     // It does not return a standard success: boolean flag.
@@ -118,7 +158,7 @@ export async function lookupCustomer(pinOrId: string): Promise<CustomerLookupRes
         };
     }
   } catch (error: any) {
-    console.error('[Customer Lookup] Error:', {
+    logger.error('[Customer Lookup] Error:', {
       status: error.response?.status,
       data: error.response?.data,
       message: error.message,
@@ -175,22 +215,20 @@ export async function submitInvoice(
 
   request.source = 'whatsapp';
 
-  console.log('Submitting invoice:', JSON.stringify(request, null, 2));
+  logger.info('Submitting invoice:', { request });
+  logger.debug(`URL: ${BASE_URL}/post-sale`);
 
   try {
     const response = await axios.post(
       `${BASE_URL}/post-sale`,
       request,
       {
-        headers: {
-          ...(await getAuthHeaders()),
-          'x-source-for': 'whatsapp'
-        },
+        headers: await getAuthHeaders(),
         timeout: 60000, 
       }
     );
 
-    console.log('Invoice API Response:', JSON.stringify(response.data, null, 2));
+    logger.info('Invoice API Response:', { data: response.data });
 
     // API returns code 8 for success
     // Transform to InvoiceSubmissionResult interface
@@ -234,7 +272,8 @@ export async function fetchInvoices(
     cleanNumber = '254' + cleanNumber;
   }
 
-  console.log('Fetching invoices for:', cleanNumber, 'status:', status || 'all', 'actor:', actor || 'all');
+  logger.info(`Fetching invoices for: ${cleanNumber}, status: ${status || 'all'}, actor: ${actor || 'all'}`);
+  logger.debug(`URL: ${BASE_URL}/buyer-initiated/fetch/${cleanNumber}`);
 
   try {
     const params = new URLSearchParams();
@@ -249,15 +288,12 @@ export async function fetchInvoices(
     const response = await axios.get(
       url,
       {
-        headers: {
-          ...(await getAuthHeaders()),
-          'x-source-for': 'whatsapp'
-        },
+        headers: await getAuthHeaders(),
         timeout: 30000
       }
     );
 
-    console.log('Fetch invoices response:', JSON.stringify(response.data, null, 2));
+    logger.info('Fetch invoices response:', { data: response.data });
 
     // Handle different response formats
     let invoices: any[] = [];
@@ -318,7 +354,7 @@ export async function fetchInvoices(
       invoices: parsedInvoices
     };
   } catch (error: any) {
-    console.error('Fetch invoices error:', error.response?.data || error.message);
+    logger.error('Fetch invoices error:', error.response?.data || error.message);
     if (error.response?.status === 404) {
       return {
         success: true,
@@ -353,7 +389,8 @@ export async function searchCreditNoteInvoice(
     cleanNumber = '254' + cleanNumber;
   }
 
-  console.log('Searching credit note invoice:', invoiceNo, 'for:', cleanNumber);
+  logger.info(`Searching credit note invoice: ${invoiceNo} for: ${cleanNumber}`);
+  logger.debug(`URL: ${BASE_URL}/search/credit-note`);
 
   try {
     const response = await axios.post(
@@ -363,15 +400,12 @@ export async function searchCreditNoteInvoice(
         invoice_no: invoiceNo.trim()
       },
       {
-        headers: {
-          ...(await getAuthHeaders()),
-          'x-source-for': 'whatsapp'
-        },
+        headers: await getAuthHeaders(),
         timeout: 30000
       }
     );
 
-    console.log('Search credit note response:', JSON.stringify(response.data, null, 2));
+    logger.info('Search credit note response:', { data: response.data });
 
     // Handle response - check if invoice data is in the response
     if (response.data.success === false) {
@@ -398,7 +432,7 @@ export async function searchCreditNoteInvoice(
       hasPartialCreditNote: response.data.has_partial_credit_note || false
     };
   } catch (error: any) {
-    console.error('Search credit note error:', error.response?.data || error.message);
+    logger.error('Search credit note error:', error.response?.data || error.message);
     
     // Handle specific error codes from API
     const errorCode = error.response?.data?.code;
@@ -473,7 +507,6 @@ export async function submitCreditNote(
      }
   }
  
-
   // Clean phone number
   let cleanNumber = request.msisdn.trim().replace(/[^\d]/g, '');
   if (cleanNumber.startsWith('0')) {
@@ -482,15 +515,10 @@ export async function submitCreditNote(
     cleanNumber = '254' + cleanNumber;
   }
 
-  console.log('Submitting credit note:', JSON.stringify({
-    ...request,
-    msisdn: cleanNumber
-  }, null, 2));
+  logger.info('Submitting credit note:', { ...request, msisdn: cleanNumber });
+  logger.debug(`URL: ${BASE_URL}/submit/credit-note`);
 
   try {
-    
-    
-
     let endpoint = '';
     let payload: any = {
       msisdn: cleanNumber,
@@ -501,7 +529,6 @@ export async function submitCreditNote(
 
     payload.invoice_no = invoiceSuffix;
     
-
     if (request.credit_note_type === 'full') {
       endpoint = `${BASE_URL}/submit/credit-note`;
       
@@ -523,22 +550,19 @@ export async function submitCreditNote(
       payload.source = 'whatsapp';
     }
 
-    console.log(`Submitting ${request.credit_note_type} credit note to:`, endpoint);
-    console.log('Payload:', JSON.stringify(payload, null, 2));
+    logger.info(`Submitting ${request.credit_note_type} credit note to: ${endpoint}`);
+    logger.debug('Payload:', { payload });
 
     const response = await axios.post(
       endpoint,
       payload,
       {
-        headers: {
-          ...(await getAuthHeaders()),
-          'x-source-for': 'whatsapp'
-        },
+        headers: await getAuthHeaders(),
         timeout: 30000
       }
     );
 
-    console.log('Submit credit note response:', JSON.stringify(response.data, null, 2));
+    logger.info('Submit credit note response:', { data: response.data });
 
     // API returns code 12 for success
     return {
@@ -550,14 +574,13 @@ export async function submitCreditNote(
       error: response.data.code !== 12 ? response.data.message : undefined
     };
   } catch (error: any) {
-    console.error('Submit credit note error:', error.response?.data || error.message);
+    logger.error('Submit credit note error:', error.response?.data || error.message);
     
     // If API doesn't support full payload yet, return mock success
     if (error.response?.status === 400 || error.response?.status === 422) {
-      console.log('API may not support full payload, returning mock success');
+      logger.debug('API may not support full payload');
       return {
         success: false,
-   
         message: 'Credit note submission failed '
       };
     }
@@ -583,7 +606,8 @@ export async function processBuyerInvoice(
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
   else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
 
-  console.log(`Processing invoice ${invoiceRef} for ${cleanNumber}: ${action}`);
+  logger.info(`Processing invoice ${invoiceRef} for ${cleanNumber}: ${action}`);
+  logger.debug(`URL: ${BASE_URL}/buyer-initiated/action/submit`);
 
   try {
     const response = await axios.post(
@@ -594,33 +618,28 @@ export async function processBuyerInvoice(
         invoice: invoiceRef
       },
       {
-        headers: {
-          ...(await getAuthHeaders()),
-          'x-source-for': 'whatsapp'
-        },
+        headers: await getAuthHeaders(),
         timeout: 30000
       }
     );
 
-    console.log('Process invoice response:', JSON.stringify(response.data, null, 2));
+    logger.info('Process invoice response:', { data: response.data });
 
     // If accepted, poll for the approved invoice to get the PDF URL
     if (action === 'accept' && (response.data.success !== false)) {
-    
-
       (async () => {
         try {
-          console.log(`Starting polling for approved invoice ${invoiceRef} PDF...`);
+          logger.info(`Starting polling for approved invoice ${invoiceRef} PDF...`);
           // Try 3 times with delay
           for (let i = 0; i < 3; i++) {
             const delay = (i + 1) * 2000; // 2s, 4s, 6s - wait, user said 1 or 3 seconds. Let's do 2s delay.
-            console.log(`Polling attempt ${i + 1}/3... waiting 2s`);
+            logger.debug(`Polling attempt ${i + 1}/3... waiting 2s`);
             await new Promise(resolve => setTimeout(resolve, 2000));
 
             const fetchResult = await fetchInvoices(cleanNumber, undefined, 'accepted', 'supplier');
             
             if (fetchResult.success && fetchResult.invoices) {
-              console.log(`Fetched ${fetchResult.invoices.length} accepted invoices.`);
+              logger.debug(`Fetched ${fetchResult.invoices.length} accepted invoices.`);
             
               const approvedInvoice = fetchResult.invoices.find(inv => 
                 (inv.invoice_number === invoiceRef) || 
@@ -630,10 +649,10 @@ export async function processBuyerInvoice(
               );
 
               if (approvedInvoice) {
-                console.log('Approved invoice found:', JSON.stringify(approvedInvoice, null, 2));
+                logger.info('Approved invoice found:', { approvedInvoice });
                 
                 if (approvedInvoice.invoice_pdf_url) {
-                  console.log('PDF URL found, sending WhatsApp...');
+                  logger.info('PDF URL found, sending WhatsApp...', { supplier_msisdn: approvedInvoice.supplier_msisdn });
                   await sendBuyerStatusUpdateWithPdf(
                     approvedInvoice.supplier_msisdn || cleanNumber,
                     approvedInvoice.seller_name || sellerName || 'Partner',
@@ -643,7 +662,7 @@ export async function processBuyerInvoice(
                   );
 
                   if (approvedInvoice.buyer_msisdn) {
-                    console.log(`Sending PDF to buyer (${approvedInvoice.buyer_msisdn})...`);
+                    logger.info(`Sending PDF to buyer (${approvedInvoice.buyer_msisdn})...`);
                     await sendBuyerStatusUpdateWithPdf(
                       approvedInvoice.buyer_msisdn,
                       approvedInvoice.buyer_name || 'Customer',
@@ -655,17 +674,17 @@ export async function processBuyerInvoice(
                   // Found and sent
                   break; 
                 } else {
-                  console.log('Invoice found but PDF URL missing yet.');
+                  logger.warn('Invoice found but PDF URL missing yet.');
                 }
               } else {
-                console.log(`Invoice ${invoiceRef} not found in fetch results yet.`);
+                logger.warn(`Invoice ${invoiceRef} not found in fetch results yet.`);
               }
             } else {
-              console.log('Fetch invoices failed or empty:', fetchResult.error);
+              logger.error('Fetch invoices failed or empty:', { error: fetchResult.error });
             }
           }
         } catch (pollError) {
-          console.error('Error polling for invoice PDF:', pollError);
+          logger.error('Error polling for invoice PDF:', { error: pollError });
         }
       })();
     }
@@ -692,7 +711,7 @@ export async function processBuyerInvoiceBulk(
   if (!msisdn) return { success: false, processed: 0, failed: 0, errors: ['Phone number is required'] };
   if (!invoices || invoices.length === 0) return { success: false, processed: 0, failed: 0, errors: ['No invoices selected'] };
 
-  console.log(`Processing bulk invoices for ${msisdn}: ${action} (${invoices.length} items)`);
+  logger.info(`Processing bulk invoices for ${msisdn}: ${action} (${invoices.length} items)`);
 
   const results = await Promise.all(
     invoices.map(async (inv) => {
@@ -724,7 +743,7 @@ export async function processBuyerInvoiceBulk(
     const successfulItems = invoices.filter((_, index) => results[index].success);
     const invoiceList = successfulItems.map((inv, i) => `${i + 1}. ${inv.ref} - ${inv.buyerName} - Total: ${inv.totalAmount}`).join('\n');
     
-    await sendWhatsAppMessage({
+    await sharedSendWhatsAppMessage({
       recipientPhone: msisdn,
       message: `Dear ${sellerName || 'Seller'}, the following invoices have been ${statusText}:\n\n${invoiceList}`
     });
@@ -757,9 +776,13 @@ export async function submitBuyerInitiatedInvoice(
   if (cleanSellerNumber.startsWith('0')) cleanSellerNumber = '254' + cleanSellerNumber.substring(1);
   else if (cleanSellerNumber && !cleanSellerNumber.startsWith('254')) cleanSellerNumber = '254' + cleanSellerNumber;
 
-  console.log('Submitting buyer initiated invoice:', JSON.stringify({ ...request, msisdn: cleanNumber }, null, 2));
+  logger.info('Submitting buyer initiated invoice:', { ...request, msisdn: cleanNumber });
+  logger.debug(`URL: ${BASE_URL}/buyer-initiated/submit/invoice`);
 
   try {
+    const authHeaders = await getAuthHeaders();
+    logger.debug('Request Headers:', { authHeaders });
+
     const response = await axios.post(
       `${BASE_URL}/buyer-initiated/submit/invoice`,
       {
@@ -772,15 +795,14 @@ export async function submitBuyerInitiatedInvoice(
         source: 'whatsapp'
       },
       {
-        headers: {
-          ...(await getAuthHeaders()),
-          'x-source-for': 'whatsapp'
-        },
+        headers: authHeaders,
         timeout: 30000
       }
     );
 
-    console.log('Submit buyer initiated invoice response:', JSON.stringify(response.data, null, 2));
+    logger.info('Submit buyer initiated invoice response status:', { status: response.status });
+    logger.debug('Submit buyer initiated invoice response headers:', { headers: response.headers });
+    logger.info('Submit buyer initiated invoice response data:', { data: response.data });
 
     return {
       success: response.data.success !== false, // Some APIs return success: true/false, others implict success
@@ -817,7 +839,8 @@ export async function checkUserStatus(msisdn: string): Promise<CheckUserStatusRe
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
   else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
 
-  console.log('Checking user status for:', cleanNumber);
+  logger.info(`Checking user status for: ${cleanNumber}`);
+  logger.debug(`URL: ${BASE_URL}/init`);
 
   try {
     const response = await axios.post(
@@ -826,13 +849,12 @@ export async function checkUserStatus(msisdn: string): Promise<CheckUserStatusRe
       {
         headers: {
           "Content-Type": "application/json",
-         
         },
         timeout: 30000
       }
     );
 
-    console.log('Init response:', JSON.stringify(response.data, null, 2));
+    logger.info('Init response:', { data: response.data });
 
     // code 1 = registered, code 0 = not registered
     const isRegistered = response.data.code === 1;
@@ -847,7 +869,7 @@ export async function checkUserStatus(msisdn: string): Promise<CheckUserStatusRe
       entities: response.data.entities,
     };
   } catch (error: any) {
-    console.error('Check user status error:', error.response?.data || error.message);
+    logger.error('Check user status error:', error.response?.data || error.message);
     return {
       success: false,
       isRegistered: false,
@@ -867,7 +889,6 @@ export interface LookupByIdResult {
 /**
  * Lookup user details by ID number using lookup API
  */
-
 export async function lookupById(idNumber: string, phoneNumber: string, yearOfBirth: string): Promise<LookupByIdResult> {
   if (!idNumber || idNumber.trim().length < 6) {
     return { success: false, error: 'ID number must be at least 6 characters' };
@@ -884,7 +905,8 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
   else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
 
-  console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth);
+  logger.info(`Looking up ID: ${idNumber}, Phone: ${cleanNumber}, YOB to verify: ${yearOfBirth}`);
+  logger.debug(`URL: ${BASE_URL}/id-lookup`);
 
   try {
     const response = await axios.post(
@@ -896,13 +918,12 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       { 
         headers: { 
           "Content-Type": "application/json",
-         
         }, 
         timeout: 30000 
       }
     );
 
-    console.log('ID lookup response:', JSON.stringify(response.data, null, 2));
+    logger.info('ID lookup response:', { data: response.data });
 
     // Check if we got a valid response with data
     if (response.data && response.data.name && response.data.yob) {
@@ -914,7 +935,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       if (returnedYob !== yearOfBirth.trim()) {
         return {
           success: false,
-          error: `Some of your information didnt match. Please check your details and try again`
+          error: `Some of your information didn't match. Please check your details and try again.`
         };
       }
 
@@ -931,7 +952,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       };
     }
   } catch (error: any) {
-    console.error('ID lookup error:', error.response?.data || error.message);
+    logger.error('ID lookup error:', error.response?.data || error.message);
     return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
   }
 }
@@ -950,29 +971,27 @@ export async function registerTaxpayer(idNumber: string, msisdn: string): Promis
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
   else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
 
-  console.log('Registering taxpayer:', { idNumber, msisdn: cleanNumber });
+  logger.info('Registering taxpayer:', { idNumber, msisdn: cleanNumber });
+  logger.debug(`URL: ${BASE_URL}/register-tax-payer`);
 
   try {
     const response = await axios.post(
       `${BASE_URL}/register-tax-payer`,
       { id_number: idNumber.trim(), msisdn: cleanNumber },
       {
-        headers: {
-          ...(await getAuthHeaders()),
-          'x-source-for': 'whatsapp'
-        },
+        headers: await getAuthHeaders(),
         timeout: 30000
       }
     );
 
-    console.log('Register response:', JSON.stringify(response.data, null, 2));
+    logger.info('Register response:', { data: response.data });
 
     // code 5 = registration successful
     if (response.data.code === 5) {
       return { success: true, message: response.data.message || 'Registration successful' };
     } else if (response.data.code === 22) {
     
-      await sendWhatsAppMessage({
+      await sharedSendWhatsAppMessage({
         recipientPhone: cleanNumber,
         message: "Dear Customer, your registration is currently in progress. Kindly try logging in again shortly.\n\n For more information, visit https://www.kra.go.ke/business/etims-electronic-tax-invoice-management-system/learn-about-etims/what-is-etims"
       });
@@ -982,7 +1001,7 @@ export async function registerTaxpayer(idNumber: string, msisdn: string): Promis
       return { success: false, error: response.data.message || 'Registration failed' };
     }
   } catch (error: any) {
-    console.error('Register taxpayer error:', error.response?.data || error.message);
+    logger.error('Register taxpayer error:', error.response?.data || error.message);
     return { success: false, error: error.response?.data?.message || 'Registration failed' };
   }
 }
@@ -993,9 +1012,6 @@ export interface GenerateOTPResult {
   error?: string;
 }
 
-/**
- * Generate and send OTP to user's phone
- */
 /**
  * Generate and send OTP to user's phone
  * (Delegates to shared auth action)
@@ -1010,16 +1026,12 @@ export async function generateOTP(msisdn: string): Promise<GenerateOTPResult> {
   };
 }
 
-
 export interface VerifyOTPResult {
   success: boolean;
   message?: string;
   error?: string;
 }
 
-/**
- * Verify OTP entered by user
- */
 /**
  * Verify OTP entered by user
  * (Delegates to shared auth action)
@@ -1039,16 +1051,8 @@ export async function verifyOTP(msisdn: string, otp: string): Promise<VerifyOTPR
   };
 }
 
-
 // WHATSAPP TEXT MESSAGE SENDING
 
-// Types imported from ./auth
-
-
-/**
- * Send a text message via WhatsApp to a user
- * Used for sending notifications, confirmations, etc.
- */
 /**
  * Send a text message via WhatsApp to a user
  */
@@ -1058,25 +1062,29 @@ export async function sendWhatsAppMessage(
     return sharedSendWhatsAppMessage(params);
 }
 
-
 // WHATSAPP DOCUMENT SENDING
 
-// Types imported from ./auth
-
-
-/**
- * Send a document (PDF) via WhatsApp to a user
- * Used for sending invoices, credit notes, reports, etc.
- */
 /**
  * Send a document (PDF) via WhatsApp to a user
  */
 export async function sendWhatsAppDocument(
   params: SendWhatsAppDocumentParams
 ): Promise<SendWhatsAppDocumentResult> {
-    return sharedSendWhatsAppDocument(params);
+    const { documentUrl } = params;
+    
+    // Always proxy PDFs for WhatsApp accessibility
+    const needsAuth = await doesPdfRequireAuth(documentUrl);
+    const cookieStore = await cookies();
+    const authToken = needsAuth ? cookieStore.get('etims_auth_token')?.value : undefined;
+    
+    logger.info(`Proxying PDF (Token needed: ${needsAuth})`, { documentUrl });
+    const proxiedDocumentUrl = getProxyUrl(documentUrl, authToken);
+    
+    return sharedSendWhatsAppDocument({
+        ...params,
+        documentUrl: proxiedDocumentUrl
+    });
 }
-
 
 /**
  * Send template message to buyer when invoice is approved/rejected
@@ -1099,7 +1107,7 @@ export async function sendBuyerInvoiceAlert(
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   
   if (!token || !phoneNumberId) {
-    console.error('WhatsApp credentials missing');
+    logger.error('WhatsApp credentials missing');
     return { success: false, error: 'Configuration error' };
   }
 
@@ -1126,6 +1134,8 @@ export async function sendBuyerInvoiceAlert(
     }
   };
 
+  logger.info('Sending WhatsApp template message:', { to: cleanNumber, payload });
+
   try {
     await axios.post(url, payload, {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -1138,9 +1148,10 @@ export async function sendBuyerInvoiceAlert(
       message_type: 'template',
       template_name: 'inoice_alert_buyer'
     });
-
+    
     return { success: true };
   } catch (error: any) {
+    logger.error('WhatsApp template error:', error.response?.data || error.message);
     return { success: false, error: error.message };
   }
 }
@@ -1158,16 +1169,26 @@ export async function sendBuyerStatusUpdateWithPdf(
   
   if (!recipientPhone) return { success: false, error: 'Recipient phone required' };
 
+  // Always proxy PDFs for WhatsApp accessibility
+  const needsAuth = await doesPdfRequireAuth(pdfUrl);
+  const cookieStore = await cookies();
+  const authToken = needsAuth ? cookieStore.get('etims_auth_token')?.value : undefined;
+  
+  logger.info(`Proxying PDF (Token needed: ${needsAuth})`, { pdfUrl });
+  const proxiedPdfUrl = getProxyUrl(pdfUrl, authToken);
+
   // Clean phone number
   let cleanNumber = recipientPhone.trim().replace(/[^\d]/g, '');
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
   else if (cleanNumber.startsWith('+')) cleanNumber = cleanNumber.substring(1);
 
+  logger.info(`Sending approved invoice to ${cleanNumber}`)
+
   const token = process.env.WHATSAPP_ACCESS_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   
   if (!token || !phoneNumberId) {
-    console.error('WhatsApp credentials missing');
+    logger.error('WhatsApp credentials missing');
     return { success: false, error: 'Configuration error' };
   }
 
@@ -1188,7 +1209,7 @@ export async function sendBuyerStatusUpdateWithPdf(
             {
               type: "document",
               document: {
-                link: pdfUrl,
+                link: proxiedPdfUrl,
                 filename: "invoice.pdf" // Optional but good practice
               }
             }
@@ -1205,7 +1226,6 @@ export async function sendBuyerStatusUpdateWithPdf(
       ]
     }
   };
-
 
   try {
     const finalPayload = {
@@ -1226,7 +1246,7 @@ export async function sendBuyerStatusUpdateWithPdf(
       }
     };
 
-    console.log('Sending WhatsApp Template:', JSON.stringify(finalPayload, null, 2));
+    logger.info('Sending WhatsApp Template:', { "buyer_alert_for_invoice_status_update": finalPayload });
     await axios.post(url, finalPayload, {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       timeout: 10000
@@ -1237,13 +1257,13 @@ export async function sendBuyerStatusUpdateWithPdf(
       recipient_phone: cleanNumber,
       message_type: 'template',
       template_name: 'buyer_alert_for_invoice_status_update',
-      document_url: pdfUrl,
+      document_url: proxiedPdfUrl,
       document_filename: 'invoice.pdf'
     });
-
+    
     return { success: true };
   } catch (error: any) {
-    console.error('WhatsApp Template Error:', error.response?.data || error.message);
+    logger.error('WhatsApp Template Error:', error.response?.data || error.message);
     return { success: false, error: error.message };
   }
 }
@@ -1270,7 +1290,7 @@ export async function sendBuyerInitiatedInvoiceAlert(
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   
   if (!token || !phoneNumberId) {
-    console.error('WhatsApp credentials missing');
+    logger.error('WhatsApp credentials missing');
     return { success: false, error: 'Configuration error' };
   }
 
@@ -1300,6 +1320,8 @@ export async function sendBuyerInitiatedInvoiceAlert(
     }
   };
 
+  logger.info('Sending WhatsApp Template:', { "alert_seller_invoice_buyer_initiated": payload });
+
   try {
     await axios.post(url, payload, {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -1315,10 +1337,11 @@ export async function sendBuyerInitiatedInvoiceAlert(
     
     return { success: true };
   } catch (error: any) {
-    console.error('WhatsApp template error:', error.response?.data || error.message);
+    logger.error('WhatsApp template error:', error.response?.data || error.message);
     return { success: false, error: error.message };
   }
 }
+
 export async function sendInvoiceCreditDocTemplate(
   recipientPhone: string,
   name: string,
@@ -1330,6 +1353,14 @@ export async function sendInvoiceCreditDocTemplate(
   
   if (!recipientPhone) return { success: false, error: 'Recipient phone required' };
 
+  // Always proxy PDFs for WhatsApp accessibility
+  const needsAuth = await doesPdfRequireAuth(pdfUrl);
+  const cookieStore = await cookies();
+  const authToken = needsAuth ? cookieStore.get('etims_auth_token')?.value : undefined;
+  
+  logger.info(`Proxying PDF (Token needed: ${needsAuth})`, { pdfUrl });
+  const proxiedPdfUrl = getProxyUrl(pdfUrl, authToken);
+
   // Clean phone number
   let cleanNumber = recipientPhone.trim().replace(/[^\d]/g, '');
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
@@ -1339,7 +1370,7 @@ export async function sendInvoiceCreditDocTemplate(
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   
   if (!token || !phoneNumberId) {
-    console.error('WhatsApp credentials missing');
+    logger.error('WhatsApp credentials missing');
     return { success: false, error: 'Configuration error' };
   }
 
@@ -1360,7 +1391,7 @@ export async function sendInvoiceCreditDocTemplate(
             {
               type: "document",
               document: {
-                link: pdfUrl,
+                link: proxiedPdfUrl,
                 filename: "document.pdf" 
               }
             }
@@ -1380,7 +1411,7 @@ export async function sendInvoiceCreditDocTemplate(
   };
 
   try {
-    console.log('Sending WhatsApp Template:', JSON.stringify(payload, null, 2));
+    logger.info('Sending WhatsApp Template:', { "invoice_credit_doc": payload });
     await axios.post(url, payload, {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       timeout: 10000
@@ -1391,16 +1422,17 @@ export async function sendInvoiceCreditDocTemplate(
       recipient_phone: cleanNumber,
       message_type: 'template',
       template_name: 'invoice_credit_doc',
-      document_url: pdfUrl,
+      document_url: proxiedPdfUrl,
       document_filename: 'document.pdf'
     });
-
+    
     return { success: true };
   } catch (error: any) {
-    console.error('WhatsApp Template Error:', error.response?.data || error.message);
+    logger.error('WhatsApp Template Error:', error.response?.data || error.message);
     return { success: false, error: error.message };
   }
 }
+
 export async function sendDownloadInvoicesTemplate(
   recipientPhone: string,
   docRef: string,
@@ -1411,6 +1443,14 @@ export async function sendDownloadInvoicesTemplate(
   
   if (!recipientPhone) return { success: false, error: 'Recipient phone required' };
 
+  // Always proxy PDFs for WhatsApp accessibility
+  const needsAuth = await doesPdfRequireAuth(pdfUrl);
+  const cookieStore = await cookies();
+  const authToken = needsAuth ? cookieStore.get('etims_auth_token')?.value : undefined;
+  
+  logger.info(`Proxying PDF (Token needed: ${needsAuth})`, { pdfUrl });
+  const proxiedPdfUrl = getProxyUrl(pdfUrl, authToken);
+
   // Clean phone number
   let cleanNumber = recipientPhone.trim().replace(/[^\d]/g, '');
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
@@ -1420,7 +1460,7 @@ export async function sendDownloadInvoicesTemplate(
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   
   if (!token || !phoneNumberId) {
-    console.error('WhatsApp credentials missing');
+    logger.error('WhatsApp credentials missing');
     return { success: false, error: 'Configuration error' };
   }
 
@@ -1441,7 +1481,7 @@ export async function sendDownloadInvoicesTemplate(
             {
               type: "document",
               document: {
-                link: pdfUrl,
+                link: proxiedPdfUrl,
                 filename: "document.pdf" 
               }
             }
@@ -1460,7 +1500,7 @@ export async function sendDownloadInvoicesTemplate(
   };
 
   try {
-    console.log('Sending WhatsApp Template:', JSON.stringify(payload, null, 2));
+    logger.info('Sending WhatsApp Template:', { template: payload });
     await axios.post(url, payload, {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       timeout: 10000
@@ -1471,13 +1511,13 @@ export async function sendDownloadInvoicesTemplate(
       recipient_phone: cleanNumber,
       message_type: 'template',
       template_name: 'download_invoices',
-      document_url: pdfUrl,
+      document_url: proxiedPdfUrl,
       document_filename: 'document.pdf'
     });
-
+    
     return { success: true };
   } catch (error: any) {
-    console.error('WhatsApp Template Error:', error.response?.data || error.message);
+    logger.error('WhatsApp Template Error:', error.response?.data || error.message);
     return { success: false, error: error.message };
   }
 }
@@ -1492,6 +1532,14 @@ export async function sendDownloadInvoiceTemplate(
   
   if (!recipientPhone) return { success: false, error: 'Recipient phone required' };
 
+  // Always proxy PDFs for WhatsApp accessibility
+  const needsAuth = await doesPdfRequireAuth(pdfUrl);
+  const cookieStore = await cookies();
+  const authToken = needsAuth ? cookieStore.get('etims_auth_token')?.value : undefined;
+  
+  logger.info(`Proxying PDF (Token needed: ${needsAuth})`, { pdfUrl });
+  const proxiedPdfUrl = getProxyUrl(pdfUrl, authToken);
+
   // Clean phone number
   let cleanNumber = recipientPhone.trim().replace(/[^\d]/g, '');
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
@@ -1501,7 +1549,7 @@ export async function sendDownloadInvoiceTemplate(
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   
   if (!token || !phoneNumberId) {
-    console.error('WhatsApp credentials missing');
+    logger.error('WhatsApp credentials missing');
     return { success: false, error: 'Configuration error' };
   }
 
@@ -1522,7 +1570,7 @@ export async function sendDownloadInvoiceTemplate(
             {
               type: "document",
               document: {
-                link: pdfUrl,
+                link: proxiedPdfUrl,
                 filename: "document.pdf" 
               }
             }
@@ -1541,7 +1589,7 @@ export async function sendDownloadInvoiceTemplate(
   };
 
   try {
-    console.log('Sending WhatsApp Template:', JSON.stringify(payload, null, 2));
+    logger.info('Sending WhatsApp Template:', { template: payload });
     await axios.post(url, payload, {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       timeout: 10000
@@ -1552,13 +1600,13 @@ export async function sendDownloadInvoiceTemplate(
       recipient_phone: cleanNumber,
       message_type: 'template',
       template_name: 'download_invoices',
-      document_url: pdfUrl,
+      document_url: proxiedPdfUrl,
       document_filename: 'document.pdf'
     });
-
+    
     return { success: true };
   } catch (error: any) {
-    console.error('WhatsApp Template Error:', error.response?.data || error.message);
+    logger.error('WhatsApp Template Error:', error.response?.data || error.message);
     return { success: false, error: error.message };
   }
 }
