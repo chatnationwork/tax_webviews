@@ -4,14 +4,19 @@
  * Lists all channels a taxpayer can use to file returns or get help:
  * USSD, WhatsApp Shuru, iTax Portal, eCitizen, and KRA Service Centres.
  * Includes a MicroFeedback widget at the bottom.
+ *
+ * Analytics: fires `campaign_page_view` on mount and `campaign_channel_click`
+ * whenever the user taps an actionable channel link, enabling measurement of
+ * which filing channels are most popular in the campaign cohort.
  */
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Layout, Card } from '@/app/_components/Layout';
 import MicroFeedback from '@/app/campaign/_components/MicroFeedback';
 import { Hash, MessageCircle, Globe, Landmark, ExternalLink } from 'lucide-react';
+import { analytics } from '@/app/_lib/analytics';
 
 /** Available filing channels */
 const CHANNELS = [
@@ -73,6 +78,27 @@ function FilingOptionsContent() {
   const router = useRouter();
   const phone = searchParams.get('phone') || '';
 
+  /**
+   * Track that the user landed on this sub-page.
+   * The AnalyticsProvider fires a generic page() event, but this
+   * explicit track gives us a named funnel step we can filter on.
+   */
+  useEffect(() => {
+    if (phone) analytics.setUserId(phone);
+    analytics.track('campaign_page_view', { page: 'filing-options' });
+  }, [phone]);
+
+  /**
+   * Track when a user taps an actionable channel link.
+   * This reveals which filing channels the campaign cohort prefers.
+   */
+  const handleChannelClick = (channelLabel: string) => {
+    analytics.track('campaign_channel_click', {
+      channel: channelLabel,
+      page: 'filing-options',
+    });
+  };
+
   return (
     <Layout
       title="Filing Options"
@@ -110,6 +136,7 @@ function FilingOptionsContent() {
                         href={channel.action}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => handleChannelClick(channel.label)}
                         className="shrink-0 flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold rounded-full bg-[var(--kra-red)] text-white hover:bg-[var(--kra-red-dark)] transition-colors"
                       >
                         {channel.actionLabel}

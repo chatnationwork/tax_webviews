@@ -3,19 +3,34 @@
  *
  * Standalone route wrapping the PostSurvey component inside the shared Layout.
  * Linked from the Support & Feedback page after filing or support interactions.
+ *
+ * Analytics: fires `campaign_survey_start` on mount to mark the beginning
+ * of the survey funnel step, separate from the `campaign_survey_open` event
+ * fired by the Support page when the CTA is tapped.
  */
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Layout } from '@/app/_components/Layout';
 import PostSurvey from '@/app/campaign/_components/PostSurvey';
+import { analytics } from '@/app/_lib/analytics';
 
 /** Inner component that reads search params */
 function SurveyContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const phone = searchParams.get('phone') || '';
+
+  /**
+   * Track that the user has actually arrived at and started the survey.
+   * This allows measurement of drop-off between the Support page CTA
+   * (`campaign_survey_open`) and survey page load (`campaign_survey_start`).
+   */
+  useEffect(() => {
+    if (phone) analytics.setUserId(phone);
+    analytics.track('campaign_survey_start', { page: 'survey' });
+  }, [phone]);
 
   return (
     <Layout

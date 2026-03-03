@@ -50,6 +50,8 @@ function AnalyticsTracker() {
             journeyName = 'Payroll';
           } else if (pathname.includes('/otp') || pathname.includes('/onboarding')) {
             journeyName = 'Onboarding';
+          } else if (pathname.startsWith('/campaign')) {
+            journeyName = 'Campaign';
           }
 
           analytics.page(journeyName);

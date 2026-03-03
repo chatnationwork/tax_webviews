@@ -4,14 +4,18 @@
  * Explains the eTIMS pre-populated filing flow: real-time invoices,
  * auto-populated ledger, review-and-submit, and the 2026 eTIMS-only rule.
  * Includes a MicroFeedback widget at the bottom.
+ *
+ * Analytics: fires `campaign_page_view` on mount to track engagement
+ * with this educational content step in the campaign funnel.
  */
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Layout, Card } from '@/app/_components/Layout';
 import MicroFeedback from '@/app/campaign/_components/MicroFeedback';
 import { Zap, BookOpen, ClipboardCheck, Send, Calendar, Gauge } from 'lucide-react';
+import { analytics } from '@/app/_lib/analytics';
 
 /** Steps describing how pre-populated filing works */
 const STEPS = [
@@ -46,6 +50,16 @@ function PrePopulationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const phone = searchParams.get('phone') || '';
+
+  /**
+   * Track that the user landed on this specific sub-page.
+   * The AnalyticsProvider fires a generic page() event, but this
+   * explicit track gives us a named funnel step we can filter on.
+   */
+  useEffect(() => {
+    if (phone) analytics.setUserId(phone);
+    analytics.track('campaign_page_view', { page: 'pre-population' });
+  }, [phone]);
 
   return (
     <Layout
