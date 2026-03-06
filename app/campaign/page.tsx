@@ -85,7 +85,14 @@ function CampaignHubContent() {
   const handleNavigate = (button: (typeof CAMPAIGN_BUTTONS)[number]) => {
     if (phone) analytics.setUserId(phone);
     analytics.track('campaign_button_click', { button: button.id });
-    window.location.href = `${button.href}?phone=${encodeURIComponent(phone)}`;
+    const campaignId = searchParams.get('campaignId');
+    const handshakeToken = searchParams.get('handshake_token');
+    
+    let url = `${button.href}?phone=${encodeURIComponent(phone)}`;
+    if (campaignId) url += `&campaignId=${encodeURIComponent(campaignId)}`;
+    if (handshakeToken) url += `&handshake_token=${encodeURIComponent(handshakeToken)}`;
+    
+    window.location.href = url;
   };
 
   return (

@@ -72,7 +72,9 @@ Receive a batch of analytics events from the SDK.
         "library": {
           "name": "@analytics/sdk",
           "version": "1.0.0"
-        }
+        },
+        "handshakeToken": "string",
+        "campaignId": "string | null"
       },
       "properties": {               // Optional: Custom event properties
         "button_id": "submit-form",

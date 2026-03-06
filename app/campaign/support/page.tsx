@@ -63,12 +63,25 @@ function SupportContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const phone = searchParams.get('phone') || '';
+  const campaignId = searchParams.get('campaignId');
+  const handshakeToken = searchParams.get('handshake_token');
 
   /** Navigate to the post-interaction survey */
   const goToSurvey = () => {
     if (phone) analytics.setUserId(phone);
     analytics.track('campaign_survey_open');
-    window.location.href = `/campaign/survey?phone=${encodeURIComponent(phone)}`;
+    let url = `/campaign/survey?phone=${encodeURIComponent(phone)}`;
+    if (campaignId) url += `&campaignId=${encodeURIComponent(campaignId)}`;
+    if (handshakeToken) url += `&handshake_token=${encodeURIComponent(handshakeToken)}`;
+    window.location.href = url;
+  };
+
+  /** Navigate back to the main campaign hub, preserving query params */
+  const handleBack = () => {
+    let url = `/campaign?phone=${encodeURIComponent(phone)}`;
+    if (campaignId) url += `&campaignId=${encodeURIComponent(campaignId)}`;
+    if (handshakeToken) url += `&handshake_token=${encodeURIComponent(handshakeToken)}`;
+    router.push(url);
   };
 
   return (
@@ -76,7 +89,7 @@ function SupportContent() {
       title="Support & Feedback"
       phone={phone}
       showFooter={false}
-      onBack={() => router.push(`/campaign?phone=${encodeURIComponent(phone)}`)}
+      onBack={handleBack}
     >
       <div className="space-y-5">
         {/* Title */}

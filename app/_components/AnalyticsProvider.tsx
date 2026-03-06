@@ -13,7 +13,17 @@ function AnalyticsTracker() {
   useEffect(() => {
     // You should use an environment variable here
     const writeKey = process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY || 'default-write-key';
-    analytics.init(writeKey);
+    
+    // We try to grab URL params if we are in browser
+    let campaignId = undefined;
+    let handshakeToken = undefined;
+    if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        campaignId = urlParams.get('campaignId') || undefined;
+        handshakeToken = urlParams.get('handshake_token') || undefined;
+    }
+
+    analytics.init(writeKey, { campaignId, handshakeToken });
   }, []);
 
   // Track page views on route change

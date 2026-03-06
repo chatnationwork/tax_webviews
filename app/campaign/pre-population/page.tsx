@@ -50,6 +50,16 @@ function PrePopulationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const phone = searchParams.get('phone') || '';
+  const campaignId = searchParams.get('campaignId');
+  const handshakeToken = searchParams.get('handshake_token');
+
+  /** Navigate back to the main campaign hub, preserving query params */
+  const handleBack = () => {
+    let url = `/campaign?phone=${encodeURIComponent(phone)}`;
+    if (campaignId) url += `&campaignId=${encodeURIComponent(campaignId)}`;
+    if (handshakeToken) url += `&handshake_token=${encodeURIComponent(handshakeToken)}`;
+    router.push(url);
+  };
 
   /**
    * Track that the user landed on this specific sub-page.
@@ -66,7 +76,7 @@ function PrePopulationContent() {
       title="Pre-Populated Filing"
       phone={phone}
       showFooter={false}
-      onBack={() => router.push(`/campaign?phone=${encodeURIComponent(phone)}`)}
+      onBack={handleBack}
     >
       <div className="space-y-5">
         {/* Title */}

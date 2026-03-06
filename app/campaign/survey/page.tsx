@@ -21,6 +21,16 @@ function SurveyContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const phone = searchParams.get('phone') || '';
+  const campaignId = searchParams.get('campaignId');
+  const handshakeToken = searchParams.get('handshake_token');
+
+  /** Navigate back to the support page, preserving query params */
+  const handleBack = () => {
+    let url = `/campaign/support?phone=${encodeURIComponent(phone)}`;
+    if (campaignId) url += `&campaignId=${encodeURIComponent(campaignId)}`;
+    if (handshakeToken) url += `&handshake_token=${encodeURIComponent(handshakeToken)}`;
+    router.push(url);
+  };
 
   /**
    * Track that the user has actually arrived at and started the survey.
@@ -37,7 +47,7 @@ function SurveyContent() {
       title="Quick Survey"
       phone={phone}
       showFooter={false}
-      onBack={() => router.push(`/campaign/support?phone=${encodeURIComponent(phone)}`)}
+      onBack={handleBack}
     >
       <div className="space-y-4">
         {/* Title */}

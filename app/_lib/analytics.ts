@@ -23,6 +23,8 @@ export interface AnalyticsEvent {
       name: string;
       version: string;
     };
+    handshakeToken?: string;
+    campaignId?: string;
     [key: string]: any;
   };
   properties?: Record<string, any>;
@@ -44,6 +46,8 @@ class AnalyticsClient {
   private anonymousId: string = '';
   private sessionId: string = '';
   private userId: string | undefined;
+  private handshakeToken: string | undefined;
+  private campaignId: string | undefined;
   private endpoint: string = 'https://analytics.chatnationbot.com/v1/capture';
   private initialized: boolean = false;
 
@@ -53,8 +57,10 @@ class AnalyticsClient {
     }
   }
 
-  public init(writeKey: string) {
+  public init(writeKey: string, options?: { handshakeToken?: string; campaignId?: string }) {
     this.writeKey = writeKey;
+    if (options?.handshakeToken) this.handshakeToken = options.handshakeToken;
+    if (options?.campaignId) this.campaignId = options.campaignId;
     this.initialized = true;
     
     // Check for existing anonymousId or create new
@@ -90,6 +96,11 @@ class AnalyticsClient {
 
   public setUserId(userId: string) {
     this.userId = userId;
+  }
+
+  public setCampaignData(campaignId?: string, handshakeToken?: string) {
+    if (campaignId) this.campaignId = campaignId;
+    if (handshakeToken) this.handshakeToken = handshakeToken;
   }
 
   public page(name?: string, properties?: Record<string, any>) {
@@ -172,7 +183,9 @@ class AnalyticsClient {
         library: {
           name: 'f88-custom-analytics',
           version: '1.0.0'
-        }
+        },
+        handshakeToken: this.handshakeToken,
+        campaignId: this.campaignId
       },
       properties: baseData.properties,
       journey_start: baseData.journey_start,
