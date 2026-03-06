@@ -62,7 +62,6 @@ const CAMPAIGN_BUTTONS = [
 function CampaignHubContent() {
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone') || '';
-  const to = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '';
 
   /**
    * Update the delivery status of the campaign to this user.
@@ -76,7 +75,7 @@ function CampaignHubContent() {
     localStorage.setItem(storageKey, new Date().toISOString());
 
     const apiKey = process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY || '';
-    const url = `https://analytics.chatnationbot.com/api/dashboard/webhooks/whatsapp-status?phone=${encodeURIComponent(phone)}&to=${encodeURIComponent(to)}`;
+    const url = `https://analytics.chatnationbot.com/api/dashboard/webhooks/whatsapp-status?phone=${encodeURIComponent(phone)}`;
 
     fetch(url, {
       method: 'GET',
@@ -84,7 +83,7 @@ function CampaignHubContent() {
         'X-API-Key': apiKey,
       },
     }).catch((err) => console.error('[Campaign] Failed to update delivery status', err));
-  }, [phone, to]);
+  }, [phone]);
 
   /**
    * Send the 4 campaign WhatsApp templates only on the very first visit.
