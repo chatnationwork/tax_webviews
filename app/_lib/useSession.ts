@@ -20,6 +20,8 @@ const isPathPublic = (pathname: string | null) => {
   }
 
   if (pathname.startsWith('/payroll')) return false;
+
+  if (pathname.startsWith('/payments')) return false;
   
   
   return true;

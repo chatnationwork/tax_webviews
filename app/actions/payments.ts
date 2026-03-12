@@ -205,15 +205,20 @@ export async function generatePrn(
 ): Promise<GeneratePrnResult> {
   try {
     const headers = await getApiHeaders(true);
+    const payload = {
+      tax_payer_pin: taxPayerPin,
+      obligation_id: obligationId,
+      tax_period_from: taxPeriodFrom,
+      tax_period_to: taxPeriodTo,
+      amount: amount,
+    };
+    
+    logger.info('BASE_URL:', BASE_URL);
+    logger.info('Generating PRN with payload:', payload, 'Headers have token:', !!headers.Authorization);
+    
     const response = await axios.post(
       `${BASE_URL}/generate-prn`,
-      {
-        tax_payer_pin: taxPayerPin,
-        obligation_id: obligationId,
-        tax_period_from: taxPeriodFrom,
-        tax_period_to: taxPeriodTo,
-        amount: amount,
-      },
+      payload,
       { headers }
     );
 

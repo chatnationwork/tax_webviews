@@ -12,9 +12,9 @@ import { savePhoneToCookie } from "@/app/actions/auth";
 const SERVICE_URLS: Record<string, string> = {
   // https://wa-etims-test.kra.go.ke/etims/?phone=254702438822
   // eTIMS Invoicing
-  "Sales Invoice": "/etims/auth?phone={{phone}}",
-  "Credit Note": "/etims/auth?phone={{phone}}",
-  "Buyer-Initiated Invoices": "/etims/auth?phone={{phone}}",
+  "Sales Invoice": "https://wa-etims-test.kra.go.ke/etims/auth?phone={{phone}}",
+  "Credit Note": "https://wa-etims-test.kra.go.ke/etims/auth?phone={{phone}}",
+  "Buyer-Initiated Invoices": "https://wa-etims-test.kra.go.ke/etims/auth?phone={{phone}}",
 
   // Return Filing
   "NIL Filing": "/nil-mri-tot/nil/validation?phone={{phone}}",
@@ -24,20 +24,17 @@ const SERVICE_URLS: Record<string, string> = {
   // PIN Services
   "PIN Registration": "/pin-registration/select-type?phone={{phone}}",
 
-  // Customs Services
-  "F88 Declaration": "/f88?phone={{phone}}",
+
   eSlip: "/payments/eslip/payment?phone={{phone}}",
   NITA: "/payments/nita/payment?phone={{phone}}",
   AHL: "/payments/ahl/payment?phone={{phone}}",
   "TCC Application": "/tcc/validation?phone={{phone}}",
   "PIN Retrieve":"/pin-retrieval?phone={{phone}}",
   "PIN Check": "/checkers/pin-checker?phone={{phone}}",
-  "Invoice Check": "/checkers/invoice-checker?phone={{phone}}",
-  "TCC Check": "/checkers/tcc-checker?phone={{phone}}",
   "Staff Check": "/checkers/staff-checker?phone={{phone}}",
   Station: "/checkers/know-your-station?phone={{phone}}",
   "Import Check": "/checkers/import-certificate?phone={{phone}}",
-  Payroll: "/payroll?phone={{phone}}",
+ 
 };
 
 // Service categories with clearer labels

@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import logger from '@/lib/logger';
 
 // types.ts
 export interface WhatsAppAnalyticsProps {
@@ -53,13 +54,20 @@ export interface AnalyticsBatch {
   write_key?: string;
 }
 
-const ANALYTICS_ENDPOINT = 'https://analytics.chatnationbot.com/v1/capture';
+const ANALYTICS_ENDPOINT =process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT;
 
 /**
  * Track a message sent event to the analytics service.
  * This is a fire-and-forget operation that logs errors but doesn't throw.
  */
 export async function trackMessageSent(props: WhatsAppAnalyticsProps): Promise<void> {
+
+  if (!ANALYTICS_ENDPOINT) {
+    logger.error('ANALYTICS_ENDPOINT is not defined');
+    return;
+  }
+
+  logger.info('ANALYTICS_ENDPOINT:', ANALYTICS_ENDPOINT);
   try {
     const { 
       message_id, 
@@ -128,7 +136,7 @@ export async function trackMessageSent(props: WhatsAppAnalyticsProps): Promise<v
 
     // Fire and forget - minimal await needed? 
     // We await to ensuring it fires before server action closes, but we catch errors.
-    console.log('[Analytics] Sending message.sent event:', event.event_id,JSON.stringify(payload));
+    logger.info('[Analytics] Sending message.sent event:', event.event_id,JSON.stringify(payload));
     
     await axios.post(ANALYTICS_ENDPOINT, payload, {
       headers: {
@@ -154,6 +162,13 @@ export interface CSATAnalyticsProps {
 }
 
 export async function trackCsatSubmitted(props: CSATAnalyticsProps): Promise<void> {
+
+  if (!ANALYTICS_ENDPOINT) {
+    logger.error('ANALYTICS_ENDPOINT is not defined');
+    return;
+  }
+
+  logger.info('ANALYTICS_ENDPOINT:', ANALYTICS_ENDPOINT);
   try {
     const { rating, feedback, journey, inboxSessionId, phone, channel } = props;
 
@@ -174,7 +189,7 @@ export async function trackCsatSubmitted(props: CSATAnalyticsProps): Promise<voi
             channel: channel || 'webview',
             page: {
                 path: '/csat',
-                url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://taxObj.chatnation.co.ke'}/csat`
+                url: `${process.env.NEXT_PUBLIC_APP_URL}/csat`
             }
         },
         properties: {
@@ -191,7 +206,7 @@ export async function trackCsatSubmitted(props: CSATAnalyticsProps): Promise<voi
         write_key: process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY
     };
 
-    console.log('[Analytics] Sending csat_submitted event:', event.event_id, JSON.stringify(payload));
+    logger.info('[Analytics] Sending csat_submitted event:', event.event_id, JSON.stringify(payload));
 
     await axios.post(ANALYTICS_ENDPOINT, payload, {
         headers: {

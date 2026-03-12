@@ -54,6 +54,9 @@ export async function getAuthHeaders() {
 
   const cookieStore = await cookies();
   const token = cookieStore.get('etims_auth_token')?.value || cookieStore.get('auth_token')?.value;
+  
+  logger.info('getAuthHeaders - Token found:', !!token, 'Available cookies:', cookieStore.getAll().map(c => c.name).join(', '));
+  
   return {
     'Content-Type': 'application/json',
     'x-source-for': 'whatsapp',

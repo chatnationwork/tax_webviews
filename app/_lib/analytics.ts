@@ -1,3 +1,7 @@
+/**
+ * Client-side analytics module for tracking page views, user events, and journeys.
+ * Uses the browser's console for logging instead of winston (which requires Node.js fs module).
+ */
 import { v4 as uuidv4 } from 'uuid';
 
 // Types based on API documentation
@@ -48,7 +52,7 @@ class AnalyticsClient {
   private userId: string | undefined;
   private handshakeToken: string | undefined;
   private campaignId: string | undefined;
-  private endpoint: string = 'https://analytics.chatnationbot.com/v1/capture';
+  private endpoint: string = process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT || '';
   private initialized: boolean = false;
 
   constructor() {
