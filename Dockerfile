@@ -27,6 +27,18 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Accept build arguments for public environment variables
+ARG NEXT_PUBLIC_ANALYTICS_ENDPOINT
+ARG NEXT_PUBLIC_ANALYTICS_WRITE_KEY
+ARG NEXT_PUBLIC_ALLOW_DESKTOP_TESTING
+ARG NEXT_PUBLIC_WHATSAPP_NUMBER
+
+# Expose them as environment variables specifically for the build step
+ENV NEXT_PUBLIC_ANALYTICS_ENDPOINT=$NEXT_PUBLIC_ANALYTICS_ENDPOINT
+ENV NEXT_PUBLIC_ANALYTICS_WRITE_KEY=$NEXT_PUBLIC_ANALYTICS_WRITE_KEY
+ENV NEXT_PUBLIC_ALLOW_DESKTOP_TESTING=$NEXT_PUBLIC_ALLOW_DESKTOP_TESTING
+ENV NEXT_PUBLIC_WHATSAPP_NUMBER=$NEXT_PUBLIC_WHATSAPP_NUMBER
+
 RUN npm run build
 
 # Production image, copy all the files and run next

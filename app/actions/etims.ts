@@ -407,6 +407,18 @@ export async function searchCreditNoteInvoice(
 
     logger.info('Search credit note response:', { data: response.data });
 
+    // [Credit Note Amount] Log full API response to understand available fields for remainder vs full amount
+    logger.info('[Credit Note Search] Raw API response keys:', {
+      keys: Object.keys(response.data || {}),
+      has_partial_credit_note: response.data?.has_partial_credit_note,
+      total_amount: response.data?.total_amount,
+      amount: response.data?.amount,
+      remaining_amount: response.data?.remaining_amount,
+      amount_credited: response.data?.amount_credited,
+      original_amount: response.data?.original_amount,
+      fullResponse: response.data,
+    });
+
     // Handle response - check if invoice data is in the response
     if (response.data.success === false) {
       return {
@@ -448,6 +460,10 @@ export async function searchCreditNoteInvoice(
     // Code 15 = Credit Note already issued for this invoice
     // The invoice exists, just has a credit note already - return success with flag
     if (errorCode === 15) {
+      logger.info('[Credit Note Search] Code 15 - existing credit note, response keys:', {
+        keys: Object.keys(error.response?.data || {}),
+        fullResponse: error.response?.data,
+      });
       return {
         success: true,
         hasCreditNote: true,
@@ -552,6 +568,16 @@ export async function submitCreditNote(
 
     logger.info(`Submitting ${request.credit_note_type} credit note to: ${endpoint}`);
     logger.debug('Payload:', { payload });
+
+    // [Credit Note Amount] Log full credit submission context
+    if (request.credit_note_type === 'full') {
+      logger.info('[Credit Note Submit] Full credit note - request context:', {
+        credit_note_type: request.credit_note_type,
+        invoice_no: request.invoice_no,
+        itemsCount: request.items?.length ?? 0,
+        items: request.items,
+      });
+    }
 
     const response = await axios.post(
       endpoint,
@@ -1365,6 +1391,14 @@ export async function sendInvoiceCreditDocTemplate(
   let cleanNumber = recipientPhone.trim().replace(/[^\d]/g, '');
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
   else if (cleanNumber.startsWith('+')) cleanNumber = cleanNumber.substring(1);
+
+  // [Credit Note Amount] Log amount being sent to user in WhatsApp message
+  logger.info('[Credit Note WhatsApp] Sending credit doc template:', {
+    recipientPhone: cleanNumber,
+    docRef,
+    amount,
+    date,
+  });
 
   const token = process.env.WHATSAPP_ACCESS_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;

@@ -20,8 +20,8 @@ function BuyerInitiatedSuccessContent() {
   };
 
   return (
-    <Layout title="Success">
-      <div className="space-y-4">
+    <Layout title="Success" onBack={() => router.push('/etims/buyer-initiated/buyer/create')}>
+      <div className="space-y-4"> 
         <Card className="bg-green-50 border-green-200 text-center py-6">
           <div className="flex flex-col items-center space-y-3">
             <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center">

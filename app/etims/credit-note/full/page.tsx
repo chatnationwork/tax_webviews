@@ -114,7 +114,7 @@ export default function CreditNoteFull() {
         {/* Full Credit Note Notice */}
         <Card className="bg-yellow-50 border-yellow-200 !p-3">
           <p className="text-sm text-yellow-900">
-            <strong>Full Credit Note:</strong> This will credit the entire invoice amount of <strong>KES {creditNote.invoice.total.toLocaleString()}</strong>.
+            <strong>Full Credit Note:</strong> This will credit the entire invoice amount.
           </p>
         </Card>
 
