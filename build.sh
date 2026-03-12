@@ -21,4 +21,4 @@ docker build \
   --build-arg NEXT_PUBLIC_ALLOW_DESKTOP_TESTING="$NEXT_PUBLIC_ALLOW_DESKTOP_TESTING" \
   --build-arg NEXT_PUBLIC_WHATSAPP_NUMBER="$NEXT_PUBLIC_WHATSAPP_NUMBER" \
   -t ghcr.io/chatnationwork/tax-app:latest \
-  -t ghcr.io/chatnationwork/tax-app:0.1.3 .
+  -t ghcr.io/chatnationwork/tax-app:0.1.4 .
