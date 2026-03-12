@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { getCreditNote, CreditNoteData, getUserSession } from '../../_lib/store';
 import { Loader2 } from 'lucide-react';
-import { submitCreditNote,sendInvoiceCreditDocTemplate } from '../../../actions/etims';
+import { submitCreditNote, sendFullCreditNoteTemplate } from '../../../actions/etims';
 import { CreditNoteReason } from '../../_lib/definitions';
 
 
@@ -64,11 +64,10 @@ export default function CreditNoteFull() {
           const session = getUserSession();
           const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
-          await sendInvoiceCreditDocTemplate(
+          await sendFullCreditNoteTemplate(
             creditNote.msisdn,
             session?.name || 'Valued Customer',
             `credit note *${result.credit_note_ref || result.credit_note_id}*`,
-            creditNote.invoice.total.toLocaleString(),
             today,
             result.credit_note_pdf_url
           );
