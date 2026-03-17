@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default to .env.production if no argument is provided
-ENV_FILE=${1:-.env.production}
+ENV_FILE=${1:-.env.dev}
 
 if [ ! -f "$ENV_FILE" ]; then
   echo "Error: $ENV_FILE not found!"
@@ -21,4 +21,4 @@ docker build \
   --build-arg NEXT_PUBLIC_ALLOW_DESKTOP_TESTING="$NEXT_PUBLIC_ALLOW_DESKTOP_TESTING" \
   --build-arg NEXT_PUBLIC_WHATSAPP_NUMBER="$NEXT_PUBLIC_WHATSAPP_NUMBER" \
   -t ghcr.io/chatnationwork/tax-app:latest \
-  -t ghcr.io/chatnationwork/tax-app:0.1.4 .
+  -t ghcr.io/chatnationwork/tax-app:0.1.1 . 

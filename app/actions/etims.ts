@@ -39,6 +39,7 @@ const getAuthHeaders = async () => {
   const sharedHeaders = await sharedGetAuthHeaders();
   return {
     ...sharedHeaders,
+    'x-source-for': 'whatsapp',
     'x-forwarded-for': 'whatsapp'
   };
 };
