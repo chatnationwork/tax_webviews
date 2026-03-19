@@ -42,7 +42,7 @@ const CAMPAIGN_BUTTONS = [
     emoji: '📲',
     label: 'Simplified Filing Options',
     description: 'Ways to file or get help',
-    href: '/campaign/filing-options',
+    href: 'https://www.kra.go.ke/file-my-returns#file-my-returns',
     color: 'bg-emerald-50 border-emerald-200 text-emerald-700',
     iconColor: 'text-emerald-600',
   },
