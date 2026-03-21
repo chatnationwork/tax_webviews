@@ -32,6 +32,12 @@ export const SERVICES_CONFIG: Record<string, ServiceConfig> = {
     description: "File and Pay Daily and Monthly Turn Over Tax.",
     targetUrl: "/nil-mri-tot/tot/validation",
   },
+  "ITR": {
+    key: "ITR",
+    name: "Income Tax Return",
+    description: "File Individual Income Tax Return for employment income.",
+    targetUrl: "/nil-mri-tot/itr/validation",
+  },
 
   // Tax Compliance
   "TCC Application": {

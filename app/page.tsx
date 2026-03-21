@@ -20,6 +20,7 @@ const SERVICE_URLS: Record<string, string> = {
   "NIL Filing": "/nil-mri-tot/nil/validation?phone={{phone}}",
   MRI: "/nil-mri-tot/mri/validation?phone={{phone}}",
   TOT: "/nil-mri-tot/tot/validation?phone={{phone}}",
+  "ITR": "/nil-mri-tot/itr/validation?phone={{phone}}",
 
   // PIN Services
   "PIN Registration": "/pin-registration/select-type?phone={{phone}}",
@@ -59,6 +60,7 @@ const SERVICE_CATEGORIES = [
       { label: "NIL Returns", key: "NIL Filing" },
       { label: "Rental Income", key: "MRI" },
       { label: "Turnover Tax", key: "TOT" },
+      { label: "Income Tax Return", key: "ITR" },
       { label: "PAYE", key: "PAYE" },
       { label: "VAT", key: "VAT" },
       { label: "Partnership", key: "Partnership" },

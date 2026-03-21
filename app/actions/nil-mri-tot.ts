@@ -864,3 +864,324 @@ export async function sendWhatsAppMessage(
 ): Promise<SendWhatsAppMessageResult> {
   return sharedSendWhatsAppMessage(params);
 }
+
+// ============= ITR Actions =============
+
+// Toggle to false when ITR APIs are live
+const ITR_MOCK = true;
+
+export interface EmploymentIncomeResult {
+  success: boolean;
+  rows?: {
+    employerPin: string;
+    employerName: string;
+    grossPay: number;
+    valueOfCarBenefit: number;
+    pension: number;
+    netValueOfHousing: number;
+    totalEmploymentIncome: number;
+    taxableSalary: number;
+    amountOfTaxDeductedPaye: number;
+    taxPayableOnTaxableSalary: number;
+  }[];
+  message?: string;
+}
+
+export interface TaxComputationResult {
+  success: boolean;
+  computation?: {
+    totalDeduction: number;
+    definedPensionContribution: number;
+    socialHealthInsuranceContribution: number;
+    housingLevyContribution: number;
+    postRetirementMedicalContribution: number;
+    employmentIncome: number;
+    allowableTaxExemptionDisability: number;
+    netTaxableIncome: number;
+    taxOnTaxableIncome: number;
+    personalRelief: number;
+    insuranceRelief: number;
+    taxCredits: number;
+    payeDeductedFromSalary: number;
+    incomeTaxPaidInAdvance: number;
+    creditsTotalReliefDtaa: number;
+    taxRefundDue: number;
+  };
+  message?: string;
+}
+
+export interface FileItrReturnResult {
+  success: boolean;
+  code: number;
+  message: string;
+  receiptNumber?: string;
+  taxDue?: string;
+}
+
+/**
+ * Get employment income details for ITR filing
+ */
+export async function getEmploymentIncome(pin: string): Promise<EmploymentIncomeResult> {
+  if (ITR_MOCK) {
+    return {
+      success: true,
+      rows: [
+        {
+          employerPin: 'P051109164C',
+          employerName: 'ENYA 051109TEST',
+          grossPay: 1714329.55,
+          valueOfCarBenefit: 0,
+          pension: 0,
+          netValueOfHousing: 0,
+          totalEmploymentIncome: 1714329.55,
+          taxableSalary: 1675618.30,
+          amountOfTaxDeductedPaye: 405797.70,
+          taxPayableOnTaxableSalary: 440085.71,
+        },
+      ],
+    };
+  }
+
+  try {
+    const headers = await getApiHeaders(true);
+    const response = await axios.get(
+      `${BASE_URL}/employment-income/${pin}`,
+      { headers, timeout: 30000 }
+    );
+    const data = response.data;
+    const rows = (Array.isArray(data) ? data : data.rows || data.employment_income || []).map((item: any) => ({
+      employerPin: item.employer_pin || item.employerPin || '',
+      employerName: item.employer_name || item.employerName || '',
+      grossPay: Number(item.gross_pay || item.grossPay || 0),
+      valueOfCarBenefit: Number(item.value_of_car_benefit || item.carBenefit || 0),
+      pension: Number(item.pension || 0),
+      netValueOfHousing: Number(item.net_value_of_housing || item.housing || 0),
+      totalEmploymentIncome: Number(item.total_employment_income || item.totalIncome || 0),
+      taxableSalary: Number(item.taxable_salary || item.taxableSalary || 0),
+      amountOfTaxDeductedPaye: Number(item.amount_of_tax_deducted_paye || item.paye || 0),
+      taxPayableOnTaxableSalary: Number(item.tax_payable_on_taxable_salary || item.taxPayable || 0),
+    }));
+    return { success: true, rows };
+  } catch (error: any) {
+    console.error('Get Employment Income Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      rows: [],
+      message: error.response?.data?.message || 'Failed to fetch employment income',
+    };
+  }
+}
+
+/**
+ * Get tax computation for ITR
+ */
+export async function getItrTaxComputation(
+  pin: string,
+  filingPeriod: string,
+  obligationId: string
+): Promise<TaxComputationResult> {
+  if (ITR_MOCK) {
+    return {
+      success: true,
+      computation: {
+        totalDeduction: 345000.00,
+        definedPensionContribution: 200000.00,
+        socialHealthInsuranceContribution: 30000.00,
+        housingLevyContribution: 50000.00,
+        postRetirementMedicalContribution: 5000.00,
+        employmentIncome: 1721529.55,
+        allowableTaxExemptionDisability: 0,
+        netTaxableIncome: 1376529.55,
+        taxOnTaxableIncome: 350358.87,
+        personalRelief: 28800.00,
+        insuranceRelief: 0,
+        taxCredits: 405797.70,
+        payeDeductedFromSalary: 405797.70,
+        incomeTaxPaidInAdvance: 0,
+        creditsTotalReliefDtaa: 0,
+        taxRefundDue: -84238.84,
+      },
+    };
+  }
+
+  try {
+    const headers = await getApiHeaders(true);
+    const [from, to] = filingPeriod.includes(' - ')
+      ? filingPeriod.split(' - ').map((s) => s.trim())
+      : [filingPeriod, filingPeriod];
+
+    const response = await axios.post(
+      `${BASE_URL}/file-return`,
+      {
+        tax_payer_pin: pin,
+        kra_obligation_id: obligationId,
+        obligation_code: obligationId,
+        start_date: from,
+        end_date: to,
+        calc_only: 'true',
+      },
+      { headers, timeout: 30000 }
+    );
+    const data = response.data;
+    return {
+      success: true,
+      computation: {
+        totalDeduction: Number(data.total_deduction || 0),
+        definedPensionContribution: Number(data.defined_pension_contribution || 0),
+        socialHealthInsuranceContribution: Number(data.social_health_insurance || 0),
+        housingLevyContribution: Number(data.housing_levy || 0),
+        postRetirementMedicalContribution: Number(data.post_retirement_medical || 0),
+        employmentIncome: Number(data.employment_income || 0),
+        allowableTaxExemptionDisability: Number(data.disability_exemption || 0),
+        netTaxableIncome: Number(data.net_taxable_income || 0),
+        taxOnTaxableIncome: Number(data.tax_on_taxable_income || 0),
+        personalRelief: Number(data.personal_relief || 0),
+        insuranceRelief: Number(data.insurance_relief || 0),
+        taxCredits: Number(data.tax_credits || 0),
+        payeDeductedFromSalary: Number(data.paye_deducted || 0),
+        incomeTaxPaidInAdvance: Number(data.income_tax_advance || 0),
+        creditsTotalReliefDtaa: Number(data.dtaa_credits || 0),
+        taxRefundDue: Number(data.tax_refund_due || data.tax_due || 0),
+      },
+    };
+  } catch (error: any) {
+    console.error('Get ITR Tax Computation Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch tax computation',
+    };
+  }
+}
+
+/**
+ * File ITR normal return
+ */
+export async function fileItrReturn(
+  taxPayerPin: string,
+  obligationId: string,
+  obligationCode: string,
+  returnPeriod: string,
+  hasInsurancePolicy: boolean,
+  insurancePolicies: any[],
+  hasDisabilityExemption: boolean
+): Promise<FileItrReturnResult> {
+  if (ITR_MOCK) {
+    return {
+      success: true,
+      code: 200,
+      message: 'ITR return filed successfully',
+      receiptNumber: `ITR-${Date.now()}`,
+      taxDue: '-84238.84',
+    };
+  }
+
+  try {
+    const headers = await getApiHeaders(true);
+    const [from, to] = returnPeriod.includes(' - ')
+      ? returnPeriod.split(' - ').map((s) => s.trim())
+      : [returnPeriod, returnPeriod];
+
+    const payload = {
+      tax_payer_pin: taxPayerPin,
+      kra_obligation_id: obligationId,
+      obligation_code: obligationCode,
+      start_date: from,
+      end_date: to,
+      returnType: 'income_tax_return',
+      has_insurance_policy: hasInsurancePolicy,
+      insurance_policies: hasInsurancePolicy ? insurancePolicies : [],
+      has_disability_exemption: hasDisabilityExemption,
+    };
+
+    console.log('Filing ITR Return:', payload);
+    const response = await axios.post(`${BASE_URL}/file-return`, payload, { headers, timeout: 30000 });
+    const data = response.data;
+    console.log('File ITR Return Response:', data);
+
+    const isSuccess =
+      data.code === 1 ||
+      data.code === 200 ||
+      data.success === true ||
+      (data.response && data.response.Status === 'OK');
+
+    let message = data.message || 'ITR filed successfully';
+    let receiptNumber = data.receipt_number || data.receiptNumber;
+    if (data.response) {
+      if (data.response.Message) message = data.response.Message;
+      if (data.response.AckNumber) receiptNumber = data.response.AckNumber;
+    }
+
+    return {
+      success: isSuccess,
+      code: data.code || (isSuccess ? 200 : 500),
+      message,
+      receiptNumber,
+      taxDue: data.tax_due,
+    };
+  } catch (error: any) {
+    console.error('File ITR Return Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      code: error.response?.status || 500,
+      message:
+        error.response?.data?.message ||
+        error.response?.data?.errors?.detail ||
+        'Failed to file ITR return',
+    };
+  }
+}
+
+/**
+ * File ITR NIL return — delegates to existing fileNilReturn with ITR obligation ID
+ */
+export async function fileItrNilReturn(
+  taxPayerPin: string,
+  obligationCode: string,
+  returnPeriod: string
+): Promise<FileReturnResult> {
+  if (ITR_MOCK) {
+    return {
+      success: true,
+      code: 200,
+      message: 'NIL ITR return filed successfully',
+      receiptNumber: `NIL-ITR-${Date.now()}`,
+    };
+  }
+  return fileNilReturn(taxPayerPin, OBLIGATION_IDS.ITR, obligationCode, returnPeriod);
+}
+
+/**
+ * Check disability exemption certificate for ITR
+ */
+export async function getDisabilityExemption(
+  pin: string
+): Promise<{ success: boolean; hasCertificate: boolean; certificateNumber?: string; message?: string }> {
+  if (ITR_MOCK) {
+    return {
+      success: true,
+      hasCertificate: false,
+      message: 'No Certificate Issued',
+    };
+  }
+
+  try {
+    const headers = await getApiHeaders(true);
+    const response = await axios.get(
+      `${BASE_URL}/disability-exemption/${pin}`,
+      { headers, timeout: 30000 }
+    );
+    const data = response.data;
+    return {
+      success: true,
+      hasCertificate: !!data.certificate_number,
+      certificateNumber: data.certificate_number,
+    };
+  } catch (error: any) {
+    console.error('Get Disability Exemption Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      hasCertificate: false,
+      message: error.response?.data?.message || 'Failed to check disability exemption',
+    };
+  }
+}
