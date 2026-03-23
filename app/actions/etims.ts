@@ -65,7 +65,7 @@ const getApiErrorMessage = (error: any, context: string = 'API'): string => {
   if (status === 401 || status === 403) {
     return 'Session expired. Please login again.';
   } else if (status === 404) {
-    return 'Service temporarily unavailable. Please try again later.';
+    return 'Service not found. Please try again.';
   } else if (status === 400) {
     return 'Invalid request. Please check your input and try again.';
   } else if (status === 500 || status === 502 || status === 503) {
@@ -635,6 +635,7 @@ export async function processBuyerInvoice(
 
   logger.info(`Processing invoice ${invoiceRef} for ${cleanNumber}: ${action}`);
   logger.debug(`URL: ${BASE_URL}/buyer-initiated/action/submit`);
+  logger.debug(`Payload: ${JSON.stringify({ action, msisdn: cleanNumber, invoice: invoiceRef })}`);
 
   try {
     const response = await axios.post(
