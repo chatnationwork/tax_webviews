@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { Layout, Card } from '../../../_components/Layout';
 import { ResultActions } from '../../../_components/ResultActions';
 import { taxpayerStore } from '../../_lib/store';
@@ -17,10 +17,17 @@ function ItrResultContent() {
 
   const [taxpayerInfo, setTaxpayerInfo] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
+  const notificationSentRef = useRef(false);
 
   useEffect(() => {
     const info = taxpayerStore.getTaxpayerInfo();
     setTaxpayerInfo(info);
+    setMounted(true);
+
+    // Guard with a ref so the notification is only sent once,
+    // even when React Strict Mode double-invokes effects in dev.
+    if (notificationSentRef.current) return;
+    notificationSentRef.current = true;
 
     const sendNotification = async () => {
       const itr = taxpayerStore.getItrData();
@@ -41,11 +48,8 @@ function ItrResultContent() {
       }
     };
 
-    if (!mounted) {
-      setMounted(true);
-      sendNotification();
-    }
-  }, [mounted]);
+    sendNotification();
+  }, []);
 
   if (!mounted) {
     return null;

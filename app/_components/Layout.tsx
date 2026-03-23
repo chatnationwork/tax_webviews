@@ -52,7 +52,7 @@ const SUPPORT_CHANNELS = [
     description: 'Visit your nearest KRA Service Centre',
     color: 'bg-amber-50',
     iconColor: 'text-amber-600',
-    action: 'https://www.kra.go.ke/helping-tax-payers/stations',
+    action: 'https://www.kra.go.ke/our-online-services',
   },
 ] as const;
 
