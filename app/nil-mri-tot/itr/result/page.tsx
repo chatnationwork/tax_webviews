@@ -28,7 +28,7 @@ function ItrResultContent() {
         try {
           const recipientPhone = taxpayerStore.getMsisdn() || await getStoredPhone() || getKnownPhone();
           if (recipientPhone) {
-            const message = `ITR Return Filed Successfully\n\nReceipt: ${itr.receiptNumber || 'N/A'}\nFiling Period: ${itr.filingPeriod}`;
+            const message = `Dear ${info.fullName || 'Taxpayer'},\n\nYour Income Tax Return has been filed successfully.\n\nPIN: ${info.pin}\nReceipt: ${itr.receiptNumber || 'N/A'}\nFiling Period: ${itr.filingPeriod}\n\nPlease keep this for your records.`;
 
             await sendWhatsAppMessage({
               recipientPhone,

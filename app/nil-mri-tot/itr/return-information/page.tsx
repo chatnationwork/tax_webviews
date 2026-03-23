@@ -33,11 +33,7 @@ function ReturnInformationContent() {
   });
   const [selectedInsurerPin, setSelectedInsurerPin] = useState('');
 
-  useEffect(() => {
-    if (showModal) {
-      setSelectedInsurerPin('P051300696C');
-    }
-  }, [showModal]);
+
 
   // Disability state
   const [loadingDisability, setLoadingDisability] = useState(false);
@@ -108,24 +104,10 @@ function ReturnInformationContent() {
     <Layout title="File Tax Return" onBack={() => router.push(`/nil-mri-tot/itr/verify${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`)} showMenu>
       <div className="space-y-4">
 
-        {/* 3-step stepper */}
-        <div className="flex items-center justify-between px-2 py-3">
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-6 h-6 rounded-full bg-[var(--kra-red)] flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-white" />
-            </div>
-            <span className="text-[10px] text-[var(--kra-red)] font-medium text-center">Return Information</span>
-          </div>
-          <div className="flex-1 h-px bg-gray-300 mx-2 mb-4" />
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center" />
-            <span className="text-[10px] text-gray-400 text-center">Employment Income</span>
-          </div>
-          <div className="flex-1 h-px bg-gray-300 mx-2 mb-4" />
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center" />
-            <span className="text-[10px] text-gray-400 text-center">Tax Computation</span>
-          </div>
+        {/* Step counter — black card, consistent with validation page */}
+        <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
+          <h1 className="text-base font-semibold">Income Tax Return</h1>
+          <p className="text-gray-400 text-xs">Step 1/3 - Return Information</p>
         </div>
 
         {/* Section header */}
@@ -257,13 +239,25 @@ function ReturnInformationContent() {
             <h2 className="text-sm font-semibold text-gray-800">Computation Of Insurance Relief</h2>
 
             <div className="space-y-2">
-              <p className="text-xs text-gray-600 font-medium">PIN Of Insurance Company</p>
-              <div className="border border-gray-200 rounded-lg p-3 space-y-1">
-                <p className="text-sm font-medium text-gray-800">IDS H 051300TEST</p>
-                <p className="text-xs text-gray-500">P051300696C</p>
-                <button type="button" className="text-xs text-[var(--kra-red)] hover:underline">Wrong User? Cancel</button>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-600 font-medium">PIN Of Insurance Company</p>
+                {selectedInsurerPin && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedInsurerPin('')}
+                    className="text-xs text-[var(--kra-red)] hover:underline"
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
-              <p className="text-xs text-gray-400">(Insurer PIN is pre-filled from your profile in production)</p>
+              <Input
+                label=""
+                placeholder="Enter insurer PIN (e.g. P051300696C)"
+                value={selectedInsurerPin}
+                onChange={(v) => setSelectedInsurerPin(v.toUpperCase())}
+                required
+              />
             </div>
 
             <Select
@@ -294,9 +288,9 @@ function ReturnInformationContent() {
 
             <Input label="Age Of Child" value={modalForm.ageOfChild || ''} onChange={(v) => setModalForm({ ...modalForm, ageOfChild: v })} placeholder="Enter age (if applicable)" />
 
-            <Input label="Commencement Date" value={modalForm.commencementDate} onChange={(v) => setModalForm({ ...modalForm, commencementDate: v })} required placeholder="DD/MM/YYYY" />
+            <Input label="Commencement Date" type="date" value={modalForm.commencementDate} onChange={(v) => setModalForm({ ...modalForm, commencementDate: v })} required />
 
-            <Input label="Maturity Date" value={modalForm.maturityDate} onChange={(v) => setModalForm({ ...modalForm, maturityDate: v })} required placeholder="DD/MM/YYYY" />
+            <Input label="Maturity Date" type="date" value={modalForm.maturityDate} onChange={(v) => setModalForm({ ...modalForm, maturityDate: v })} required />
 
             <Input label="Sum Assured" value={modalForm.sumAssured} onChange={(v) => setModalForm({ ...modalForm, sumAssured: v })} required type="number" placeholder="0.00" />
 

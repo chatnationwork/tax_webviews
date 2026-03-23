@@ -132,29 +132,10 @@ function TaxComputationContent() {
     >
       <div className="space-y-4">
 
-        {/* 3-step stepper */}
-        <div className="flex items-center justify-between px-2 py-3">
-          {[
-            { label: 'Return Information', done: true },
-            { label: 'Employment Income', done: true },
-            { label: 'Tax Computation', done: false, active: true },
-          ].map((step, i, arr) => (
-            <div key={step.label} className="flex items-center flex-1 last:flex-none">
-              <div className="flex flex-col items-center gap-1">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${step.done || step.active ? 'bg-[var(--kra-red)]' : 'border-2 border-gray-300'}`}>
-                  {step.done && !step.active ? (
-                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                  ) : step.active ? (
-                    <div className="w-2 h-2 rounded-full bg-white" />
-                  ) : null}
-                </div>
-                <span className={`text-[10px] font-medium text-center ${step.done || step.active ? 'text-[var(--kra-red)]' : 'text-gray-400'}`}>{step.label}</span>
-              </div>
-              {i < arr.length - 1 && (
-                <div className={`flex-1 h-px mx-2 mb-4 ${step.done ? 'bg-[var(--kra-red)]' : 'bg-gray-300'}`} />
-              )}
-            </div>
-          ))}
+        {/* Step counter — black card, consistent across ITR wizard */}
+        <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
+          <h1 className="text-base font-semibold">Income Tax Return</h1>
+          <p className="text-gray-400 text-xs">Step 3/3 - Tax Computation</p>
         </div>
 
         <p className="text-sm font-semibold text-gray-700">Tax Computation</p>

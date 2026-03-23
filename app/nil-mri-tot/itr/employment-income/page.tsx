@@ -7,23 +7,67 @@ import { taxpayerStore } from '../../_lib/store';
 import { getEmploymentIncome } from '@/app/actions/nil-mri-tot';
 import { Loader2 } from 'lucide-react';
 
-const fmt = (n: number) => `KES ${n.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
+const fmt = (n: number) =>
+  `KES ${n.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
+
+interface IncomeRow {
+  employerPin: string;
+  employerName: string;
+  grossPay: number;
+  valueOfCarBenefit: number;
+  pension: number;
+  netValueOfHousing: number;
+  totalEmploymentIncome: number;
+  taxableSalary: number;
+  amountOfTaxDeductedPaye: number;
+  taxPayableOnTaxableSalary: number;
+}
+
+const ROW_LABELS: { key: keyof IncomeRow; label: string }[] = [
+  { key: 'employerPin',              label: 'Employer PIN' },
+  { key: 'employerName',             label: 'Employer Name' },
+  { key: 'grossPay',                 label: 'Gross Pay' },
+  { key: 'valueOfCarBenefit',        label: 'Car Benefit' },
+  { key: 'pension',                  label: 'Pension' },
+  { key: 'netValueOfHousing',        label: 'Net Value of Housing' },
+  { key: 'totalEmploymentIncome',    label: 'Total Employment Income' },
+  { key: 'taxableSalary',            label: 'Taxable Salary' },
+  { key: 'amountOfTaxDeductedPaye',  label: 'PAYE Deducted' },
+  { key: 'taxPayableOnTaxableSalary',label: 'Tax Payable on Taxable Salary' },
+];
+
+const CURRENCY_KEYS = new Set<keyof IncomeRow>([
+  'grossPay', 'valueOfCarBenefit', 'pension', 'netValueOfHousing',
+  'totalEmploymentIncome', 'taxableSalary', 'amountOfTaxDeductedPaye',
+  'taxPayableOnTaxableSalary',
+]);
 
 function EmploymentIncomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone') || '';
-  const [rows, setRows] = useState<any[]>([]);
+  const [rows, setRows] = useState<IncomeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const taxpayerInfo = taxpayerStore.getTaxpayerInfo();
+  const phoneParam = phone ? `?phone=${encodeURIComponent(phone)}` : '';
 
   useEffect(() => {
-    const fetch = async () => {
+    const load = async () => {
       setLoading(true);
       try {
-        const result = await getEmploymentIncome(taxpayerInfo.pin);
+        // Pass the filing year derived from the stored filing period if available
+        const itrData = taxpayerStore.getItrData();
+        let returnYear: number | undefined;
+        if (itrData.filingPeriod) {
+          // period format: "01/01/2024 - 31/12/2024"
+          const yearMatch = itrData.filingPeriod.match(/(\d{4})/g);
+          if (yearMatch && yearMatch.length > 0) {
+            returnYear = parseInt(yearMatch[0]);
+          }
+        }
+        const result = await getEmploymentIncome(taxpayerInfo.pin, returnYear);
         if (result.success && result.rows) {
           setRows(result.rows);
           taxpayerStore.setItrField('employmentIncomeRows', result.rows);
@@ -36,12 +80,10 @@ function EmploymentIncomeContent() {
         setLoading(false);
       }
     };
-    fetch();
+    load();
   }, []);
 
   const totalIncome = rows.reduce((sum, r) => sum + r.totalEmploymentIncome, 0);
-
-  const phoneParam = phone ? `?phone=${encodeURIComponent(phone)}` : '';
 
   return (
     <Layout
@@ -51,26 +93,10 @@ function EmploymentIncomeContent() {
     >
       <div className="space-y-4">
 
-        {/* 3-step stepper */}
-        <div className="flex items-center justify-between px-2 py-3">
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-6 h-6 rounded-full bg-[var(--kra-red)] flex items-center justify-center">
-              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-            </div>
-            <span className="text-[10px] text-[var(--kra-red)] font-medium text-center">Return Information</span>
-          </div>
-          <div className="flex-1 h-px bg-[var(--kra-red)] mx-2 mb-4" />
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-6 h-6 rounded-full bg-[var(--kra-red)] flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-white" />
-            </div>
-            <span className="text-[10px] text-[var(--kra-red)] font-medium text-center">Employment Income</span>
-          </div>
-          <div className="flex-1 h-px bg-gray-300 mx-2 mb-4" />
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-6 h-6 rounded-full border-2 border-gray-300" />
-            <span className="text-[10px] text-gray-400 text-center">Tax Computation</span>
-          </div>
+        {/* Step counter — same black card style as validation page */}
+        <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
+          <h1 className="text-base font-semibold">Income Tax Return</h1>
+          <p className="text-gray-400 text-xs">Step 2/3 - Employment Income</p>
         </div>
 
         <p className="text-sm font-semibold text-gray-700">Details Of Employment Income</p>
@@ -88,47 +114,63 @@ function EmploymentIncomeContent() {
             <p className="text-sm text-gray-500">No employment income records found</p>
           </Card>
         ) : (
-          <div className="overflow-x-auto">
-            <Card className="p-0 overflow-hidden">
-              <table className="w-full text-xs">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    {['Employer PIN','Employer Name','Gross Pay','Car Benefit','Pension','Housing','Total Income','Taxable Salary','PAYE Deducted','Tax Payable'].map(h => (
-                      <th key={h} className="px-2 py-2 text-left text-gray-600 font-medium whitespace-nowrap">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r, i) => (
-                    <tr key={i} className="border-b border-gray-100">
-                      <td className="px-2 py-2 text-gray-800 whitespace-nowrap">{r.employerPin}</td>
-                      <td className="px-2 py-2 text-gray-800 whitespace-nowrap">{r.employerName}</td>
-                      <td className="px-2 py-2 text-gray-800 whitespace-nowrap">{fmt(r.grossPay)}</td>
-                      <td className="px-2 py-2 text-gray-800 whitespace-nowrap">{fmt(r.valueOfCarBenefit)}</td>
-                      <td className="px-2 py-2 text-gray-800 whitespace-nowrap">{fmt(r.pension)}</td>
-                      <td className="px-2 py-2 text-gray-800 whitespace-nowrap">{fmt(r.netValueOfHousing)}</td>
-                      <td className="px-2 py-2 text-gray-800 whitespace-nowrap">{fmt(r.totalEmploymentIncome)}</td>
-                      <td className="px-2 py-2 text-gray-800 whitespace-nowrap">{fmt(r.taxableSalary)}</td>
-                      <td className="px-2 py-2 text-gray-800 whitespace-nowrap">{fmt(r.amountOfTaxDeductedPaye)}</td>
-                      <td className="px-2 py-2 text-gray-800 whitespace-nowrap">{fmt(r.taxPayableOnTaxableSalary)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot className="bg-gray-50 border-t border-gray-200">
-                  <tr>
-                    <td colSpan={6} className="px-2 py-2 text-xs font-semibold text-gray-800">Total Employment Income</td>
-                    <td className="px-2 py-2 text-xs font-semibold text-gray-800">{fmt(totalIncome)}</td>
-                    <td colSpan={3} />
-                  </tr>
-                </tfoot>
-              </table>
-            </Card>
+          <div className="space-y-3">
+            {rows.map((row, idx) => (
+              <Card key={idx} className="divide-y divide-gray-100 p-0">
+                {idx === 0 && rows.length > 1 && (
+                  <div className="px-4 py-2 bg-gray-50 rounded-t-xl">
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      Employer {idx + 1}
+                    </span>
+                  </div>
+                )}
+                {ROW_LABELS.map(({ key, label }) => {
+                  const val = row[key];
+                  const display =
+                    CURRENCY_KEYS.has(key) && typeof val === 'number'
+                      ? fmt(val as number)
+                      : String(val);
+                  const isBold =
+                    key === 'totalEmploymentIncome' || key === 'taxPayableOnTaxableSalary';
+                  return (
+                    <div key={key} className="flex items-start justify-between px-4 py-2.5">
+                      <span className="text-xs text-gray-500 flex-1 pr-2">{label}</span>
+                      <span
+                        className={`text-xs text-right ${
+                          isBold ? 'font-semibold text-gray-900' : 'text-gray-800'
+                        }`}
+                      >
+                        {display}
+                      </span>
+                    </div>
+                  );
+                })}
+              </Card>
+            ))}
+
+            {/* Total summary card */}
+            <div className="bg-gray-900 rounded-xl px-4 py-3 flex items-center justify-between">
+              <span className="text-xs text-gray-300 font-medium">Total Employment Income</span>
+              <span className="text-sm font-bold text-white">{fmt(totalIncome)}</span>
+            </div>
           </div>
         )}
 
         <div className="flex gap-2 pt-2">
-          <Button variant="secondary" onClick={() => { taxpayerStore.clear(); router.push('/nil-mri-tot'); }} className="flex-1">Cancel</Button>
-          <Button onClick={() => router.push(`/nil-mri-tot/itr/tax-computation${phoneParam}`)} disabled={loading || rows.length === 0} className="flex-1">Next</Button>
+          <Button
+            variant="secondary"
+            onClick={() => { taxpayerStore.clear(); router.push('/nil-mri-tot'); }}
+            className="flex-1"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => router.push(`/nil-mri-tot/itr/tax-computation${phoneParam}`)}
+            disabled={loading || rows.length === 0}
+            className="flex-1"
+          >
+            Next
+          </Button>
         </div>
       </div>
     </Layout>
@@ -137,7 +179,13 @@ function EmploymentIncomeContent() {
 
 export default function EmploymentIncomePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[var(--kra-red)]" /></div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[var(--kra-red)]" />
+        </div>
+      }
+    >
       <EmploymentIncomeContent />
     </Suspense>
   );
