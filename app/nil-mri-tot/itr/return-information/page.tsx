@@ -64,7 +64,7 @@ function ReturnInformationContent() {
   }, [activeTab]);
 
   const handleAddPolicy = () => {
-    if (!modalForm.typeOfPolicy || !modalForm.insurancePolicyNumber || !selectedInsurerPin) return;
+    if (!selectedInsurerPin || !modalForm.typeOfPolicy || !modalForm.insurancePolicyNumber || !modalForm.policyHolder || !modalForm.commencementDate || !modalForm.maturityDate || !modalForm.sumAssured || !modalForm.annualPremiumPaid || !modalForm.amountOfInsuranceRelief) return;
     const entry = {
       ...modalForm,
       insuranceCompanyPin: selectedInsurerPin,
@@ -301,7 +301,7 @@ function ReturnInformationContent() {
             <div className="flex gap-2 pt-2">
               <Button variant="secondary" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
               <Button onClick={handleAddPolicy} className="flex-1"
-                disabled={!modalForm.typeOfPolicy || !modalForm.insurancePolicyNumber || !modalForm.commencementDate || !modalForm.maturityDate}
+                disabled={!selectedInsurerPin || !modalForm.typeOfPolicy || !modalForm.insurancePolicyNumber || !modalForm.policyHolder || !modalForm.commencementDate || !modalForm.maturityDate || !modalForm.sumAssured || !modalForm.annualPremiumPaid || !modalForm.amountOfInsuranceRelief}
               >
                 Add
               </Button>
