@@ -102,6 +102,51 @@ class TaxpayerStore {
       filingYear: new Date().getFullYear(),
       liabilities: [],
     };
+    this.clearItr();
+  }
+
+  // ITR wizard state
+  private itrData: {
+    hasInsurancePolicy: boolean;
+    insurancePolicies: any[];
+    hasDisabilityExemption: boolean;
+    disabilityCertificateNumber?: string;
+    employmentIncomeRows: any[];
+    taxComputation?: any;
+    filingPeriod: string;
+    obligationId: string;
+    obligationCode: string;
+    receiptNumber?: string;
+    error?: string;
+    successMessage?: string;
+  } = {
+    hasInsurancePolicy: false,
+    insurancePolicies: [],
+    hasDisabilityExemption: false,
+    employmentIncomeRows: [],
+    filingPeriod: '',
+    obligationId: '',
+    obligationCode: '',
+  };
+
+  setItrField(key: string, value: any) {
+    (this.itrData as any)[key] = value;
+  }
+
+  getItrData() {
+    return this.itrData;
+  }
+
+  clearItr() {
+    this.itrData = {
+      hasInsurancePolicy: false,
+      insurancePolicies: [],
+      hasDisabilityExemption: false,
+      employmentIncomeRows: [],
+      filingPeriod: '',
+      obligationId: '',
+      obligationCode: '',
+    };
   }
   
   setLiabilities(liabilities: any[]) {

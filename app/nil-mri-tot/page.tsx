@@ -3,7 +3,7 @@
 import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { FileText, Home as HomeIcon, Calculator } from 'lucide-react';
+import { FileText, Home as HomeIcon, Calculator, Receipt } from 'lucide-react';
 import { Layout, Card } from '../_components/Layout';
 import { taxpayerStore } from './_lib/store';
 
@@ -54,6 +54,13 @@ function NilMriTotContent() {
       color: 'amber' as const,
       onClick: () => router.push(getServiceHref('/nil-mri-tot/tot/validation')),
     },
+    {
+      title: 'Income Tax Return',
+      description: 'File Individual Income Tax Return (ITR)',
+      icon: Receipt,
+      color: 'green' as const,
+      onClick: () => router.push(getServiceHref('/nil-mri-tot/itr/validation')),
+    },
   ];
 
   const colorClasses = {
@@ -72,6 +79,11 @@ function NilMriTotContent() {
       icon: 'bg-amber-100',
       text: 'text-amber-600',
     },
+    green: {
+      card: 'bg-green-50 border-green-200',
+      icon: 'bg-green-100',
+      text: 'text-green-600',
+    },
   };
 
   return (
@@ -83,7 +95,7 @@ function NilMriTotContent() {
         </div>
 
         {/* Action Cards */}
-        <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {actionCards.map((card) => {
             const Icon = card.icon;
             const colors = colorClasses[card.color];
