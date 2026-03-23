@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect, useState, Suspense } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { ArrowLeft, Menu, Home, LogOut, Headphones, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Menu, Home, LogOut, Headphones, CheckCircle, HelpCircle, X, Phone, MessageCircle, Landmark } from 'lucide-react';
 
 import { useSessionManager } from '../_lib/useSession';
 import { clearUserSession, getKnownPhone, isSessionValid } from '../_lib/session-store';
@@ -25,13 +25,43 @@ function SessionController() {
   return null;
 }
 
-
+/** KRA Support channels shown in the Help & Support modal */
+const SUPPORT_CHANNELS = [
+  {
+    icon: Phone,
+    label: 'Call KRA',
+    detail: '0711 099 999',
+    description: 'Speak directly with a KRA officer',
+    color: 'bg-blue-50',
+    iconColor: 'text-blue-600',
+    action: 'tel:0711099999',
+  },
+  {
+    icon: MessageCircle,
+    label: 'WhatsApp Shuru',
+    detail: '0711 099 999',
+    description: 'Get instant help via WhatsApp',
+    color: 'bg-green-50',
+    iconColor: 'text-green-600',
+    action: 'https://wa.me/254711099999',
+  },
+  {
+    icon: Landmark,
+    label: 'Visit Tax Station',
+    detail: 'Walk in for assistance',
+    description: 'Visit your nearest KRA Service Centre',
+    color: 'bg-amber-50',
+    iconColor: 'text-amber-600',
+    action: 'https://www.kra.go.ke/helping-tax-payers/stations',
+  },
+] as const;
 
 export function Layout({ children, title, step, onBack, showMenu = false, showHeader = true, showFooter = true, phone }: LayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [internalPhone, setInternalPhone] = useState<string | null>(null);
   const [hasSession, setHasSession] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   useEffect(() => {
    setInternalPhone(getKnownPhone());
@@ -109,6 +139,19 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
    window.location.href = `/`;
   };
 
+  const handleHelpSupport = () => {
+    const phoneToUse = phone || internalPhone || getKnownPhone();
+    if (phoneToUse) analytics.setUserId(phoneToUse);
+    analytics.track('help_support_click');
+    setShowHelpModal(true);
+  };
+
+  // Determine footer grid columns based on number of buttons
+  const getFooterGridCols = () => {
+    if (hasSession) return 'grid-cols-4'; // Main Menu, Help, Connect Agent, Logout
+    return 'grid-cols-3'; // Main Menu, Help, Connect Agent
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Suspense fallback={null}>
@@ -158,13 +201,21 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
       {showFooter && (
         <div className="bg-white border-t border-gray-200 sticky bottom-0 z-10">
           <div className="max-w-4xl mx-auto px-3 py-2">
-            <div className={`grid gap-2 ${hasSession ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            <div className={`grid gap-2 ${getFooterGridCols()}`}>
               <button 
                 onClick={handleMainMenu}
                 className="flex flex-col items-center justify-center gap-0.5 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium text-[10px]"
               >
                 <Home className="w-4 h-4" />
                 {isF88 ? 'Home' : 'Main Menu'}
+              </button>
+              <button 
+                onClick={handleHelpSupport}
+                className="flex flex-col items-center justify-center gap-0.5 py-2 bg-emerald-50 hover:bg-emerald-100 rounded-lg text-emerald-700 font-medium text-[10px]"
+                id="help-support-btn"
+              >
+                <HelpCircle className="w-4 h-4" />
+                Help & Support
               </button>
               <button 
                 onClick={handleConnectAgent}
@@ -186,6 +237,77 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
           </div>
         </div>
       )}
+
+      {/* Help & Support Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowHelpModal(false)}
+          />
+          {/* Modal Content */}
+          <div
+            className="relative w-full max-w-lg bg-white rounded-t-2xl shadow-2xl px-4 pt-4 pb-6"
+            style={{ animation: 'slideUp 0.3s ease-out' }}
+          >
+            {/* Handle bar */}
+            <div className="flex justify-center mb-3">
+              <div className="w-10 h-1 bg-gray-300 rounded-full" />
+            </div>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-base font-bold text-gray-900">Help & Support</h2>
+                <p className="text-xs text-gray-500 mt-0.5">Reach out through any channel below</p>
+              </div>
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            {/* Support Channel Cards */}
+            <div className="space-y-2.5">
+              {SUPPORT_CHANNELS.map((channel) => {
+                const Icon = channel.icon;
+                return (
+                  <a
+                    key={channel.label}
+                    href={channel.action}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      analytics.track('help_channel_click', { channel: channel.label });
+                    }}
+                    className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all active:scale-[0.98]"
+                  >
+                    <div className={`shrink-0 w-10 h-10 rounded-xl ${channel.color} flex items-center justify-center`}>
+                      <Icon className={`w-5 h-5 ${channel.iconColor}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900">{channel.label}</p>
+                      <p className="text-xs text-gray-500">{channel.detail}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{channel.description}</p>
+                    </div>
+                    <ArrowLeft className="w-4 h-4 text-gray-300 rotate-180 shrink-0" />
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Slide-up animation for modal */}
+      <style jsx>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
