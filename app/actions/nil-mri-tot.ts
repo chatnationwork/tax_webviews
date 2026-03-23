@@ -141,6 +141,18 @@ export async function getStoredPhone(): Promise<string | null> {
  * Lookup user details by ID number using lookup API
  */
 export async function lookupById(idNumber: string, phoneNumber: string, yearOfBirth: string): Promise<LookupByIdResult> {
+  // Remove when ITR validation APIs are confirmed stable in test environment
+  const ITR_VALIDATION_MOCK = true;
+
+  if (ITR_VALIDATION_MOCK) {
+    return {
+      success: true,
+      idNumber: idNumber,
+      name: 'KENNEDY TEST USER',
+      pin: 'A010133486K',
+    };
+  }
+
   if (!idNumber || idNumber.trim().length < 6) {
     return { success: false, error: 'ID number must be at least 6 characters' };
   }

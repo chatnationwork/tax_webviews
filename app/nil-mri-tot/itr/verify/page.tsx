@@ -5,7 +5,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { Layout, Button, Card, IdentityStrip } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { fileItrNilReturn, getFilingPeriods, getTaxpayerObligations, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
+import { getFilingPeriods, getTaxpayerObligations, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
 import { getKnownPhone } from '@/app/_lib/session-store';
 
 function ItrVerifyContent() {
@@ -43,6 +43,19 @@ function ItrVerifyContent() {
 
     const fetchObligations = async () => {
       setLoadingObligations(true);
+      const ITR_OBLIGATIONS_MOCK = true;
+
+      if (ITR_OBLIGATIONS_MOCK) {
+        setItrObligation({
+          obligationId: '2',
+          obligationCode: 'IT',
+          obligationName: 'Individual Income Tax - Resident (ITR)',
+        });
+        setFilingPeriod('01/01/2024 - 31/12/2024');
+        setLoadingObligations(false);
+        return;
+      }
+
       try {
         const result = await getTaxpayerObligations(taxpayerInfo.pin);
         if (result.success && result.obligations) {
@@ -77,6 +90,15 @@ function ItrVerifyContent() {
     }
 
     const fetchPeriod = async () => {
+      const ITR_PERIOD_MOCK = true;
+
+      if (ITR_PERIOD_MOCK) {
+        setFilingPeriod('01/01/2024 - 31/12/2024');
+        setPeriodError('');
+        setLoadingPeriod(false);
+        return;
+      }
+
       setLoadingPeriod(true);
       setError('');
       try {
@@ -112,34 +134,10 @@ function ItrVerifyContent() {
 
   const handleFileNilReturn = async () => {
     if (!itrObligation || !filingPeriod) return;
-
-    setLoading(true);
-    setError('');
-    taxpayerStore.setItrField('filingPeriod', filingPeriod);
     taxpayerStore.setItrField('obligationId', itrObligation.obligationId);
     taxpayerStore.setItrField('obligationCode', itrObligation.obligationCode);
-
-    try {
-      const result = await fileItrNilReturn(
-        taxpayerInfo.pin,
-        itrObligation.obligationCode,
-        filingPeriod
-      );
-
-      if (result.success) {
-        taxpayerStore.setItrField('receiptNumber', result.receiptNumber || '');
-        taxpayerStore.setItrField('successMessage', result.message);
-        taxpayerStore.setItrField('error', undefined);
-      } else {
-        taxpayerStore.setItrField('error', result.message || 'Failed to file NIL ITR return');
-      }
-      router.push(`/nil-mri-tot/itr/result${phoneParam}`);
-    } catch (err: any) {
-      taxpayerStore.setItrField('error', err.message || 'An unexpected error occurred');
-      router.push(`/nil-mri-tot/itr/result${phoneParam}`);
-    } finally {
-      setLoading(false);
-    }
+    taxpayerStore.setItrField('filingPeriod', filingPeriod);
+    router.push(`/nil-mri-tot/itr/nil-confirm${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`);
   };
 
   const handleFileFullReturn = () => {
