@@ -108,24 +108,10 @@ function ReturnInformationContent() {
     <Layout title="File Tax Return" onBack={() => router.push(`/nil-mri-tot/itr/verify${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`)} showMenu>
       <div className="space-y-4">
 
-        {/* 3-step stepper */}
-        <div className="flex items-center justify-between px-2 py-3">
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-6 h-6 rounded-full bg-[var(--kra-red)] flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-white" />
-            </div>
-            <span className="text-[10px] text-[var(--kra-red)] font-medium text-center">Return Information</span>
-          </div>
-          <div className="flex-1 h-px bg-gray-300 mx-2 mb-4" />
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center" />
-            <span className="text-[10px] text-gray-400 text-center">Employment Income</span>
-          </div>
-          <div className="flex-1 h-px bg-gray-300 mx-2 mb-4" />
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center" />
-            <span className="text-[10px] text-gray-400 text-center">Tax Computation</span>
-          </div>
+        {/* Step counter — black card, consistent with validation page */}
+        <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
+          <h1 className="text-base font-semibold">Income Tax Return</h1>
+          <p className="text-gray-400 text-xs">Step 1/3 - Return Information</p>
         </div>
 
         {/* Section header */}
