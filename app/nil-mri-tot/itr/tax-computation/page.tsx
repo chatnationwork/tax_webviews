@@ -56,30 +56,30 @@ function TaxComputationContent() {
         }
 
         // Prefer pre-computed data from getItrReturn (Phase 1.5) stored during employment-income step
-        const preComputed = itrData.taxComputation;
-        if (preComputed && Object.keys(preComputed).length > 0 && preComputed.netTaxableIncome !== undefined) {
-          const normalizedPreComputed: Record<string, number> = {
-            totalDeduction: toNumber(preComputed.totalDeduction),
-            definedPensionContribution: toNumber(preComputed.definedPensionContribution),
-            socialHealthInsuranceContribution: toNumber(preComputed.socialHealthInsuranceContribution),
-            housingLevyContribution: toNumber(preComputed.housingLevyContribution),
-            postRetirementMedicalContribution: toNumber(preComputed.postRetirementMedicalContribution),
-            employmentIncome: toNumber(preComputed.employmentIncome),
-            allowableTaxExemptionDisability: toNumber(preComputed.allowableTaxExemptionDisability),
-            netTaxableIncome: toNumber(preComputed.netTaxableIncome),
-            taxOnTaxableIncome: toNumber(preComputed.taxOnTaxableIncome),
-            personalRelief: toNumber(preComputed.personalRelief),
-            insuranceRelief: toNumber(preComputed.insuranceRelief),
-            taxCredits: toNumber(preComputed.taxCredits),
-            payeDeductedFromSalary: toNumber(preComputed.payeDeductedFromSalary),
-            incomeTaxPaidInAdvance: toNumber(preComputed.incomeTaxPaidInAdvance),
-            creditsTotalReliefDtaa: toNumber(preComputed.creditsTotalReliefDtaa),
-            taxRefundDue: toNumber(preComputed.taxRefundDue),
-          };
-          setComputation(normalizedPreComputed);
-          setLoading(false);
-          return;
-        }
+        // const preComputed = itrData.taxComputation;
+        // if (preComputed && Object.keys(preComputed).length > 0 && preComputed.netTaxableIncome !== undefined) {
+        //   const normalizedPreComputed: Record<string, number> = {
+        //     totalDeduction: toNumber(preComputed.totalDeduction),
+        //     definedPensionContribution: toNumber(preComputed.definedPensionContribution),
+        //     socialHealthInsuranceContribution: toNumber(preComputed.socialHealthInsuranceContribution),
+        //     housingLevyContribution: toNumber(preComputed.housingLevyContribution),
+        //     postRetirementMedicalContribution: toNumber(preComputed.postRetirementMedicalContribution),
+        //     employmentIncome: toNumber(preComputed.employmentIncome),
+        //     allowableTaxExemptionDisability: toNumber(preComputed.allowableTaxExemptionDisability),
+        //     netTaxableIncome: toNumber(preComputed.netTaxableIncome),
+        //     taxOnTaxableIncome: toNumber(preComputed.taxOnTaxableIncome),
+        //     personalRelief: toNumber(preComputed.personalRelief),
+        //     insuranceRelief: toNumber(preComputed.insuranceRelief),
+        //     taxCredits: toNumber(preComputed.taxCredits),
+        //     payeDeductedFromSalary: toNumber(preComputed.payeDeductedFromSalary),
+        //     incomeTaxPaidInAdvance: toNumber(preComputed.incomeTaxPaidInAdvance),
+        //     creditsTotalReliefDtaa: toNumber(preComputed.creditsTotalReliefDtaa),
+        //     taxRefundDue: toNumber(preComputed.taxRefundDue),
+        //   };
+        //   setComputation(normalizedPreComputed);
+        //   setLoading(false);
+        //   return;
+        // }
 
         // Fallback: fetch summary from itr-summary/{id}
         const result = await getItrSummary(itrData.taxReturnId);

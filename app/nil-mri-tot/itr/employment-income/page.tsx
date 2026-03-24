@@ -71,6 +71,7 @@ function EmploymentIncomeContent() {
         }
         const result = await getItrEmploymentDetails(taxpayerInfo.pin, returnYear);
         if (result.success && result.rows) {
+          console.log('Employment income rows:', result.rows);
           setRows(result.rows);
           taxpayerStore.setItrField('employmentIncomeRows', result.rows);
         } else {
