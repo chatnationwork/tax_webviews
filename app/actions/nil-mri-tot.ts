@@ -1311,6 +1311,19 @@ export async function getItrReturn(
   period: string,
   returnType: string = 'normal'
 ): Promise<ItrReturnResult> {
+  const toNumber = (value: unknown): number => {
+    if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+    if (typeof value === 'string') {
+      const normalized = value.replace(/,/g, '').trim();
+      if (!normalized) return 0;
+      const parsed = Number(normalized);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+    if (value === null || value === undefined) return 0;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.get(
@@ -1332,22 +1345,22 @@ export async function getItrReturn(
 
     // Map the server response to our computation shape
     const computation: TaxComputationResult['computation'] = {
-      totalDeduction: Number(data.total_deduction || 0),
-      definedPensionContribution: Number(data.pension_contribution || data.defined_pension_contribution || 0),
-      socialHealthInsuranceContribution: Number(data.shif_contribution || data.social_health_insurance || 0),
-      housingLevyContribution: Number(data.hl_contribution || data.housing_levy || 0),
-      postRetirementMedicalContribution: Number(data.pmf_contribution || data.post_retirement_medical || 0),
-      employmentIncome: Number(data.employment_income || data.total_employment_income || 0),
-      allowableTaxExemptionDisability: Number(data.disability_exemption || 0),
-      netTaxableIncome: Number(data.net_taxable_income || 0),
-      taxOnTaxableIncome: Number(data.tax_on_taxable_income || data.total_tax_payable || 0),
-      personalRelief: Number(data.personal_relief || 0),
-      insuranceRelief: Number(data.insurance_relief || 0),
-      taxCredits: Number(data.tax_credits || data.credits || 0),
-      payeDeductedFromSalary: Number(data.paye_deducted || data.total_payed_deducted || 0),
-      incomeTaxPaidInAdvance: Number(data.income_tax_advance || 0),
-      creditsTotalReliefDtaa: Number(data.dtaa_credits || 0),
-      taxRefundDue: Number(data.tax_refund_due || data.amount_payable_or_refundable || data.tax_due || 0),
+      totalDeduction: toNumber(data.total_deduction),
+      definedPensionContribution: toNumber(data.pension_contribution ?? data.defined_pension_contribution),
+      socialHealthInsuranceContribution: toNumber(data.shif_contribution ?? data.social_health_insurance),
+      housingLevyContribution: toNumber(data.hl_contribution ?? data.housing_levy),
+      postRetirementMedicalContribution: toNumber(data.pmf_contribution ?? data.post_retirement_medical),
+      employmentIncome: toNumber(data.employment_income ?? data.total_employment_income),
+      allowableTaxExemptionDisability: toNumber(data.disability_exemption),
+      netTaxableIncome: toNumber(data.net_taxable_income),
+      taxOnTaxableIncome: toNumber(data.tax_on_taxable_income ?? data.total_tax_payable),
+      personalRelief: toNumber(data.personal_relief),
+      insuranceRelief: toNumber(data.insurance_relief),
+      taxCredits: toNumber(data.tax_credits ?? data.credits),
+      payeDeductedFromSalary: toNumber(data.paye_deducted ?? data.total_payed_deducted),
+      incomeTaxPaidInAdvance: toNumber(data.income_tax_advance),
+      creditsTotalReliefDtaa: toNumber(data.dtaa_credits),
+      taxRefundDue: toNumber(data.tax_refund_due ?? data.amount_payable_or_refundable ?? data.tax_due),
     };
 
     return {
