@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button, Input, Select } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { validateInsurancePin } from '@/app/actions/nil-mri-tot';
+import { validateInsurancePin, createItrReturn, getItrReturn } from '@/app/actions/nil-mri-tot';
 import { Loader2, Plus, Trash2, Shield, CircleDot, Landmark, Wallet } from 'lucide-react';
 import type { ItrConfigLimits, MortgageEntry, DisabilityCertDetail } from '../../_lib/definitions';
 
@@ -158,8 +158,12 @@ function ReturnInformationContent() {
     taxpayerStore.setItrField('mortgages', updated);
   };
 
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState('');
+
   // --- Navigation ---
-  const handleNext = () => {
+  const handleNext = async () => {
+    // Save all deduction values to store
     taxpayerStore.setItrField('pensionContribution', Number(pension) || 0);
     taxpayerStore.setItrField('shifContribution', Number(shif) || 0);
     taxpayerStore.setItrField('hlContribution', Number(hl) || 0);
@@ -172,7 +176,49 @@ function ReturnInformationContent() {
       taxpayerStore.setItrField('disabilityCertificates', []);
     }
 
-    router.push(`/nil-mri-tot/itr/tax-computation${phoneParam}`);
+    // Create the ITR draft and trigger backend computation before navigating
+    setCreating(true);
+    setCreateError('');
+    try {
+      const data = taxpayerStore.getItrData();
+      const result = await createItrReturn({
+        pin: taxpayerInfo.pin,
+        period: data.filingPeriod,
+        returnType: 'normal',
+        pensionContribution: Number(pension) || 0,
+        shifContribution: Number(shif) || 0,
+        hlContribution: Number(hl) || 0,
+        pmfContribution: Number(pmf) || 0,
+        insurancePolicies: hasInsurance ? data.insurancePolicies : [],
+        disabilityCertificates: data.disabilityCertificates || [],
+        employmentIncome: data.employmentIncomeRows,
+        mortgages: data.mortgages || [],
+      });
+
+      if (!result.success) {
+        setCreateError(result.message || 'Failed to create ITR return');
+        return;
+      }
+
+      taxpayerStore.setItrField('taxReturnId', result.taxReturnId || null);
+      taxpayerStore.setItrField('taxPayerId', result.taxPayerId || null);
+      taxpayerStore.setItrField('taxObligationId', result.taxObligationId || null);
+
+      // Trigger backend tax computation (personal relief, PAYE reconciliation etc.)
+      if (result.taxPayerId && result.taxObligationId && data.filingPeriod) {
+        try {
+          await getItrReturn(result.taxPayerId, result.taxObligationId, data.filingPeriod);
+        } catch {
+          // Non-fatal: tax-computation page will retry or fallback
+        }
+      }
+
+      router.push(`/nil-mri-tot/itr/tax-computation${phoneParam}`);
+    } catch (e: any) {
+      setCreateError(e.message || 'Unexpected error');
+    } finally {
+      setCreating(false);
+    }
   };
 
   const hasDeductionErrors =
@@ -383,10 +429,18 @@ function ReturnInformationContent() {
           )}
         </Card>
 
+        {createError && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-xs text-red-600">{createError}</p>
+          </div>
+        )}
+
         {/* Navigation */}
         <div className="flex gap-2 pt-2">
           <Button variant="secondary" onClick={() => { taxpayerStore.clear(); router.push('/nil-mri-tot'); }} className="flex-1">Cancel</Button>
-          <Button onClick={handleNext} disabled={hasDeductionErrors} className="flex-1">Next</Button>
+          <Button onClick={handleNext} disabled={hasDeductionErrors || creating} className="flex-1">
+            {creating ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Calculating Tax...</> : 'Next'}
+          </Button>
         </div>
       </div>
 

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button, DeclarationCheckbox } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
 import { createItrReturn, getItrReturn, getItrSummary, fileItrReturn } from '@/app/actions/nil-mri-tot';
+import type { ItrState } from '../../_lib/definitions';
 import { Loader2, Pencil } from 'lucide-react';
 
 const fmt = (n: number) => `KES ${Math.abs(n).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
@@ -50,7 +51,7 @@ function mapSummaryToComputation(data: Record<string, any>): Record<string, numb
  * Compute the tax summary client-side from the draft + employment income data.
  * Used as a fallback when itr-summary endpoint is not yet available for the draft.
  */
-function computeFromDraftData(createResponseData: any): Record<string, number> {
+function computeFromDraftData(): Record<string, number> {
   const itr = taxpayerStore.getItrData();
   const rows = itr.employmentIncomeRows || [];
   const summary = itr.employmentIncomeSummary;
@@ -117,64 +118,26 @@ function TaxComputationContent() {
   const taxpayerInfo = taxpayerStore.getTaxpayerInfo();
   const phoneParam = phone ? `?phone=${encodeURIComponent(phone)}` : '';
 
-  const editableFields: { key: string; storeKey: keyof typeof itrData; label: string }[] = [
+  const editableFields: { key: string; storeKey: keyof ItrState; label: string }[] = [
     { key: 'definedPensionContribution', storeKey: 'pensionContribution', label: 'Defined / Pension Contribution' },
     { key: 'socialHealthInsuranceContribution', storeKey: 'shifContribution', label: 'Social Health Insurance Contribution' },
     { key: 'housingLevyContribution', storeKey: 'hlContribution', label: 'Housing Levy Contribution' },
     { key: 'postRetirementMedicalContribution', storeKey: 'pmfContribution', label: 'Post-Retirement Medical Contribution' },
   ];
 
-  /** Build the create-return payload from current store state */
-  const buildCreatePayload = useCallback(() => {
-    const data = taxpayerStore.getItrData();
-    return {
-      pin: taxpayerInfo.pin,
-      period: data.filingPeriod,
-      returnType: 'normal',
-      pensionContribution: data.pensionContribution,
-      shifContribution: data.shifContribution,
-      hlContribution: data.hlContribution,
-      pmfContribution: data.pmfContribution,
-      insurancePolicies: data.hasInsurancePolicy ? data.insurancePolicies : [],
-      disabilityCertificates: data.disabilityCertificates || [],
-      employmentIncome: data.employmentIncomeRows,
-      mortgages: data.mortgages || [],
-    };
-  }, [taxpayerInfo.pin]);
-
-  /** Create/update the return draft, then get the computed summary (server or fallback) */
-  const createAndFetchSummary = useCallback(async () => {
+  /** Fetch the backend-computed summary. Falls back to client-side if unavailable. */
+  const fetchSummary = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const createResult = await createItrReturn(buildCreatePayload());
-      if (!createResult.success) {
-        setError(createResult.message || 'Failed to create ITR return');
-        return;
-      }
-
-      const taxReturnId = createResult.taxReturnId;
-      const taxPayerId = createResult.taxPayerId;
-      const taxObligationId = createResult.taxObligationId;
-      if (!taxReturnId) {
-        setError('Backend did not return a tax return ID');
-        return;
-      }
-
-      taxpayerStore.setItrField('taxReturnId', taxReturnId);
-      if (taxPayerId) taxpayerStore.setItrField('taxPayerId', taxPayerId);
-      if (taxObligationId) taxpayerStore.setItrField('taxObligationId', taxObligationId);
-
-      // Try to trigger the backend computation via getItrReturn
       const currentItr = taxpayerStore.getItrData();
-      let itrReturnData: any = null;
-      if (taxPayerId && taxObligationId && currentItr.filingPeriod) {
-        const itrResult = await getItrReturn(taxPayerId, taxObligationId, currentItr.filingPeriod);
-        if (itrResult.success) itrReturnData = itrResult.rawData;
+      if (!currentItr.taxReturnId) {
+        setError('Missing tax return ID. Please go back and try again.');
+        return;
       }
 
-      // Strategy 1: Try itr-summary (works for published/processed returns)
-      const summaryResult = await getItrSummary(taxReturnId);
+      // Try the backend summary endpoint first
+      const summaryResult = await getItrSummary(currentItr.taxReturnId);
       if (summaryResult.success && summaryResult.summary) {
         const comp = mapSummaryToComputation(summaryResult.summary);
         setComputation(comp);
@@ -182,37 +145,8 @@ function TaxComputationContent() {
         return;
       }
 
-      // Strategy 2: Use getItrReturn meta_data if it was populated
-      if (itrReturnData?.meta_data) {
-        const meta = itrReturnData.meta_data;
-        const comp: Record<string, number> = {
-          totalDeduction: toNumber(itrReturnData.pension_contribution) + toNumber(itrReturnData.shif_contribution) + toNumber(itrReturnData.hl_contribution) + toNumber(itrReturnData.pmf_contribution),
-          definedPensionContribution: toNumber(itrReturnData.pension_contribution),
-          socialHealthInsuranceContribution: toNumber(itrReturnData.shif_contribution),
-          housingLevyContribution: toNumber(itrReturnData.hl_contribution),
-          postRetirementMedicalContribution: toNumber(itrReturnData.pmf_contribution),
-          mortgageInterest: 0,
-          depositInHomeOwnershipSavingPlan: 0,
-          employmentIncome: toNumber(itrReturnData.taxable_amount ?? meta.employment_income),
-          allowableTaxExemptionDisability: 0,
-          netTaxableIncome: toNumber(meta.net_taxable_income),
-          taxOnTaxableIncome: toNumber(meta.total_tax_payable),
-          totalOfTaxPayableLessReliefsAndExemptions: toNumber(meta.total_tax_payable) - toNumber(meta.personal_relief),
-          personalRelief: toNumber(meta.personal_relief),
-          insuranceRelief: 0,
-          taxCredits: toNumber(meta.total_payed_deducted),
-          payeDeductedFromSalary: toNumber(meta.total_payed_deducted),
-          incomeTaxPaidInAdvance: 0,
-          creditsTotalReliefDtaa: toNumber(meta.credits),
-          taxRefundDue: toNumber(meta.amount_payable_or_refundable ?? itrReturnData.tax_due),
-        };
-        setComputation(comp);
-        taxpayerStore.setItrField('taxComputation', comp as any);
-        return;
-      }
-
-      // Strategy 3: Compute from draft data + employment income summary
-      const comp = computeFromDraftData(createResult.data);
+      // Fallback: compute from draft data + employment income summary
+      const comp = computeFromDraftData();
       setComputation(comp);
       taxpayerStore.setItrField('taxComputation', comp as any);
     } catch (e: any) {
@@ -220,7 +154,7 @@ function TaxComputationContent() {
     } finally {
       setLoading(false);
     }
-  }, [buildCreatePayload]);
+  }, []);
 
   useEffect(() => {
     if (!taxpayerInfo.pin || !itrData.filingPeriod) {
@@ -228,22 +162,53 @@ function TaxComputationContent() {
       setLoading(false);
       return;
     }
-    createAndFetchSummary();
+    fetchSummary();
   }, []);
 
-  /** When an editable deduction is saved, update the store and re-create + re-fetch */
+  /** When an editable deduction is saved, re-create the draft and re-fetch */
   const handleEditSave = async (fieldKey: string, storeKey: string) => {
     if (!computation) return;
     const newValue = Number(editValue);
-
-    // Update the store with the new deduction value
     taxpayerStore.setItrField(storeKey as any, newValue);
-
     setEditingField(null);
     setEditValue('');
 
-    // Re-create the return and re-fetch summary with updated deductions
-    await createAndFetchSummary();
+    // Re-create the return with updated deductions, then re-fetch summary
+    setLoading(true);
+    setError('');
+    try {
+      const data = taxpayerStore.getItrData();
+      const createResult = await createItrReturn({
+        pin: taxpayerInfo.pin,
+        period: data.filingPeriod,
+        returnType: 'normal',
+        pensionContribution: data.pensionContribution,
+        shifContribution: data.shifContribution,
+        hlContribution: data.hlContribution,
+        pmfContribution: data.pmfContribution,
+        insurancePolicies: data.hasInsurancePolicy ? data.insurancePolicies : [],
+        disabilityCertificates: data.disabilityCertificates || [],
+        employmentIncome: data.employmentIncomeRows,
+        mortgages: data.mortgages || [],
+      });
+
+      if (createResult.success) {
+        if (createResult.taxReturnId) taxpayerStore.setItrField('taxReturnId', createResult.taxReturnId);
+        if (createResult.taxPayerId) taxpayerStore.setItrField('taxPayerId', createResult.taxPayerId);
+        if (createResult.taxObligationId) taxpayerStore.setItrField('taxObligationId', createResult.taxObligationId);
+
+        // Trigger backend recomputation
+        const updatedItr = taxpayerStore.getItrData();
+        if (updatedItr.taxPayerId && updatedItr.taxObligationId && updatedItr.filingPeriod) {
+          try { await getItrReturn(updatedItr.taxPayerId, updatedItr.taxObligationId, updatedItr.filingPeriod); } catch {}
+        }
+      }
+
+      await fetchSummary();
+    } catch (e: any) {
+      setError(e.message || 'Failed to update');
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
