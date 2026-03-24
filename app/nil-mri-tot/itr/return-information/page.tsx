@@ -190,7 +190,7 @@ function ReturnInformationContent() {
         hlContribution: Number(hl) || 0,
         pmfContribution: Number(pmf) || 0,
         insurancePolicies: hasInsurance ? data.insurancePolicies : [],
-        disabilityCertificates: data.disabilityCertificates || [],
+        disabilityCertificates: [],
         employmentIncome: data.employmentIncomeRows,
         mortgages: data.mortgages || [],
       });
