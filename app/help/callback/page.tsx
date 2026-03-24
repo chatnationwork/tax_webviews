@@ -9,7 +9,7 @@ import {
   Phone,
   User,
 } from 'lucide-react';
-import { Button, Card } from '@/app/_components/Layout';
+import { Button, Card, Layout } from '@/app/_components/Layout';
 
 type CallbackPayload = {
   id: string;
@@ -223,7 +223,7 @@ export default function CallbackPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-white">
+    <Layout title="Request a Callback" showHeader={false}>
       <header className="sticky top-0 z-10 bg-[#CC0000] text-white">
         <div className="max-w-md mx-auto px-3 py-3 flex items-center">
           <button
@@ -257,6 +257,6 @@ export default function CallbackPage() {
 
         <CallbackForm />
       </main>
-    </div>
+    </Layout>
   );
 }

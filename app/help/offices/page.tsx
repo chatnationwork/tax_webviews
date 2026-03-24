@@ -9,7 +9,7 @@ import {
   Phone,
   Search,
 } from 'lucide-react';
-import { Button, Card } from '@/app/_components/Layout';
+import { Button, Card, Layout } from '@/app/_components/Layout';
 import { KRA_OFFICES, KRAOffice } from '@/data/kra-offices';
 
 const REGIONS = [
@@ -150,7 +150,7 @@ export default function OfficesPage() {
     useOfficeSearch(KRA_OFFICES);
 
   return (
-    <div className="min-h-screen bg-white">
+    <Layout title="KRA Offices" showHeader={false}>
       <header className="sticky top-0 z-10 bg-[#CC0000] text-white">
         <div className="max-w-md mx-auto px-3 py-3 flex items-center">
           <button
@@ -196,7 +196,7 @@ export default function OfficesPage() {
 
         <p className="text-xs text-gray-500">Showing {filteredOffices.length} offices</p>
 
-        <section className="h-[calc(100vh-220px)] overflow-y-auto pb-3">
+        <section className="pb-3">
           {filteredOffices.length > 0 ? (
             <div key={transitionKey} className="space-y-2.5 offices-fade-in">
               {filteredOffices.map((office) => (
@@ -236,6 +236,6 @@ export default function OfficesPage() {
           }
         }
       `}</style>
-    </div>
+    </Layout>
   );
 }

@@ -105,9 +105,9 @@ function buildHelpModalItems(): HelpModalItem[] {
       subtitle: 'Understand your notice',
       iconBgClass: 'bg-amber-50',
       iconClass: 'text-amber-600',
-      action: 'https://www.kra.go.ke',
-      isInternal: false,
-      rightIcon: 'external',
+      action: '/help/faq',
+      isInternal: true,
+      rightIcon: 'chevron',
     },
   ];
 }

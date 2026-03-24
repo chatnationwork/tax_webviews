@@ -5,14 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button, Input, Select } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
 import { getDisabilityExemption, validateInsurancePin } from '@/app/actions/nil-mri-tot';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, Shield, CircleDot } from 'lucide-react';
 
 function ReturnInformationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone') || '';
 
-  const [activeTab, setActiveTab] = useState<'insurance' | 'disability'>('insurance');
   const [hasInsurance, setHasInsurance] = useState(false);
   const [policies, setPolicies] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -39,9 +38,9 @@ function ReturnInformationContent() {
 
   const taxpayerInfo = taxpayerStore.getTaxpayerInfo();
 
-  // Fetch disability exemption when disability tab is opened
+  // Fetch disability exemption on first render
   useEffect(() => {
-    if (activeTab === 'disability' && disabilityResult === null) {
+    if (disabilityResult === null) {
       const fetchDisability = async () => {
         setLoadingDisability(true);
         try {
@@ -59,7 +58,7 @@ function ReturnInformationContent() {
       };
       fetchDisability();
     }
-  }, [activeTab]);
+  }, [disabilityResult, taxpayerInfo.pin]);
 
   const handleAddPolicy = () => {
     if (!validatedInsurer || !modalForm.typeOfPolicy || !modalForm.insurancePolicyNumber || !modalForm.policyHolder || !modalForm.commencementDate || !modalForm.maturityDate || !modalForm.sumAssured || !modalForm.annualPremiumPaid || !modalForm.amountOfInsuranceRelief) return;
@@ -155,36 +154,16 @@ function ReturnInformationContent() {
         {/* Section header */}
         <p className="text-sm font-semibold text-gray-700">Return Information</p>
 
-        {/* Left tab navigation */}
-        <div className="flex gap-3">
-          {/* Tabs */}
-          <div className="flex flex-col gap-1 min-w-[110px]">
-            <button
-              onClick={() => setActiveTab('insurance')}
-              className={`text-left text-xs px-3 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'insurance'
-                  ? 'bg-[var(--kra-red)] text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Insurance Policy
-            </button>
-            <button
-              onClick={() => setActiveTab('disability')}
-              className={`text-left text-xs px-3 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'disability'
-                  ? 'bg-[var(--kra-red)] text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Disability
-            </button>
-          </div>
-
-          {/* Tab content */}
-          <div className="flex-1">
-            {activeTab === 'insurance' && (
-              <Card className="space-y-3">
+        <div className="space-y-3">
+          <Card className="space-y-3 border border-gray-200">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-gray-800 inline-flex items-center gap-2">
+                <Shield className="w-4 h-4 text-[var(--kra-red)]" />
+                Insurance Policy
+              </p>
+              <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Active</span>
+            </div>
+            <div className="space-y-3">
                 <div className="flex items-center gap-4">
                   <p className="text-xs text-gray-600 font-medium">Do you have insurance policy?</p>
                   <label className="flex items-center gap-1 cursor-pointer">
@@ -200,7 +179,7 @@ function ReturnInformationContent() {
                 {hasInsurance && (
                   <div className="space-y-2">
                     <p className="text-xs font-medium text-gray-700">Computation of Insurance Relief</p>
-                    <Card className="space-y-2 border border-gray-200">
+                    <div className="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50">
                       <Input
                         label="Insurance Company PIN"
                         placeholder="Enter insurer PIN (e.g. P051300696C)"
@@ -233,7 +212,7 @@ function ReturnInformationContent() {
                           <p className="text-xs text-red-600">{insurancePinError}</p>
                         </div>
                       ) : null}
-                    </Card>
+                    </div>
 
                     {policies.length === 0 ? (
                       <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center space-y-2">
@@ -272,36 +251,42 @@ function ReturnInformationContent() {
                     )}
                   </div>
                 )}
-              </Card>
-            )}
+            </div>
+          </Card>
 
-            {activeTab === 'disability' && (
-              <Card className="space-y-3">
-                <p className="text-xs text-gray-600">Have you been issued the exemption certificate for disability?</p>
-                <p className="text-xs font-medium text-gray-700">Exemption Certificate Details</p>
-                {loadingDisability ? (
-                  <div className="flex items-center gap-2 text-gray-500 p-4">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-xs">Checking certificate...</span>
-                  </div>
-                ) : disabilityResult?.hasCertificate ? (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                    <p className="text-xs font-medium text-green-800">Certificate Issued</p>
-                    <p className="text-xs text-green-700 mt-1">Certificate No: {disabilityResult.certificateNumber}</p>
-                  </div>
-                ) : (
-                  <div className="border border-dashed border-gray-200 rounded-lg p-8 flex flex-col items-center justify-center gap-2">
-                    <div className="w-10 h-8 bg-gray-200 rounded" />
-                    <div className="space-y-1 text-center">
-                      <div className="w-16 h-2 bg-gray-200 rounded mx-auto" />
-                      <div className="w-12 h-2 bg-gray-200 rounded mx-auto" />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">No Certificate Issued</p>
-                  </div>
-                )}
-              </Card>
+          <Card className="space-y-3 border border-gray-200">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-gray-800 inline-flex items-center gap-2">
+                <CircleDot className="w-4 h-4 text-blue-500" />
+                Disability Exemption
+              </p>
+              <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                {disabilityResult?.hasCertificate ? 'Selected' : 'None selected'}
+              </span>
+            </div>
+            <p className="text-xs text-gray-600">Have you been issued the exemption certificate for disability?</p>
+            <p className="text-xs font-medium text-gray-700">Exemption Certificate Details</p>
+            {loadingDisability ? (
+              <div className="flex items-center gap-2 text-gray-500 p-4">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-xs">Checking certificate...</span>
+              </div>
+            ) : disabilityResult?.hasCertificate ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <p className="text-xs font-medium text-green-800">Certificate Issued</p>
+                <p className="text-xs text-green-700 mt-1">Certificate No: {disabilityResult.certificateNumber}</p>
+              </div>
+            ) : (
+              <div className="border border-dashed border-gray-200 rounded-lg p-8 flex flex-col items-center justify-center gap-2">
+                <div className="w-10 h-8 bg-gray-200 rounded" />
+                <div className="space-y-1 text-center">
+                  <div className="w-16 h-2 bg-gray-200 rounded mx-auto" />
+                  <div className="w-12 h-2 bg-gray-200 rounded mx-auto" />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">No Certificate Issued</p>
+              </div>
             )}
-          </div>
+          </Card>
         </div>
 
         {/* Navigation */}
