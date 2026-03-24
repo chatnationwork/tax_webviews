@@ -18,6 +18,7 @@ function ItrResultContent() {
   const [taxpayerInfo, setTaxpayerInfo] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
   const notificationSentRef = useRef(false);
+  const [whatsAppSent, setWhatsAppSent] = useState(false);
 
   useEffect(() => {
     const info = taxpayerStore.getTaxpayerInfo();
@@ -35,12 +36,18 @@ function ItrResultContent() {
         try {
           const recipientPhone = taxpayerStore.getMsisdn() || await getStoredPhone() || getKnownPhone();
           if (recipientPhone) {
+            const taxDue = Number(itr.taxComputation?.taxRefundDue || 0).toLocaleString('en-KE', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            });
             const message = `Dear ${info.fullName || 'Taxpayer'},\n\nYour Income Tax Return has been filed successfully.\n\nPIN: ${info.pin}\nReceipt: ${itr.receiptNumber || 'N/A'}\nFiling Period: ${itr.filingPeriod}\n\nPlease keep this for your records.`;
+            const enrichedMessage = `Dear ${info.fullName || 'Taxpayer'},\n\nYour Income Tax Return has been filed successfully.\n\nPIN: ${info.pin}\nReceipt: ${itr.receiptNumber || 'N/A'}\nFiling Period: ${itr.filingPeriod}\nTax Due: KES ${taxDue}\n\nPlease keep this for your records.`;
 
             await sendWhatsAppMessage({
               recipientPhone,
-              message,
+              message: enrichedMessage || message,
             });
+            setWhatsAppSent(true);
           }
         } catch (err) {
           console.error('Failed to send WhatsApp notification', err);
@@ -105,7 +112,7 @@ function ItrResultContent() {
               </div>
 
               <p className="text-xs text-blue-800 bg-blue-100/50 px-4 py-2 rounded-full mt-4">
-                Confirmation sent to your registered number
+                {whatsAppSent ? '✓ Confirmation sent to your registered number' : 'Sending confirmation...'}
               </p>
             </div>
           </Card>

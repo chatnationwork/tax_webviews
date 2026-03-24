@@ -98,7 +98,8 @@ function ItrValidationContent() {
         };
         taxpayerStore.setTaxpayerInfo(idNumber, parseInt(yob), taxpayer.fullName, taxpayer.pin);
         analytics.track('itr_validation_success', { obligation_type: 'itr' }, { journey_start: true });
-        const nextUrl = `/nil-mri-tot/itr/verify${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`;
+        const verifyPath = '/nil-mri-tot/itr/verify';
+        const nextUrl = `/otp?redirect=${encodeURIComponent(verifyPath)}&phone=${encodeURIComponent(phone)}`;
         router.push(nextUrl);
       } else {
         setError(result.error|| 'Invalid taxpayer credentials');
@@ -116,7 +117,7 @@ function ItrValidationContent() {
         {/* Header Card */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
           <h1 className="text-base font-semibold">Income Tax Return</h1>
-          <p className="text-gray-400 text-xs">Step 1/3 - Validation</p>
+          <p className="text-gray-400 text-xs">Step 1/3 — Validation</p>
         </div>
 
         <Card>

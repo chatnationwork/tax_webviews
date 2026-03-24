@@ -4,11 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button, Input, Select } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { getDisabilityExemption } from '@/app/actions/nil-mri-tot';
+import { getDisabilityExemption, validateInsurancePin } from '@/app/actions/nil-mri-tot';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
-
-// Static 3-step stepper — render inline, not a component
-// Step 1 active, steps 2-3 inactive
 
 function ReturnInformationContent() {
   const router = useRouter();
@@ -32,8 +29,9 @@ function ReturnInformationContent() {
     amountOfInsuranceRelief: '',
   });
   const [selectedInsurerPin, setSelectedInsurerPin] = useState('');
-
-
+  const [validatedInsurer, setValidatedInsurer] = useState<{ pin: string; companyName: string } | null>(null);
+  const [insurancePinError, setInsurancePinError] = useState('');
+  const [validatingInsurancePin, setValidatingInsurancePin] = useState(false);
 
   // Disability state
   const [loadingDisability, setLoadingDisability] = useState(false);
@@ -64,10 +62,11 @@ function ReturnInformationContent() {
   }, [activeTab]);
 
   const handleAddPolicy = () => {
-    if (!selectedInsurerPin || !modalForm.typeOfPolicy || !modalForm.insurancePolicyNumber || !modalForm.policyHolder || !modalForm.commencementDate || !modalForm.maturityDate || !modalForm.sumAssured || !modalForm.annualPremiumPaid || !modalForm.amountOfInsuranceRelief) return;
+    if (!validatedInsurer || !modalForm.typeOfPolicy || !modalForm.insurancePolicyNumber || !modalForm.policyHolder || !modalForm.commencementDate || !modalForm.maturityDate || !modalForm.sumAssured || !modalForm.annualPremiumPaid || !modalForm.amountOfInsuranceRelief) return;
     const entry = {
       ...modalForm,
-      insuranceCompanyPin: selectedInsurerPin,
+      insuranceCompanyPin: validatedInsurer.pin,
+      insuranceCompanyName: validatedInsurer.companyName,
       sumAssured: Number(modalForm.sumAssured),
       annualPremiumPaid: Number(modalForm.annualPremiumPaid),
       amountOfInsuranceRelief: Number(modalForm.amountOfInsuranceRelief),
@@ -82,7 +81,41 @@ function ReturnInformationContent() {
       maturityDate: '', sumAssured: '', annualPremiumPaid: '', amountOfInsuranceRelief: '',
     });
     setSelectedInsurerPin('');
+    setValidatedInsurer(null);
+    setInsurancePinError('');
   };
+  const handleValidateInsurancePin = async () => {
+    setInsurancePinError('');
+    setValidatedInsurer(null);
+    if (selectedInsurerPin.length !== 11) {
+      setInsurancePinError('PIN must be exactly 11 characters');
+      return;
+    }
+
+    setValidatingInsurancePin(true);
+    try {
+      const result = await validateInsurancePin(selectedInsurerPin);
+      if (result.success && result.companyName && result.pin) {
+        setValidatedInsurer({ pin: result.pin, companyName: result.companyName });
+      } else {
+        setInsurancePinError(result.error || 'Invalid insurance company PIN');
+      }
+    } catch (error: any) {
+      setInsurancePinError(error?.message || 'Failed to validate insurance PIN');
+    } finally {
+      setValidatingInsurancePin(false);
+    }
+  };
+
+  const handleOpenInsuranceModal = () => {
+    if (!validatedInsurer) return;
+    setModalForm((prev) => ({
+      ...prev,
+      insuranceCompanyPin: validatedInsurer.pin,
+    }));
+    setShowModal(true);
+  };
+
 
   const handleRemovePolicy = (index: number) => {
     const updated = policies.filter((_, i) => i !== index);
@@ -92,6 +125,15 @@ function ReturnInformationContent() {
 
   const handleNext = () => {
     taxpayerStore.setItrField('hasInsurancePolicy', hasInsurance);
+    if (disabilityResult?.hasCertificate && disabilityResult.certificateNumber) {
+      taxpayerStore.setItrField('disabilityCertificates', [{
+        certificateNumber: disabilityResult.certificateNumber,
+        effectiveDate: '',
+        expiryDate: '',
+      }]);
+    } else {
+      taxpayerStore.setItrField('disabilityCertificates', []);
+    }
     router.push(`/nil-mri-tot/itr/employment-income${phone ? `?phone=${encodeURIComponent(phone)}` : ''}`);
   };
 
@@ -158,15 +200,51 @@ function ReturnInformationContent() {
                 {hasInsurance && (
                   <div className="space-y-2">
                     <p className="text-xs font-medium text-gray-700">Computation of Insurance Relief</p>
+                    <Card className="space-y-2 border border-gray-200">
+                      <Input
+                        label="Insurance Company PIN"
+                        placeholder="Enter insurer PIN (e.g. P051300696C)"
+                        value={selectedInsurerPin}
+                        onChange={(v) => {
+                          const normalized = v.toUpperCase();
+                          setSelectedInsurerPin(normalized);
+                          setValidatedInsurer(null);
+                          setInsurancePinError('');
+                        }}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleValidateInsurancePin}
+                        disabled={selectedInsurerPin.length !== 11 || validatingInsurancePin}
+                        className="w-full"
+                      >
+                        {validatingInsurancePin ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" /> Validating PIN...</> : 'Validate PIN'}
+                      </Button>
+                      {validatedInsurer ? (
+                        <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <p className="text-xs text-green-700 font-medium">
+                            ✓ {validatedInsurer.companyName} ({validatedInsurer.pin})
+                          </p>
+                        </div>
+                      ) : null}
+                      {insurancePinError ? (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                          <p className="text-xs text-red-600">{insurancePinError}</p>
+                        </div>
+                      ) : null}
+                    </Card>
+
                     {policies.length === 0 ? (
                       <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center space-y-2">
                         <p className="text-sm font-medium text-gray-700">Add Insurance Relief Details</p>
                         <p className="text-xs text-gray-500">Select Add to add details of insurance relief</p>
                         <button
-                          onClick={() => setShowModal(true)}
+                          onClick={handleOpenInsuranceModal}
+                          disabled={!validatedInsurer}
                           className="px-4 py-1.5 bg-gray-900 text-white text-xs rounded-lg hover:bg-gray-700"
                         >
-                          Add
+                          Continue to Details
                         </button>
                       </div>
                     ) : (
@@ -184,7 +262,8 @@ function ReturnInformationContent() {
                         ))}
                         <button
                           type="button"
-                          onClick={() => setShowModal(true)}
+                          onClick={handleOpenInsuranceModal}
+                          disabled={!validatedInsurer}
                           className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium"
                         >
                           <Plus className="w-3 h-3" /> Add another policy
@@ -241,10 +320,15 @@ function ReturnInformationContent() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-xs text-gray-600 font-medium">PIN Of Insurance Company</p>
-                {selectedInsurerPin && (
+                {validatedInsurer && (
                   <button
                     type="button"
-                    onClick={() => setSelectedInsurerPin('')}
+                    onClick={() => {
+                      setSelectedInsurerPin('');
+                      setValidatedInsurer(null);
+                      setInsurancePinError('');
+                      setShowModal(false);
+                    }}
                     className="text-xs text-[var(--kra-red)] hover:underline"
                   >
                     Clear
@@ -254,10 +338,14 @@ function ReturnInformationContent() {
               <Input
                 label=""
                 placeholder="Enter insurer PIN (e.g. P051300696C)"
-                value={selectedInsurerPin}
-                onChange={(v) => setSelectedInsurerPin(v.toUpperCase())}
+                value={validatedInsurer?.pin || selectedInsurerPin}
+                onChange={setSelectedInsurerPin}
+                disabled
                 required
               />
+              {validatedInsurer?.companyName ? (
+                <p className="text-xs text-green-700">✓ {validatedInsurer.companyName}</p>
+              ) : null}
             </div>
 
             <Select
@@ -294,14 +382,24 @@ function ReturnInformationContent() {
 
             <Input label="Sum Assured" value={modalForm.sumAssured} onChange={(v) => setModalForm({ ...modalForm, sumAssured: v })} required type="number" placeholder="0.00" />
 
-            <Input label="Annual Premium Paid" value={modalForm.annualPremiumPaid} onChange={(v) => setModalForm({ ...modalForm, annualPremiumPaid: v })} required type="number" placeholder="0.00" />
+            <Input label="Annual Premium Paid" value={modalForm.annualPremiumPaid} onChange={(v) => {
+              const premium = Number(v) || 0;
+              const relief = Math.round(premium * 0.15 * 100) / 100;
+              setModalForm({ ...modalForm, annualPremiumPaid: v, amountOfInsuranceRelief: String(relief) });
+            }} required type="number" placeholder="0.00" />
 
-            <Input label="Amount Of Insurance Relief" value={modalForm.amountOfInsuranceRelief} onChange={(v) => setModalForm({ ...modalForm, amountOfInsuranceRelief: v })} required type="number" placeholder="0.00" />
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Amount Of Insurance Relief</label>
+              <div className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">
+                {modalForm.amountOfInsuranceRelief || '0.00'}
+              </div>
+              <p className="text-[10px] text-gray-400 mt-0.5">Auto-calculated: 15% of Annual Premium Paid</p>
+            </div>
 
             <div className="flex gap-2 pt-2">
               <Button variant="secondary" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
               <Button onClick={handleAddPolicy} className="flex-1"
-                disabled={!selectedInsurerPin || !modalForm.typeOfPolicy || !modalForm.insurancePolicyNumber || !modalForm.policyHolder || !modalForm.commencementDate || !modalForm.maturityDate || !modalForm.sumAssured || !modalForm.annualPremiumPaid || !modalForm.amountOfInsuranceRelief}
+                disabled={!validatedInsurer || !modalForm.typeOfPolicy || !modalForm.insurancePolicyNumber || !modalForm.policyHolder || !modalForm.commencementDate || !modalForm.maturityDate || !modalForm.sumAssured || !modalForm.annualPremiumPaid || !modalForm.amountOfInsuranceRelief}
               >
                 Add
               </Button>

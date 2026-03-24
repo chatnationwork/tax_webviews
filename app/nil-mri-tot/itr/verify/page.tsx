@@ -4,9 +4,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import { Layout, Button, Card, IdentityStrip } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { getStoredPhone } from '@/app/actions/nil-mri-tot';
+import { getStoredPhone, getTaxpayerObligations, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
 import { getKnownPhone } from '@/app/_lib/session-store';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 function ItrVerifyContent() {
   const router = useRouter();
@@ -14,6 +14,9 @@ function ItrVerifyContent() {
   const phone = searchParams.get('phone');
   const [taxpayerInfo, setTaxpayerInfo] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
+  const [loadingObligations, setLoadingObligations] = useState(false);
+  const [hasItrObligation, setHasItrObligation] = useState<boolean | null>(null);
+  const [finishing, setFinishing] = useState(false);
 
   useEffect(() => {
     const info = taxpayerStore.getTaxpayerInfo();
@@ -24,6 +27,32 @@ function ItrVerifyContent() {
       router.push('/nil-mri-tot/itr/validation');
     }
   }, [router]);
+
+  useEffect(() => {
+    if (!taxpayerInfo?.pin) return;
+
+    const fetchObligations = async () => {
+      setLoadingObligations(true);
+      try {
+        const result = await getTaxpayerObligations(taxpayerInfo.pin);
+        if (result.success && result.obligations) {
+          const hasItr = result.obligations.some((obs: any) =>
+            obs.obligationName?.toLowerCase().includes('income tax')
+          );
+          setHasItrObligation(hasItr);
+        } else {
+          setHasItrObligation(false);
+        }
+      } catch (error) {
+        console.error('Failed to fetch obligations', error);
+        setHasItrObligation(false);
+      } finally {
+        setLoadingObligations(false);
+      }
+    };
+
+    fetchObligations();
+  }, [taxpayerInfo?.pin]);
 
 
 
@@ -36,7 +65,24 @@ function ItrVerifyContent() {
 
 
   const handleNext = () => {
+    if (!hasItrObligation) return;
     router.push(`/nil-mri-tot/itr/disclaimer${phoneParam}`);
+  };
+
+  const handleFinish = async () => {
+    setFinishing(true);
+    try {
+      const storedPhone = taxpayerStore.getMsisdn() || await getStoredPhone() || getKnownPhone();
+      if (storedPhone && taxpayerInfo?.pin) {
+        const message = `Dear ${taxpayerInfo.fullName},\n\nYour PIN: ${taxpayerInfo.pin} does not currently have an Income Tax obligation eligible for ITR filing.\n\nNo action is required at this time.`;
+        await sendWhatsAppMessage({ recipientPhone: storedPhone, message });
+      }
+    } catch (error) {
+      console.error('Failed to send WhatsApp notification', error);
+    } finally {
+      setFinishing(false);
+      router.push('/');
+    }
   };
 
   const handleBack = async () => {
@@ -93,9 +139,30 @@ function ItrVerifyContent() {
 
 
         <div className="pt-2">
-          <Button onClick={handleNext} className="w-full">
-            Next
-          </Button>
+          {loadingObligations ? (
+            <div className="flex items-center justify-center py-3 text-gray-500">
+              <Loader2 className="w-4 h-4 animate-spin" />
+            </div>
+          ) : hasItrObligation === false ? (
+            <div className="space-y-3">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">No Eligible ITR Filing</p>
+                  <p className="text-xs text-gray-700 mt-1">
+                    Based on our records, you do not currently have an Income Tax obligation eligible for ITR filing.
+                  </p>
+                </div>
+              </div>
+              <Button onClick={handleFinish} disabled={finishing} className="w-full bg-[var(--kra-red)] hover:bg-red-700">
+                {finishing ? 'Finishing...' : 'Finish'}
+              </Button>
+            </div>
+          ) : (
+            <Button onClick={handleNext} className="w-full">
+              Next
+            </Button>
+          )}
         </div>
       </div>
     </Layout>

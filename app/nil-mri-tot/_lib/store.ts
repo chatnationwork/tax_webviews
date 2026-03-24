@@ -111,11 +111,19 @@ class TaxpayerStore {
     insurancePolicies: any[];
     hasDisabilityExemption: boolean;
     disabilityCertificateNumber?: string;
+    disabilityCertificates: any[];
     employmentIncomeRows: any[];
     taxComputation?: any;
     filingPeriod: string;
     obligationId: string;
     obligationCode: string;
+    taxReturnId: number | null;
+    taxPayerId: number | null;
+    taxObligationId: number | null;
+    pensionContribution: number;
+    shifContribution: number;
+    hlContribution: number;
+    pmfContribution: number;
     receiptNumber?: string;
     error?: string;
     successMessage?: string;
@@ -123,10 +131,18 @@ class TaxpayerStore {
     hasInsurancePolicy: false,
     insurancePolicies: [],
     hasDisabilityExemption: false,
+    disabilityCertificates: [],
     employmentIncomeRows: [],
     filingPeriod: '',
     obligationId: '',
     obligationCode: '',
+    taxReturnId: null,
+    taxPayerId: null,
+    taxObligationId: null,
+    pensionContribution: 0,
+    shifContribution: 0,
+    hlContribution: 0,
+    pmfContribution: 0,
   };
 
   setItrField(key: string, value: any) {
@@ -142,10 +158,18 @@ class TaxpayerStore {
       hasInsurancePolicy: false,
       insurancePolicies: [],
       hasDisabilityExemption: false,
+      disabilityCertificates: [],
       employmentIncomeRows: [],
       filingPeriod: '',
       obligationId: '',
       obligationCode: '',
+      taxReturnId: null,
+      taxPayerId: null,
+      taxObligationId: null,
+      pensionContribution: 0,
+      shifContribution: 0,
+      hlContribution: 0,
+      pmfContribution: 0,
     };
   }
   

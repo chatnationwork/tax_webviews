@@ -24,6 +24,7 @@ function OTPContent() {
     if (pathLower.includes('/nil/')) return 'NIL Returns';
     if (pathLower.includes('/mri/')) return 'Monthly Rental Income';
     if (pathLower.includes('/tot/')) return 'Turnover Tax';
+    if (pathLower.includes('/itr/')) return 'Income Tax Return';
     if (pathLower.includes('/tcc/')) return 'Tax Compliance Certificate';
     if (pathLower.includes('/payroll')) return 'Payroll';
     if (pathLower.includes('/customs')) return 'Customs';

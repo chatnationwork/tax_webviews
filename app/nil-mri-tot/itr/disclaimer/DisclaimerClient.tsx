@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Button, Card } from '@/app/_components/Layout';
 import { taxpayerStore } from '@/app/nil-mri-tot/_lib/store';
 import { useEffect, useState } from 'react';
-import { getFilingPeriods, getTaxpayerObligations, sendWhatsAppMessage, getStoredPhone } from '@/app/actions/nil-mri-tot';
+import { getItrFilingPeriods, getTaxpayerObligations, sendWhatsAppMessage, getStoredPhone } from '@/app/actions/nil-mri-tot';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function DisclaimerClient() {
@@ -78,7 +78,7 @@ export default function DisclaimerClient() {
       setLoadingPeriod(true);
       setError('');
       try {
-        const result = await getFilingPeriods(taxpayerInfo.pin, itrObligation.obligationId);
+        const result = await getItrFilingPeriods(taxpayerInfo.pin, itrObligation.obligationId);
 
         if (result.success && result.periods && result.periods.length > 0) {
           setFilingPeriod(result.periods[0]);

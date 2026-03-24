@@ -15,6 +15,7 @@ import {
   SendWhatsAppMessageResult
 } from './auth';
 import { cleanPhoneNumber } from '../_lib/utils';
+import { checkPin } from './checkers';
 
 
 const BASE_URL = `${process.env.API_URL}/ussd`;
@@ -953,10 +954,12 @@ export interface EmploymentIncomeResult {
     valueOfCarBenefit: number;
     pension: number;
     netValueOfHousing: number;
+    allowancesBenefits: number;
     totalEmploymentIncome: number;
     taxableSalary: number;
     amountOfTaxDeductedPaye: number;
     taxPayableOnTaxableSalary: number;
+    amountOfTaxPayableRefundable: number;
   }[];
   /** Top-level summary fields from the API */
   summary?: {
@@ -1000,12 +1003,135 @@ export interface FileItrReturnResult {
   taxDue?: string;
 }
 
+export interface ValidateInsurancePinResult {
+  success: boolean;
+  companyName?: string;
+  pin?: string;
+  error?: string;
+}
+
+// ---- New ITR types for Postman API integration ----
+
+export interface ItrConfigResult {
+  success: boolean;
+  config?: any;
+  message?: string;
+}
+
+export interface CreateItrReturnResult {
+  success: boolean;
+  taxReturnId?: number;
+  taxPayerId?: number;
+  taxObligationId?: number;
+  data?: any;
+  message?: string;
+}
+
+export interface ItrReturnResult {
+  success: boolean;
+  computation?: TaxComputationResult['computation'];
+  rawData?: any;
+  message?: string;
+}
+
+export interface ItrSummaryResult {
+  success: boolean;
+  summary?: any;
+  message?: string;
+}
+
+// ---- New ITR server actions matching Postman collection ----
+
 /**
- * Get employment income details for ITR filing
- * Real API: GET /itax/fetch-employment-income?employee_pin={pin}&return_year={year}&tax_code=2
- * Response: { DETAILS: [{ employerPin, employerName, grossPay, pension, PAYEDeducted, taxablePay, taxPayableOnTaxablePay }], totalPAYEDeducted, totalTaxPayable, ... }
+ * Get ITR configuration (tax brackets, relief limits, etc.)
+ * GET /api/settings/itr/config
  */
-export async function getEmploymentIncome(
+export async function getItrConfig(): Promise<ItrConfigResult> {
+  try {
+    const headers = await getApiHeaders(true);
+    const response = await axios.get(
+      `${process.env.API_URL}/settings/itr/config`,
+      { headers, timeout: 30000 }
+    );
+
+    logger.info('ITR Config Response:', JSON.stringify(response.data, null, 2));
+
+    return {
+      success: true,
+      config: response.data,
+    };
+  } catch (error: any) {
+    logger.error('Get ITR Config Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch ITR configuration',
+    };
+  }
+}
+
+/**
+ * Get filing periods for ITR using the correct GET endpoint.
+ * GET /api/obligation-filling-period?pin=...&obligation_id=2&is_amended=N&...
+ * This is separate from the shared getFilingPeriods to avoid breaking NIL/MRI/TOT.
+ */
+export async function getItrFilingPeriods(
+  pin: string,
+  obligationId: string
+): Promise<FilingPeriodResult> {
+  try {
+    const headers = await getApiHeaders(true);
+    const response = await axios.get(
+      `${process.env.API_URL}/obligation-filling-period`,
+      {
+        params: {
+          pin: pin,
+          obligation_id: obligationId,
+          is_amended: 'N',
+          branch_id: '',
+          from_date: '',
+          from_itms_or_prtl: 'PRTL',
+        },
+        headers,
+        timeout: 30000,
+      }
+    );
+
+    logger.info('ITR Filing Periods Response:', JSON.stringify(response.data, null, 2));
+
+    const data = response.data;
+    let periods: string[] = [];
+
+    if (Array.isArray(data)) {
+      // Response is an array of period strings
+      periods = data.map((item: any) =>
+        typeof item === 'string' ? item : (item.period || `${item.from_date} - ${item.to_date}`)
+      );
+    } else if (data.periods && Array.isArray(data.periods)) {
+      periods = data.periods;
+    } else if (data.trpFromDate && data.trpToDate) {
+      periods = [`${data.trpFromDate} - ${data.trpToDate}`];
+    }
+
+    return {
+      success: periods.length > 0,
+      periods,
+      message: data.description || data.message,
+    };
+  } catch (error: any) {
+    logger.error('ITR Filing Period Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      periods: [],
+      message: error.response?.data?.message || error.message || 'Failed to retrieve ITR filing periods',
+    };
+  }
+}
+
+/**
+ * Get employment income details for ITR filing using the correct endpoint.
+ * GET /api/tax-return/itr-employment-details?employee_pin=...&return_year=...&tax_code=2
+ */
+export async function getItrEmploymentDetails(
   pin: string,
   returnYear?: number
 ): Promise<EmploymentIncomeResult> {
@@ -1014,7 +1140,7 @@ export async function getEmploymentIncome(
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.get(
-      `${process.env.API_URL}/itax/fetch-employment-income`,
+      `${process.env.API_URL}/tax-return/itr-employment-details`,
       {
         params: {
           employee_pin: pin,
@@ -1027,27 +1153,33 @@ export async function getEmploymentIncome(
     );
 
     const data = response.data;
-    console.log('Employment Income Response:', JSON.stringify(data, null, 2));
+    logger.info('ITR Employment Details Response:', JSON.stringify(data, null, 2));
 
-    if (data.Status !== 'OK' && data.ResponseCode !== 29000) {
-      // ── DEMO FALLBACK: return mock data when API returns error ──
-      logger.info('[DEMO] Employment income API returned error, using mock data');
-      return getMockEmploymentIncome(pin);
+    // Handle various response shapes
+    let details: any[] = [];
+    if (Array.isArray(data)) {
+      details = data;
+    } else if (Array.isArray(data.DETAILS)) {
+      details = data.DETAILS;
+    } else if (Array.isArray(data.employment_income)) {
+      details = data.employment_income;
+    } else if (Array.isArray(data.data)) {
+      details = data.data;
     }
 
-    const details: any[] = Array.isArray(data.DETAILS) ? data.DETAILS : [];
-
     const rows = details.map((item: any) => ({
-      employerPin: item.employerPin || '',
-      employerName: item.employerName || '',
-      grossPay: Number(item.grossPay || 0),
-      valueOfCarBenefit: Number(item.valueOfCarBenefit || 0),
+      employerPin: item.employer_pin || item.employerPin || '',
+      employerName: item.employer_name || item.employerName || '',
+      grossPay: Number(item.gross_pay || item.grossPay || 0),
+      valueOfCarBenefit: Number(item.value_of_car_benefit || item.valueOfCarBenefit || 0),
       pension: Number(item.pension || 0),
-      netValueOfHousing: Number(item.netValueOfHousing || 0),
-      totalEmploymentIncome: Number(item.grossPay || 0),
-      taxableSalary: Number(item.taxablePay || 0),
-      amountOfTaxDeductedPaye: Number(item.PAYEDeducted || 0),
-      taxPayableOnTaxableSalary: Number(item.taxPayableOnTaxablePay || 0),
+      netValueOfHousing: Number(item.net_value_of_housing || item.netValueOfHousing || 0),
+      allowancesBenefits: Number(item.allowances_benefits || item.allowancesBenefits || 0),
+      totalEmploymentIncome: Number(item.total_employment_income || item.grossPay || item.gross_pay || 0),
+      taxableSalary: Number(item.taxable_salary || item.taxablePay || item.taxable_pay || 0),
+      amountOfTaxDeductedPaye: Number(item.amount_of_tax_deducted_paye || item.PAYEDeducted || item.paye_deducted || 0),
+      taxPayableOnTaxableSalary: Number(item.tax_payable_on_taxable_salary || item.taxPayableOnTaxablePay || item.tax_payable_on_table_pay || 0),
+      amountOfTaxPayableRefundable: Number(item.amount_of_tax_payable_refundable || 0),
     }));
 
     return {
@@ -1056,164 +1188,290 @@ export async function getEmploymentIncome(
       summary: {
         totalPAYEDeducted: Number(data.totalPAYEDeducted || 0),
         totalTaxPayable: Number(data.totalTaxPayable || 0),
-        amountPayableOrRefundable: Number(data.amountPayableOrRefuindable || 0),
+        amountPayableOrRefundable: Number(data.amountPayableOrRefuindable || data.amountPayableOrRefundable || 0),
         personalRelief: Number(data.personalRelief || 0),
-        isPwd: data.isPwd === 'Y',
+        isPwd: data.isPwd === 'Y' || data.isPwd === true,
       },
     };
   } catch (error: any) {
-    console.error('Get Employment Income Error:', error.response?.data || error.message);
-    // ── DEMO FALLBACK: return mock data on network/API failure ──
-    logger.info('[DEMO] Employment income API failed, using mock data');
-    return getMockEmploymentIncome(pin);
+    logger.error('Get ITR Employment Details Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to load employment income details',
+    };
   }
 }
 
-/** Mock employment income for demo purposes */
-function getMockEmploymentIncome(pin: string): EmploymentIncomeResult {
-  return {
-    success: true,
-    rows: [
-      {
-        employerPin: 'P051109164C',
-        employerName: 'ACME CORPORATION LTD',
-        grossPay: 1714329.55,
-        valueOfCarBenefit: 0,
-        pension: 0,
-        netValueOfHousing: 0,
-        totalEmploymentIncome: 1714329.55,
-        taxableSalary: 1675618.30,
-        amountOfTaxDeductedPaye: 405797.70,
-        taxPayableOnTaxableSalary: 440085.71,
-      },
-    ],
-    summary: {
-      totalPAYEDeducted: 405797.70,
-      totalTaxPayable: 34288.01,
-      amountPayableOrRefundable: 0,
-      personalRelief: 0,
-      isPwd: false,
-    },
-  };
+/**
+ * Legacy employment income endpoint — kept for backward compatibility.
+ * Delegates to the new getItrEmploymentDetails.
+ */
+export async function getEmploymentIncome(
+  pin: string,
+  returnYear?: number
+): Promise<EmploymentIncomeResult> {
+  return getItrEmploymentDetails(pin, returnYear);
 }
 
 /**
- * Get tax computation for ITR
+ * Create/Draft an ITR return (Phase 1 of two-phase submit).
+ * POST /api/tax-return/itr-create
  */
-export async function getItrTaxComputation(
-  pin: string,
-  filingPeriod: string,
-  obligationId: string
-): Promise<TaxComputationResult> {
-
+export async function createItrReturn(payload: {
+  pin: string;
+  period: string;
+  returnType: string;
+  pensionContribution: number;
+  shifContribution: number;
+  hlContribution: number;
+  pmfContribution: number;
+  insurancePolicies: any[];
+  disabilityCertificates: any[];
+  employmentIncome: any[];
+}): Promise<CreateItrReturnResult> {
   try {
     const headers = await getApiHeaders(true);
-    const [from, to] = filingPeriod.includes(' - ')
-      ? filingPeriod.split(' - ').map((s) => s.trim())
-      : [filingPeriod, filingPeriod];
+
+    const body = {
+      pin: payload.pin,
+      period: payload.period,
+      return_type: payload.returnType,
+      pension_contribution: String(payload.pensionContribution),
+      shif_contribution: String(payload.shifContribution),
+      hl_contribution: String(payload.hlContribution),
+      pmf_contribution: String(payload.pmfContribution),
+      insurance_policy: payload.insurancePolicies.map((p: any) => ({
+        pin: p.insuranceCompanyPin || p.pin || '',
+        insurer_name: p.insuranceCompanyName || p.insurer_name || '',
+        insurance_policy_no: p.insurancePolicyNumber || p.insurance_policy_no || '',
+        type_of_policy: p.typeOfPolicy || p.type_of_policy || '',
+        policy_holder: p.policyHolder || p.policy_holder || '',
+        child_age: Number(p.ageOfChild || p.child_age || 0),
+        commencement_date: p.commencementDate || p.commencement_date || '',
+        maturity_date: p.maturityDate || p.maturity_date || '',
+        sum_assured: Number(p.sumAssured || p.sum_assured || 0),
+        annual_premium_paid: Number(p.annualPremiumPaid || p.annual_premium_paid || 0),
+        amount_of_insurance_relief: Number(p.amountOfInsuranceRelief || p.amount_of_insurance_relief || 0),
+      })),
+      disability_certificate: payload.disabilityCertificates.map((d: any) => ({
+        cert_no: d.certificateNumber || d.cert_no || '',
+        effective_date: d.effectiveDate || d.effective_date || '',
+        expiry_date: d.expiryDate || d.expiry_date || '',
+      })),
+      employment_income: payload.employmentIncome.map((e: any) => ({
+        employer_pin: e.employerPin || e.employer_pin || '',
+        employer_name: e.employerName || e.employer_name || '',
+        gross_pay: Number(e.grossPay || e.gross_pay || 0),
+        value_of_car_benefit: Number(e.valueOfCarBenefit || e.value_of_car_benefit || 0),
+        pension: Number(e.pension || 0),
+        net_value_of_housing: Number(e.netValueOfHousing || e.net_value_of_housing || 0),
+        allowances_benefits: Number(e.allowancesBenefits || e.allowances_benefits || 0),
+        total_employment_income: Number(e.totalEmploymentIncome || e.total_employment_income || 0),
+        taxable_salary: Number(e.taxableSalary || e.taxable_salary || 0),
+        amount_of_tax_deducted_paye: Number(e.amountOfTaxDeductedPaye || e.amount_of_tax_deducted_paye || 0),
+        tax_payable_on_taxable_salary: Number(e.taxPayableOnTaxableSalary || e.tax_payable_on_taxable_salary || 0),
+        amount_of_tax_payable_refundable: Number(e.amountOfTaxPayableRefundable || e.amount_of_tax_payable_refundable || 0),
+      })),
+    };
+
+    logger.info('Creating ITR Return (Phase 1):', JSON.stringify(body, null, 2));
 
     const response = await axios.post(
-      `${BASE_URL}/file-return`,
-      {
-        tax_payer_pin: pin,
-        kra_obligation_id: obligationId,
-        obligation_code: obligationId,
-        start_date: from,
-        end_date: to,
-        calc_only: 'true',
-      },
+      `${process.env.API_URL}/tax-return/itr-create`,
+      body,
       { headers, timeout: 30000 }
     );
+
     const data = response.data;
+    logger.info('Create ITR Return Response:', JSON.stringify(data, null, 2));
+
     return {
       success: true,
-      computation: {
-        totalDeduction: Number(data.total_deduction || 0),
-        definedPensionContribution: Number(data.defined_pension_contribution || 0),
-        socialHealthInsuranceContribution: Number(data.social_health_insurance || 0),
-        housingLevyContribution: Number(data.housing_levy || 0),
-        postRetirementMedicalContribution: Number(data.post_retirement_medical || 0),
-        employmentIncome: Number(data.employment_income || 0),
-        allowableTaxExemptionDisability: Number(data.disability_exemption || 0),
-        netTaxableIncome: Number(data.net_taxable_income || 0),
-        taxOnTaxableIncome: Number(data.tax_on_taxable_income || 0),
-        personalRelief: Number(data.personal_relief || 0),
-        insuranceRelief: Number(data.insurance_relief || 0),
-        taxCredits: Number(data.tax_credits || 0),
-        payeDeductedFromSalary: Number(data.paye_deducted || 0),
-        incomeTaxPaidInAdvance: Number(data.income_tax_advance || 0),
-        creditsTotalReliefDtaa: Number(data.dtaa_credits || 0),
-        taxRefundDue: Number(data.tax_refund_due || data.tax_due || 0),
-      },
+      taxReturnId: data.tax_return_id || data.id || data.data?.id || data.data?.tax_return_id,
+      taxPayerId: data.tax_payer_id || data.data?.tax_payer_id,
+      taxObligationId: data.tax_obligation_id || data.data?.tax_obligation_id,
+      data: data,
     };
   } catch (error: any) {
-    console.error('Get ITR Tax Computation Error:', error.response?.data || error.message);
-    // ── DEMO FALLBACK: return mock tax computation with insurance relief ──
-    logger.info('[DEMO] Tax computation API failed, using mock data');
-    return getMockTaxComputation();
+    logger.error('Create ITR Return Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to create ITR return',
+    };
   }
 }
 
-/** Mock tax computation for demo purposes (includes insurance relief) */
-function getMockTaxComputation(): TaxComputationResult {
-  return {
-    success: true,
-    computation: {
-      totalDeduction: 240000.00,
-      definedPensionContribution: 120000.00,
-      socialHealthInsuranceContribution: 36000.00,
-      housingLevyContribution: 45000.00,
-      postRetirementMedicalContribution: 39000.00,
-      employmentIncome: 1714329.55,
-      allowableTaxExemptionDisability: 0,
-      netTaxableIncome: 1474329.55,
-      taxOnTaxableIncome: 440085.71,
-      personalRelief: 28800.00,
-      insuranceRelief: 15000.00,
-      taxCredits: 449597.70,
-      payeDeductedFromSalary: 405797.70,
-      incomeTaxPaidInAdvance: 0,
-      creditsTotalReliefDtaa: 0,
-      taxRefundDue: 34288.01,
-    },
-  };
+/**
+ * Get the server-computed tax return after draft creation.
+ * GET /api/tax-return-itr?tax_payer_id=...&tax_obligation_id=...&period=...&return_type=normal
+ */
+export async function getItrReturn(
+  taxPayerId: number,
+  taxObligationId: number,
+  period: string,
+  returnType: string = 'normal'
+): Promise<ItrReturnResult> {
+  try {
+    const headers = await getApiHeaders(true);
+    const response = await axios.get(
+      `${process.env.API_URL}/tax-return-itr`,
+      {
+        params: {
+          tax_payer_id: taxPayerId,
+          tax_obligation_id: taxObligationId,
+          period: period,
+          return_type: returnType,
+        },
+        headers,
+        timeout: 30000,
+      }
+    );
+
+    const data = response.data;
+    logger.info('Get ITR Return Response:', JSON.stringify(data, null, 2));
+
+    // Map the server response to our computation shape
+    const computation: TaxComputationResult['computation'] = {
+      totalDeduction: Number(data.total_deduction || 0),
+      definedPensionContribution: Number(data.pension_contribution || data.defined_pension_contribution || 0),
+      socialHealthInsuranceContribution: Number(data.shif_contribution || data.social_health_insurance || 0),
+      housingLevyContribution: Number(data.hl_contribution || data.housing_levy || 0),
+      postRetirementMedicalContribution: Number(data.pmf_contribution || data.post_retirement_medical || 0),
+      employmentIncome: Number(data.employment_income || data.total_employment_income || 0),
+      allowableTaxExemptionDisability: Number(data.disability_exemption || 0),
+      netTaxableIncome: Number(data.net_taxable_income || 0),
+      taxOnTaxableIncome: Number(data.tax_on_taxable_income || data.total_tax_payable || 0),
+      personalRelief: Number(data.personal_relief || 0),
+      insuranceRelief: Number(data.insurance_relief || 0),
+      taxCredits: Number(data.tax_credits || data.credits || 0),
+      payeDeductedFromSalary: Number(data.paye_deducted || data.total_payed_deducted || 0),
+      incomeTaxPaidInAdvance: Number(data.income_tax_advance || 0),
+      creditsTotalReliefDtaa: Number(data.dtaa_credits || 0),
+      taxRefundDue: Number(data.tax_refund_due || data.amount_payable_or_refundable || data.tax_due || 0),
+    };
+
+    return {
+      success: true,
+      computation,
+      rawData: data,
+    };
+  } catch (error: any) {
+    logger.error('Get ITR Return Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch ITR return computation',
+    };
+  }
 }
 
 /**
- * File ITR normal return
+ * Get ITR summary for review before final submission.
+ * GET /api/tax-return/itr-summary/{id}
  */
-export async function fileItrReturn(
-  taxPayerPin: string,
-  obligationId: string,
-  obligationCode: string,
-  returnPeriod: string,
-  hasInsurancePolicy: boolean,
-  insurancePolicies: any[],
-  hasDisabilityExemption: boolean
-): Promise<FileItrReturnResult> {
-
+export async function getItrSummary(
+  taxReturnId: number
+): Promise<ItrSummaryResult> {
   try {
     const headers = await getApiHeaders(true);
-    const [from, to] = returnPeriod.includes(' - ')
-      ? returnPeriod.split(' - ').map((s) => s.trim())
-      : [returnPeriod, returnPeriod];
+    const url = `${process.env.API_URL}/tax-return/itr-summary/${taxReturnId}`;
+    logger.info(`ITR Summary Request: GET ${url} | taxReturnId=${taxReturnId} (type: ${typeof taxReturnId}) | Auth: ${headers.Authorization ? 'Bearer ...' + String(headers.Authorization).slice(-10) : 'MISSING'}`);
+    const response = await axios.get(
+      url,
+      { headers, timeout: 30000 }
+    );
+
+    logger.info('ITR Summary Response:', JSON.stringify(response.data, null, 2));
+
+    return {
+      success: true,
+      summary: response.data,
+    };
+  } catch (error: any) {
+    logger.error('Get ITR Summary Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch ITR summary',
+    };
+  }
+}
+
+/**
+ * File/Submit ITR return (Phase 2 of two-phase submit).
+ * POST /api/tax-return/create
+ * Uses the tax_return_id from Phase 1 (createItrReturn).
+ */
+export async function fileItrReturn(
+  taxReturnId: number,
+  obligationId: string,
+  returnPeriod: string,
+  taxableAmount: number,
+  taxDue: number,
+  taxPayerPin: string,
+  taxPayerId: number,
+  metaData: {
+    returnYear: number;
+    taxCode: string;
+    employeePin: string;
+    totalTaxPayable: number;
+    totalPayedDeducted: number;
+    amountPayableOrRefundable: number;
+    pensionContribution: number;
+    hlContribution: number;
+    pmfContribution: number;
+    shifContribution: number;
+    personalRelief: number;
+    credits: number;
+    netTaxableIncome: number;
+    employmentIncome: any[];
+  }
+): Promise<FileItrReturnResult> {
+  try {
+    const headers = await getApiHeaders(true);
 
     const payload = {
-      tax_payer_pin: taxPayerPin,
-      kra_obligation_id: obligationId,
-      obligation_code: obligationCode,
-      start_date: from,
-      end_date: to,
-      returnType: 'income_tax_return',
-      has_insurance_policy: hasInsurancePolicy,
-      insurance_policies: hasInsurancePolicy ? insurancePolicies : [],
-      has_disability_exemption: hasDisabilityExemption,
+      tax_return_id: taxReturnId,
+      obligation_id: obligationId,
+      returnType: 'normal',
+      returnPeriod: returnPeriod,
+      taxable_amount: String(taxableAmount),
+      tax_due: String(taxDue),
+      currency: 'KES',
+      meta_data: {
+        return_year: metaData.returnYear,
+        tax_code: metaData.taxCode,
+        employee_pin: metaData.employeePin,
+        total_tax_payable: metaData.totalTaxPayable,
+        total_payed_deducted: metaData.totalPayedDeducted,
+        amount_payable_or_refundable: metaData.amountPayableOrRefundable,
+        pension_contribution: metaData.pensionContribution,
+        hl_contribution: metaData.hlContribution,
+        pmf_contribution: metaData.pmfContribution,
+        shif_contribution: metaData.shifContribution,
+        personal_relief: metaData.personalRelief,
+        credits: metaData.credits,
+        net_taxable_income: String(metaData.netTaxableIncome),
+        employment_income: metaData.employmentIncome.map((row: any) => ({
+          employer_pin: row.employerPin || row.employer_pin || '',
+          employer_name: row.employerName || row.employer_name || '',
+          gross_pay: Number(row.grossPay || row.gross_pay || 0),
+          pension: Number(row.pension || 0),
+          taxable_pay: Number(row.taxableSalary || row.taxable_pay || 0),
+          tax_payable_on_table_pay: Number(row.taxPayableOnTaxableSalary || row.tax_payable_on_table_pay || 0),
+          paye_deducted: Number(row.amountOfTaxDeductedPaye || row.paye_deducted || 0),
+        })),
+      },
     };
 
-    console.log('Filing ITR Return:', payload);
-    const response = await axios.post(`${BASE_URL}/file-return`, payload, { headers, timeout: 30000 });
+    logger.info('Submitting ITR Return (Phase 2):', JSON.stringify(payload, null, 2));
+
+    const response = await axios.post(
+      `${process.env.API_URL}/tax-return/create`,
+      payload,
+      { headers, timeout: 30000 }
+    );
+
     const data = response.data;
-    console.log('File ITR Return Response:', data);
+    logger.info('Submit ITR Return Response:', JSON.stringify(data, null, 2));
 
     const isSuccess =
       data.code === 1 ||
@@ -1236,17 +1494,42 @@ export async function fileItrReturn(
       taxDue: data.tax_due,
     };
   } catch (error: any) {
-    console.error('File ITR Return Error:', error.response?.data || error.message);
-    // ── DEMO FALLBACK: return mock success when API fails ──
-    logger.info('[DEMO] File ITR Return API failed, using mock success response');
+    logger.error('Submit ITR Return Error:', error.response?.data || error.message);
     return {
-      success: true,
-      code: 200,
-      message: 'Income Tax Return filed successfully',
-      receiptNumber: `ITR-${Date.now().toString().slice(-8)}`,
-      taxDue: '34288.01',
+      success: false,
+      code: error.response?.status || 500,
+      message: error.response?.data?.Message || error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to submit ITR return',
     };
   }
+}
+
+/**
+ * Validate insurance company PIN and return company details.
+ */
+export async function validateInsurancePin(pin: string): Promise<ValidateInsurancePinResult> {
+  const normalizedPin = (pin || '').trim().toUpperCase();
+  if (!normalizedPin || normalizedPin.length !== 11) {
+    return {
+      success: false,
+      pin: normalizedPin,
+      error: 'PIN must be exactly 11 characters',
+    };
+  }
+
+  const result = await checkPin(normalizedPin);
+  if (!result.success || !result.data?.taxpayerName) {
+    return {
+      success: false,
+      pin: normalizedPin,
+      error: result.error || 'Invalid insurance company PIN',
+    };
+  }
+
+  return {
+    success: true,
+    pin: normalizedPin,
+    companyName: result.data.taxpayerName,
+  };
 }
 
 /**
