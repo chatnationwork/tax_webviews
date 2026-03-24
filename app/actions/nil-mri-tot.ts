@@ -961,6 +961,12 @@ export interface EmploymentIncomeResult {
     taxPayableOnTaxableSalary: number;
     amountOfTaxPayableRefundable: number;
   }[];
+  /** Disability exemption certificate details from the employment response */
+  itExemptionCertDetails?: {
+    certNo: string;
+    effectiveDate: string;
+    expiryDate: string;
+  }[];
   /** Top-level summary fields from the API */
   summary?: {
     totalPAYEDeducted: number;
@@ -1182,9 +1188,18 @@ export async function getItrEmploymentDetails(
       amountOfTaxPayableRefundable: Number(item.amount_of_tax_payable_refundable || 0),
     }));
 
+    // Parse disability exemption certificate details from the employment response
+    const rawCerts = Array.isArray(data.itExemptionCertDetails) ? data.itExemptionCertDetails : [];
+    const itExemptionCertDetails = rawCerts.map((c: any) => ({
+      certNo: c.exemptionCertNo || c.certNo || '',
+      effectiveDate: c.certEffectiveDate || c.effectiveDate || '',
+      expiryDate: c.certExpiryDate || c.expiryDate || '',
+    }));
+
     return {
       success: true,
       rows,
+      itExemptionCertDetails,
       summary: {
         totalPAYEDeducted: Number(data.totalPAYEDeducted || 0),
         totalTaxPayable: Number(data.totalTaxPayable || 0),
@@ -1228,11 +1243,12 @@ export async function createItrReturn(payload: {
   insurancePolicies: any[];
   disabilityCertificates: any[];
   employmentIncome: any[];
+  mortgages?: any[];
 }): Promise<CreateItrReturnResult> {
   try {
     const headers = await getApiHeaders(true);
 
-    const body = {
+    const body: Record<string, any> = {
       pin: payload.pin,
       period: payload.period,
       return_type: payload.returnType,
@@ -1254,7 +1270,7 @@ export async function createItrReturn(payload: {
         amount_of_insurance_relief: Number(p.amountOfInsuranceRelief || p.amount_of_insurance_relief || 0),
       })),
       disability_certificate: payload.disabilityCertificates.map((d: any) => ({
-        cert_no: d.certificateNumber || d.cert_no || '',
+        cert_no: d.certNo || d.certificateNumber || d.cert_no || '',
         effective_date: d.effectiveDate || d.effective_date || '',
         expiry_date: d.expiryDate || d.expiry_date || '',
       })),
@@ -1273,6 +1289,17 @@ export async function createItrReturn(payload: {
         amount_of_tax_payable_refundable: Number(e.amountOfTaxPayableRefundable || e.amount_of_tax_payable_refundable || 0),
       })),
     };
+
+    if (payload.mortgages && payload.mortgages.length > 0) {
+      body.mortgage = payload.mortgages.map((m: any) => ({
+        pin_of_lender: m.pinOfLender || m.pin_of_lender || '',
+        name_of_lender: m.nameOfLender || m.name_of_lender || '',
+        mortgage_account_no: m.mortgageAccountNo || m.mortgage_account_no || '',
+        amount_borrowed: String(m.amountBorrowed || m.amount_borrowed || 0),
+        outstanding_amount: String(m.outstandingAmount || m.outstanding_amount || 0),
+        interest_amount_paid: String(m.interestAmountPaid || m.interest_amount_paid || 0),
+      }));
+    }
 
     logger.info('Creating ITR Return (Phase 1):', JSON.stringify(body, null, 2));
 
@@ -1343,24 +1370,25 @@ export async function getItrReturn(
     const data = response.data;
     logger.info('Get ITR Return Response:', JSON.stringify(data, null, 2));
 
-    // Map the server response to our computation shape
+    const meta = data.meta_data ?? {};
+
     const computation: TaxComputationResult['computation'] = {
-      totalDeduction: toNumber(data.total_deduction),
-      definedPensionContribution: toNumber(data.pension_contribution ?? data.defined_pension_contribution),
-      socialHealthInsuranceContribution: toNumber(data.shif_contribution ?? data.social_health_insurance),
-      housingLevyContribution: toNumber(data.hl_contribution ?? data.housing_levy),
-      postRetirementMedicalContribution: toNumber(data.pmf_contribution ?? data.post_retirement_medical),
-      employmentIncome: toNumber(data.employment_income ?? data.total_employment_income),
-      allowableTaxExemptionDisability: toNumber(data.disability_exemption),
-      netTaxableIncome: toNumber(data.net_taxable_income),
-      taxOnTaxableIncome: toNumber(data.tax_on_taxable_income ?? data.total_tax_payable),
-      personalRelief: toNumber(data.personal_relief),
-      insuranceRelief: toNumber(data.insurance_relief),
-      taxCredits: toNumber(data.tax_credits ?? data.credits),
-      payeDeductedFromSalary: toNumber(data.paye_deducted ?? data.total_payed_deducted),
-      incomeTaxPaidInAdvance: toNumber(data.income_tax_advance),
-      creditsTotalReliefDtaa: toNumber(data.dtaa_credits),
-      taxRefundDue: toNumber(data.tax_refund_due ?? data.amount_payable_or_refundable ?? data.tax_due),
+      totalDeduction: toNumber(data.total_deduction ?? meta.total_deduction),
+      definedPensionContribution: toNumber(data.pension_contribution ?? data.defined_pension_contribution ?? meta.pension_contribution),
+      socialHealthInsuranceContribution: toNumber(data.shif_contribution ?? meta.shif_contribution),
+      housingLevyContribution: toNumber(data.hl_contribution ?? meta.hl_contribution),
+      postRetirementMedicalContribution: toNumber(data.pmf_contribution ?? meta.pmf_contribution),
+      employmentIncome: toNumber(data.taxable_amount ?? meta.employment_income ?? data.employment_income),
+      allowableTaxExemptionDisability: toNumber(data.allowable_tax_exemption_incase_of_person_with_disability ?? data.disability_exemption),
+      netTaxableIncome: toNumber(meta.net_taxable_income ?? data.net_taxable_income),
+      taxOnTaxableIncome: toNumber(meta.total_tax_payable ?? data.tax_on_taxable_income),
+      personalRelief: toNumber(meta.personal_relief ?? data.personal_relief),
+      insuranceRelief: toNumber(data.insurance_relief ?? meta.insurance_relief),
+      taxCredits: toNumber(data.tax_credits ?? meta.tax_credits),
+      payeDeductedFromSalary: toNumber(data.paye_deducted_from_salary ?? meta.total_payed_deducted),
+      incomeTaxPaidInAdvance: toNumber(data.income_tax_paid_in_advance ?? meta.income_tax_paid_in_advance),
+      creditsTotalReliefDtaa: toNumber(meta.credits ?? data.credits),
+      taxRefundDue: toNumber(data.tax_due ?? data.tax_due_refund_due ?? meta.amount_payable_or_refundable),
     };
 
     return {

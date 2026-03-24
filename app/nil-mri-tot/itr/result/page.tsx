@@ -25,8 +25,6 @@ function ItrResultContent() {
     setTaxpayerInfo(info);
     setMounted(true);
 
-    // Guard with a ref so the notification is only sent once,
-    // even when React Strict Mode double-invokes effects in dev.
     if (notificationSentRef.current) return;
     notificationSentRef.current = true;
 
@@ -40,13 +38,9 @@ function ItrResultContent() {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             });
-            const message = `Dear ${info.fullName || 'Taxpayer'},\n\nYour Income Tax Return has been filed successfully.\n\nPIN: ${info.pin}\nReceipt: ${itr.receiptNumber || 'N/A'}\nFiling Period: ${itr.filingPeriod}\n\nPlease keep this for your records.`;
-            const enrichedMessage = `Dear ${info.fullName || 'Taxpayer'},\n\nYour Income Tax Return has been filed successfully.\n\nPIN: ${info.pin}\nReceipt: ${itr.receiptNumber || 'N/A'}\nFiling Period: ${itr.filingPeriod}\nTax Due: KES ${taxDue}\n\nPlease keep this for your records.`;
+            const message = `Dear ${info.fullName || 'Taxpayer'},\n\nYour Income Tax Return has been filed successfully.\n\nPIN: ${info.pin}\nReceipt: ${itr.receiptNumber || 'N/A'}\nFiling Period: ${itr.filingPeriod}\nTax Due: KES ${taxDue}\n\nPlease keep this for your records.`;
 
-            await sendWhatsAppMessage({
-              recipientPhone,
-              message: enrichedMessage || message,
-            });
+            await sendWhatsAppMessage({ recipientPhone, message });
             setWhatsAppSent(true);
           }
         } catch (err) {
@@ -58,9 +52,7 @@ function ItrResultContent() {
     sendNotification();
   }, []);
 
-  if (!mounted) {
-    return null;
-  }
+  if (!mounted) return null;
 
   const itrData = taxpayerStore.getItrData();
 
@@ -81,12 +73,9 @@ function ItrResultContent() {
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center shadow-sm">
                 <AlertCircle className="w-10 h-10 text-red-600" />
               </div>
-
               <div>
                 <h2 className="text-red-900 text-xl font-bold mb-2">Filing Failed</h2>
-                <p className="text-sm text-red-800 px-4">
-                  {itrData.error}
-                </p>
+                <p className="text-sm text-red-800 px-4">{itrData.error}</p>
               </div>
             </div>
           </Card>
@@ -96,13 +85,11 @@ function ItrResultContent() {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center shadow-sm">
                 <CheckCircle className="w-10 h-10 text-green-600" />
               </div>
-
               <div>
                 <h2 className="text-green-900 text-xl font-bold mb-2">ITR Filing Successful!</h2>
                 <p className="text-sm text-green-800 px-4">
                   Your Individual Income Tax Return for {taxpayerInfo?.fullName} has been filed.
                 </p>
-
                 {itrData.receiptNumber ? (
                   <div className="mt-4 bg-white/60 px-4 py-2 rounded-lg inline-block border border-green-200">
                     <p className="text-xs text-green-600 uppercase font-semibold">Receipt Number</p>
@@ -110,7 +97,6 @@ function ItrResultContent() {
                   </div>
                 ) : null}
               </div>
-
               <p className="text-xs text-blue-800 bg-blue-100/50 px-4 py-2 rounded-full mt-4">
                 {whatsAppSent ? '✓ Confirmation sent to your registered number' : 'Sending confirmation...'}
               </p>

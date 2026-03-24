@@ -117,7 +117,7 @@ function ItrValidationContent() {
         {/* Header Card */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
           <h1 className="text-base font-semibold">Income Tax Return</h1>
-          <p className="text-gray-400 text-xs">Step 1/3 — Validation</p>
+          <p className="text-gray-400 text-xs">Taxpayer Validation</p>
         </div>
 
         <Card>

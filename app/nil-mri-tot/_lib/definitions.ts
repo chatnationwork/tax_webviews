@@ -3,6 +3,7 @@ export interface InsurancePolicyEntry {
   typeOfPolicy: string;
   policyHolder: string;
   insuranceCompanyPin: string;
+  insuranceCompanyName?: string;
   insurancePolicyNumber: string;
   ageOfChild?: string;
   commencementDate: string;
@@ -10,6 +11,24 @@ export interface InsurancePolicyEntry {
   sumAssured: number;
   annualPremiumPaid: number;
   amountOfInsuranceRelief: number;
+}
+
+// ITR — Mortgage entry
+export interface MortgageEntry {
+  pinOfLender: string;
+  nameOfLender: string;
+  mortgageAccountNo: string;
+  amountBorrowed: number;
+  outstandingAmount: number;
+  interestAmountPaid: number;
+  validPin?: boolean;
+}
+
+// ITR — Disability certificate from KRA
+export interface DisabilityCertDetail {
+  certNo: string;
+  effectiveDate: string;
+  expiryDate: string;
 }
 
 // ITR — Employment Income row (read-only from API)
@@ -20,10 +39,12 @@ export interface EmploymentIncomeRow {
   valueOfCarBenefit: number;
   pension: number;
   netValueOfHousing: number;
+  allowancesBenefits: number;
   totalEmploymentIncome: number;
   taxableSalary: number;
   amountOfTaxDeductedPaye: number;
   taxPayableOnTaxableSalary: number;
+  amountOfTaxPayableRefundable: number;
 }
 
 // ITR — Tax Computation (editable line items)
@@ -33,10 +54,13 @@ export interface TaxComputation {
   socialHealthInsuranceContribution: number;
   housingLevyContribution: number;
   postRetirementMedicalContribution: number;
+  mortgageInterest: number;
+  depositInHomeOwnershipSavingPlan: number;
   employmentIncome: number;
   allowableTaxExemptionDisability: number;
   netTaxableIncome: number;
   taxOnTaxableIncome: number;
+  totalOfTaxPayableLessReliefsAndExemptions: number;
   personalRelief: number;
   insuranceRelief: number;
   taxCredits: number;
@@ -46,17 +70,53 @@ export interface TaxComputation {
   taxRefundDue: number;
 }
 
+// ITR config from /api/settings/itr/config
+export interface ItrConfigLimits {
+  hlevy: { max: number; min: number };
+  insurance_relief: { max: number; min: number };
+  mortgage: { interestCap: { max: number; min: number } };
+  pension: { max: number; min: number };
+  prmc: { max: number; min: number };
+}
+
+export interface ItrConfig {
+  default: ItrConfigLimits;
+  [yearKey: string]: ItrConfigLimits | number;
+}
+
+// Summary from the employment income API response
+export interface EmploymentIncomeSummary {
+  totalPAYEDeducted: number;
+  totalTaxPayable: number;
+  amountPayableOrRefundable: number;
+  personalRelief: number;
+  isPwd: boolean;
+}
+
 // ITR — full wizard state
 export interface ItrState {
   hasInsurancePolicy: boolean;
   insurancePolicies: InsurancePolicyEntry[];
   hasDisabilityExemption: boolean;
   disabilityCertificateNumber?: string;
+  disabilityCertificates: DisabilityCertDetail[];
+  isPwd: boolean;
+  itExemptionCertDetails: DisabilityCertDetail[];
   employmentIncomeRows: EmploymentIncomeRow[];
+  employmentIncomeSummary?: EmploymentIncomeSummary;
+  mortgages: MortgageEntry[];
   taxComputation?: TaxComputation;
+  itrConfig?: ItrConfig;
   filingPeriod: string;
   obligationId: string;
   obligationCode: string;
+  taxReturnId: number | null;
+  taxPayerId: number | null;
+  taxObligationId: number | null;
+  pensionContribution: number;
+  shifContribution: number;
+  hlContribution: number;
+  pmfContribution: number;
   receiptNumber?: string;
   error?: string;
   successMessage?: string;

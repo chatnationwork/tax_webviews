@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { getItrEmploymentDetails, createItrReturn, getItrReturn } from '@/app/actions/nil-mri-tot';
+import { getItrEmploymentDetails } from '@/app/actions/nil-mri-tot';
 import { Loader2 } from 'lucide-react';
 
 const fmt = (n: number) =>
@@ -52,12 +52,16 @@ function EmploymentIncomeContent() {
   const [rows, setRows] = useState<IncomeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [creating, setCreating] = useState(false);
 
   const taxpayerInfo = taxpayerStore.getTaxpayerInfo();
   const phoneParam = phone ? `?phone=${encodeURIComponent(phone)}` : '';
 
   useEffect(() => {
+    if (!taxpayerInfo.pin) {
+      router.push('/nil-mri-tot/itr/validation');
+      return;
+    }
+
     const load = async () => {
       setLoading(true);
       try {
@@ -69,11 +73,28 @@ function EmploymentIncomeContent() {
             returnYear = parseInt(yearMatch[0]);
           }
         }
+
         const result = await getItrEmploymentDetails(taxpayerInfo.pin, returnYear);
         if (result.success && result.rows) {
-          console.log('Employment income rows:', result.rows);
           setRows(result.rows);
           taxpayerStore.setItrField('employmentIncomeRows', result.rows);
+
+          // Store the server-computed summary for fallback in tax-computation
+          if (result.summary) {
+            taxpayerStore.setItrField('employmentIncomeSummary', result.summary);
+          }
+
+          // Store disability/PWD info from the employment response
+          const isPwd = result.summary?.isPwd ?? false;
+          taxpayerStore.setItrField('isPwd', isPwd);
+
+          if (result.itExemptionCertDetails && result.itExemptionCertDetails.length > 0) {
+            taxpayerStore.setItrField('itExemptionCertDetails', result.itExemptionCertDetails);
+            taxpayerStore.setItrField('hasDisabilityExemption', true);
+          } else {
+            taxpayerStore.setItrField('itExemptionCertDetails', []);
+            taxpayerStore.setItrField('hasDisabilityExemption', isPwd);
+          }
         } else {
           setError(result.message || 'Failed to load employment income');
         }
@@ -88,71 +109,20 @@ function EmploymentIncomeContent() {
 
   const totalIncome = rows.reduce((sum, r) => sum + r.totalEmploymentIncome, 0);
 
-  const handleNext = async () => {
-    setCreating(true);
-    setError('');
-    try {
-      const itrData = taxpayerStore.getItrData();
-
-      // Phase 1: Create the ITR draft
-      const result = await createItrReturn({
-        pin: taxpayerInfo.pin,
-        period: itrData.filingPeriod,
-        returnType: 'normal',
-        pensionContribution: itrData.pensionContribution || 0,
-        shifContribution: itrData.shifContribution || 0,
-        hlContribution: itrData.hlContribution || 0,
-        pmfContribution: itrData.pmfContribution || 0,
-        insurancePolicies: itrData.hasInsurancePolicy ? itrData.insurancePolicies : [],
-        disabilityCertificates: itrData.disabilityCertificates || [],
-        employmentIncome: rows,
-      });
-
-      if (result.success) {
-        taxpayerStore.setItrField('taxReturnId', result.taxReturnId || null);
-        taxpayerStore.setItrField('taxPayerId', result.taxPayerId || null);
-        taxpayerStore.setItrField('taxObligationId', result.taxObligationId || null);
-
-        // Phase 1.5: Trigger backend tax computation with reliefs
-        // GET /api/tax-return-itr — computes personal relief, insurance relief,
-        // PAYE reconciliation etc. Must be called before fetching the summary.
-        if (result.taxPayerId && result.taxObligationId && itrData.filingPeriod) {
-          try {
-            const computationResult = await getItrReturn(
-              result.taxPayerId,
-              result.taxObligationId,
-              itrData.filingPeriod
-            );
-            if (computationResult.success && computationResult.computation) {
-              taxpayerStore.setItrField('taxComputation', computationResult.computation);
-            }
-          } catch (computeErr) {
-            // Non-fatal: summary page will still attempt getItrSummary as fallback
-            console.warn('getItrReturn failed, summary page will fallback to itr-summary:', computeErr);
-          }
-        }
-
-        router.push(`/nil-mri-tot/itr/tax-computation${phoneParam}`);
-      } else {
-        setError(result.message || 'Failed to create ITR return. Please try again.');
-      }
-    } catch (e: any) {
-      setError(e.message || 'Unexpected error creating return');
-    } finally {
-      setCreating(false);
-    }
+  const handleNext = () => {
+    router.push(`/nil-mri-tot/itr/return-information${phoneParam}`);
   };
 
   return (
     <Layout
       title="File Tax Return"
-      onBack={() => router.push(`/nil-mri-tot/itr/return-information${phoneParam}`)}
+      onBack={() => router.push(`/nil-mri-tot/itr/verify${phoneParam}`)}
       showMenu
     >
       <div className="space-y-4">
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
           <h1 className="text-base font-semibold">Income Tax Return</h1>
-          <p className="text-gray-400 text-xs">Step 2/3 - Employment Income</p>
+          <p className="text-gray-400 text-xs">Step 1/3 — Employment Income</p>
         </div>
 
         <p className="text-sm font-semibold text-gray-700">Details Of Employment Income</p>
@@ -173,7 +143,7 @@ function EmploymentIncomeContent() {
           <div className="space-y-3">
             {rows.map((row, idx) => (
               <Card key={idx} className="divide-y divide-gray-100 p-0">
-                {idx === 0 && rows.length > 1 && (
+                {rows.length > 1 && (
                   <div className="px-4 py-2 bg-gray-50 rounded-t-xl">
                     <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       Employer {idx + 1}
@@ -227,10 +197,10 @@ function EmploymentIncomeContent() {
           </Button>
           <Button
             onClick={handleNext}
-            disabled={loading || rows.length === 0 || creating}
+            disabled={loading || rows.length === 0}
             className="flex-1"
           >
-            {creating ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Calculating Tax...</> : 'Next'}
+            Next
           </Button>
         </div>
       </div>

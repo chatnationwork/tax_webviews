@@ -1,3 +1,5 @@
+import type { ItrState, ItrConfig, DisabilityCertDetail, InsurancePolicyEntry, EmploymentIncomeRow, MortgageEntry, TaxComputation } from './definitions';
+
 // Simple state management using singleton pattern
 class TaxpayerStore {
   private data: {
@@ -92,7 +94,7 @@ class TaxpayerStore {
   }
 
   clear() {
-    const msisdn = this.data.msisdn; // Preserve msisdn across sessions
+    const msisdn = this.data.msisdn;
     this.data = {
       msisdn,
       idNumber: '',
@@ -106,60 +108,18 @@ class TaxpayerStore {
   }
 
   // ITR wizard state
-  private itrData: {
-    hasInsurancePolicy: boolean;
-    insurancePolicies: any[];
-    hasDisabilityExemption: boolean;
-    disabilityCertificateNumber?: string;
-    disabilityCertificates: any[];
-    employmentIncomeRows: any[];
-    taxComputation?: any;
-    filingPeriod: string;
-    obligationId: string;
-    obligationCode: string;
-    taxReturnId: number | null;
-    taxPayerId: number | null;
-    taxObligationId: number | null;
-    pensionContribution: number;
-    shifContribution: number;
-    hlContribution: number;
-    pmfContribution: number;
-    receiptNumber?: string;
-    error?: string;
-    successMessage?: string;
-  } = {
-    hasInsurancePolicy: false,
-    insurancePolicies: [],
-    hasDisabilityExemption: false,
-    disabilityCertificates: [],
-    employmentIncomeRows: [],
-    filingPeriod: '',
-    obligationId: '',
-    obligationCode: '',
-    taxReturnId: null,
-    taxPayerId: null,
-    taxObligationId: null,
-    pensionContribution: 0,
-    shifContribution: 0,
-    hlContribution: 0,
-    pmfContribution: 0,
-  };
+  private itrData: ItrState = this.freshItrState();
 
-  setItrField(key: string, value: any) {
-    (this.itrData as any)[key] = value;
-  }
-
-  getItrData() {
-    return this.itrData;
-  }
-
-  clearItr() {
-    this.itrData = {
+  private freshItrState(): ItrState {
+    return {
       hasInsurancePolicy: false,
       insurancePolicies: [],
       hasDisabilityExemption: false,
       disabilityCertificates: [],
+      isPwd: false,
+      itExemptionCertDetails: [],
       employmentIncomeRows: [],
+      mortgages: [],
       filingPeriod: '',
       obligationId: '',
       obligationCode: '',
@@ -172,7 +132,19 @@ class TaxpayerStore {
       pmfContribution: 0,
     };
   }
-  
+
+  setItrField<K extends keyof ItrState>(key: K, value: ItrState[K]) {
+    this.itrData[key] = value;
+  }
+
+  getItrData(): ItrState {
+    return this.itrData;
+  }
+
+  clearItr() {
+    this.itrData = this.freshItrState();
+  }
+
   setLiabilities(liabilities: any[]) {
       this.data.liabilities = liabilities;
   }
