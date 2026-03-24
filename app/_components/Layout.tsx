@@ -46,6 +46,7 @@ const SUPPORT_CHANNELS = [
     color: 'bg-purple-50',
     iconColor: 'text-purple-600',
     action: 'https://www.kra.go.ke/contact-us',
+    isInternal: false,
   },
   {
     icon: Phone,
@@ -54,7 +55,8 @@ const SUPPORT_CHANNELS = [
     description: 'Have a KRA officer call you back',
     color: 'bg-sky-50',
     iconColor: 'text-sky-600',
-    action: 'tel:0711099999',
+    action: '/help/callback',
+    isInternal: true,
   },
 
   {
@@ -65,6 +67,7 @@ const SUPPORT_CHANNELS = [
     color: 'bg-amber-50',
     iconColor: 'text-amber-600',
     action: 'https://www.kra.go.ke/our-online-services',
+    isInternal: false,
   },
     {
     icon: MessageCircle,
@@ -74,6 +77,7 @@ const SUPPORT_CHANNELS = [
     color: 'bg-green-50',
     iconColor: 'text-green-600',
     action: 'https://wa.me/254711099999',
+    isInternal: false,
   },
   // {
   //   icon: Landmark,
@@ -303,14 +307,21 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
             <div className="space-y-2.5">
               {SUPPORT_CHANNELS.map((channel) => {
                 const Icon = channel.icon;
+                const phoneToUse = phone || internalPhone || getKnownPhone();
+                const callbackUrl = phoneToUse
+                  ? `${channel.action}?phone=${encodeURIComponent(phoneToUse)}`
+                  : channel.action;
                 return (
                   <a
                     key={channel.label}
-                    href={channel.action}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={channel.isInternal ? callbackUrl : channel.action}
+                    target={channel.isInternal ? undefined : '_blank'}
+                    rel={channel.isInternal ? undefined : 'noopener noreferrer'}
                     onClick={() => {
                       analytics.track('help_channel_click', { channel: channel.label });
+                      if (channel.isInternal) {
+                        setShowHelpModal(false);
+                      }
                     }}
                     className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all active:scale-[0.98]"
                   >
