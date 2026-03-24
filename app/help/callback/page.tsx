@@ -224,20 +224,19 @@ export default function CallbackPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-200">
+      <header className="sticky top-0 z-10 bg-[#CC0000] text-white">
         <div className="max-w-md mx-auto px-3 py-3 flex items-center">
           <button
             onClick={() => router.back()}
-            className="p-1 rounded-md hover:bg-gray-100"
+            className="p-1 rounded-md hover:bg-red-700"
             aria-label="Go back"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-700" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 className="flex-1 text-center text-sm font-semibold text-gray-900 pr-6">
+          <h1 className="flex-1 text-center text-sm font-semibold pr-6">
             Request a Callback
           </h1>
         </div>
-        <div className="h-0.5 bg-[#CC0000]" />
       </header>
 
       <main className="max-w-md mx-auto px-3 py-4 space-y-4">

@@ -2,7 +2,22 @@
 
 import { ReactNode, useEffect, useState, Suspense } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { ArrowLeft, Menu, Home, LogOut, Headphones, CheckCircle, HelpCircle, X, Phone, MessageCircle, Landmark } from 'lucide-react';
+import {
+  ArrowLeft,
+  Menu,
+  Home,
+  LogOut,
+  Headphones,
+  CheckCircle,
+  HelpCircle,
+  X,
+  Phone,
+  PhoneCall,
+  MessageCircle,
+  Building2,
+  ChevronRight,
+  ExternalLink,
+} from 'lucide-react';
 
 import { useSessionManager } from '../_lib/useSession';
 import { clearUserSession, getKnownPhone, isSessionValid } from '../_lib/session-store';
@@ -25,70 +40,161 @@ function SessionController() {
   return null;
 }
 
-/** KRA Support channels shown in the Help & Support modal */
-const SUPPORT_CHANNELS = [
-  // {
-  //   icon: Phone,
-  //   label: 'Call KRA',
-  //   detail: '0711 099 999',
-  //   description: 'Speak directly with a KRA officer',
-  //   color: 'bg-blue-50',
-  //   iconColor: 'text-blue-600',
-  //   action: 'tel:0711099999',
-  // },
+export type HelpModalItem = {
+  id: string;
+  icon: any;
+  title: string;
+  subtitle: string;
+  iconBgClass: string;
+  iconClass: string;
+  action: string;
+  isInternal: boolean;
+  rightIcon: 'chevron' | 'external';
+};
 
-
-  {
-    icon: HelpCircle,
-    label: 'Why KRA contacted you',
-    detail: 'Understand your notice',
-    description: 'Learn why KRA reached out to you',
-    color: 'bg-purple-50',
-    iconColor: 'text-purple-600',
-    action: 'https://www.kra.go.ke/contact-us',
-    isInternal: false,
-  },
-  {
-    icon: Phone,
-    label: 'Call back',
-    detail: 'Request a call back',
-    description: 'Have a KRA officer call you back',
-    color: 'bg-sky-50',
-    iconColor: 'text-sky-600',
-    action: '/help/callback',
-    isInternal: true,
-  },
-
-  {
-    icon: Landmark,
-    label: 'Your Station',
-    detail: 'Walk in for assistance',
-    description: 'Visit your nearest KRA Service Centre',
-    color: 'bg-amber-50',
-    iconColor: 'text-amber-600',
-    action: 'https://www.kra.go.ke/our-online-services',
-    isInternal: false,
-  },
+function buildHelpModalItems(): HelpModalItem[] {
+  return [
     {
-    icon: MessageCircle,
-    label: 'WhatsApp Shuru',
-    detail: '0711 099 999',
-    description: 'Get instant help via WhatsApp',
-    color: 'bg-green-50',
-    iconColor: 'text-green-600',
-    action: 'https://wa.me/254711099999',
-    isInternal: false,
-  },
-  // {
-  //   icon: Landmark,
-  //   label: 'Your Station',
-  //   detail: 'Find your nearest station',
-  //   description: 'Locate the KRA station serving you',
-  //   color: 'bg-orange-50',
-  //   iconColor: 'text-orange-600',
-  //   action: 'https://www.kra.go.ke/station-locator',
-  // },
-] as const;
+      id: 'call-kra',
+      icon: Phone,
+      title: 'Call KRA',
+      subtitle: 'Speak to a KRA officer now',
+      iconBgClass: 'bg-blue-50',
+      iconClass: 'text-blue-600',
+      action: 'tel:0711099999',
+      isInternal: false,
+      rightIcon: 'chevron',
+    },
+    {
+      id: 'request-callback',
+      icon: PhoneCall,
+      title: 'Request a Callback',
+      subtitle: "We'll call you back within 1 working day",
+      iconBgClass: 'bg-green-50',
+      iconClass: 'text-green-600',
+      action: '/help/callback',
+      isInternal: true,
+      rightIcon: 'chevron',
+    },
+    {
+      id: 'whatsapp-shuru',
+      icon: MessageCircle,
+      title: 'Chat on WhatsApp Shuru',
+      subtitle: '0711 099 999 — instant help',
+      iconBgClass: 'bg-green-50',
+      iconClass: 'text-[#25D366]',
+      action: 'https://wa.me/254711099999',
+      isInternal: false,
+      rightIcon: 'external',
+    },
+    {
+      id: 'nearest-office',
+      icon: Building2,
+      title: 'Your Nearest KRA Office',
+      subtitle: 'Find a service centre near you',
+      iconBgClass: 'bg-red-50',
+      iconClass: 'text-[var(--kra-red)]',
+      action: '/help/offices',
+      isInternal: true,
+      rightIcon: 'chevron',
+    },
+    {
+      id: 'why-contacted',
+      icon: HelpCircle,
+      title: 'Why KRA Contacted You',
+      subtitle: 'Understand your notice',
+      iconBgClass: 'bg-amber-50',
+      iconClass: 'text-amber-600',
+      action: 'https://www.kra.go.ke',
+      isInternal: false,
+      rightIcon: 'external',
+    },
+  ];
+}
+
+type HelpSupportModalProps = {
+  open: boolean;
+  onClose: () => void;
+  onTrackClick: (itemTitle: string) => void;
+  phone?: string | null;
+};
+
+function HelpSupportModal({ open, onClose, onTrackClick, phone }: HelpSupportModalProps) {
+  const items = buildHelpModalItems();
+
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="relative w-full max-w-lg bg-white rounded-t-2xl shadow-2xl px-4 pt-4 pb-6"
+        style={{ animation: 'slideUp 0.3s ease-out' }}
+      >
+        <div className="flex justify-center mb-3">
+          <div className="w-10 h-1 bg-gray-300 rounded-full" />
+        </div>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-base font-bold text-gray-900">Help & Support</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Reach out through any channel below</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        <div className="space-y-0">
+          {items.map((item, index) => {
+            const Icon = item.icon;
+            const href = item.isInternal && phone
+              ? `${item.action}?phone=${encodeURIComponent(phone)}`
+              : item.action;
+            const RightIcon =
+              item.rightIcon === 'chevron' ? (
+                <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+              ) : (
+                <ExternalLink className="w-4 h-4 text-gray-400 shrink-0" />
+              );
+
+            return (
+              <div key={item.id}>
+                <a
+                  href={href}
+                  target={item.isInternal ? undefined : '_blank'}
+                  rel={item.isInternal ? undefined : 'noopener noreferrer'}
+                  onClick={() => {
+                    onTrackClick(item.title);
+                    if (item.isInternal) {
+                      onClose();
+                    }
+                  }}
+                  className="w-full flex items-center gap-3 py-3 px-2 rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${item.iconBgClass}`}>
+                    <Icon className={`w-5 h-5 ${item.iconClass}`} />
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+                    <p className="text-xs text-gray-500">{item.subtitle}</p>
+                  </div>
+                  {RightIcon}
+                </a>
+                {index < items.length - 1 && <div className="h-px bg-gray-100 my-0.5" />}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Layout({ children, title, step, onBack, showMenu = false, showHeader = true, showFooter = true, phone }: LayoutProps) {
   const router = useRouter();
@@ -272,75 +378,12 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
         </div>
       )}
 
-      {/* Help & Support Modal */}
-      {showHelpModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setShowHelpModal(false)}
-          />
-          {/* Modal Content */}
-          <div
-            className="relative w-full max-w-lg bg-white rounded-t-2xl shadow-2xl px-4 pt-4 pb-6"
-            style={{ animation: 'slideUp 0.3s ease-out' }}
-          >
-            {/* Handle bar */}
-            <div className="flex justify-center mb-3">
-              <div className="w-10 h-1 bg-gray-300 rounded-full" />
-            </div>
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-base font-bold text-gray-900">Help & Support</h2>
-                <p className="text-xs text-gray-500 mt-0.5">Reach out through any channel below</p>
-              </div>
-              <button
-                onClick={() => setShowHelpModal(false)}
-                className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
-            {/* Support Channel Cards */}
-            <div className="space-y-2.5">
-              {SUPPORT_CHANNELS.map((channel) => {
-                const Icon = channel.icon;
-                const phoneToUse = phone || internalPhone || getKnownPhone();
-                const callbackUrl = phoneToUse
-                  ? `${channel.action}?phone=${encodeURIComponent(phoneToUse)}`
-                  : channel.action;
-                return (
-                  <a
-                    key={channel.label}
-                    href={channel.isInternal ? callbackUrl : channel.action}
-                    target={channel.isInternal ? undefined : '_blank'}
-                    rel={channel.isInternal ? undefined : 'noopener noreferrer'}
-                    onClick={() => {
-                      analytics.track('help_channel_click', { channel: channel.label });
-                      if (channel.isInternal) {
-                        setShowHelpModal(false);
-                      }
-                    }}
-                    className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all active:scale-[0.98]"
-                  >
-                    <div className={`shrink-0 w-10 h-10 rounded-xl ${channel.color} flex items-center justify-center`}>
-                      <Icon className={`w-5 h-5 ${channel.iconColor}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900">{channel.label}</p>
-                      <p className="text-xs text-gray-500">{channel.detail}</p>
-                      <p className="text-[10px] text-gray-400 mt-0.5">{channel.description}</p>
-                    </div>
-                    <ArrowLeft className="w-4 h-4 text-gray-300 rotate-180 shrink-0" />
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+      <HelpSupportModal
+        open={showHelpModal}
+        onClose={() => setShowHelpModal(false)}
+        onTrackClick={(itemTitle) => analytics.track('help_channel_click', { channel: itemTitle })}
+        phone={phone || internalPhone || getKnownPhone()}
+      />
 
       {/* Slide-up animation for modal */}
       <style jsx>{`
