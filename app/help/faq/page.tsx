@@ -81,14 +81,7 @@ export default function HelpFaqPage() {
           >
             Start Filling
           </a>
-          <a
-            href={TAX_SUMMARY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full inline-flex items-center justify-center py-2.5 px-4 rounded-lg text-sm font-medium bg-[var(--kra-red)] text-white hover:bg-[var(--kra-red-dark)]"
-          >
-            View Tax Summary
-          </a>
+          
         </div>
       </main>
     </Layout>
