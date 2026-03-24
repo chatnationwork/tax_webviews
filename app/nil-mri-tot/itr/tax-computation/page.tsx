@@ -37,37 +37,47 @@ function TaxComputationContent() {
     const fetchSummary = async () => {
       setLoading(true);
       try {
-        // After CREATE RETURN, get the tax summary using taxReturnId
-        if (itrData.taxReturnId) {
-          const result = await getItrSummary(itrData.taxReturnId);
-          if (result.success && result.summary) {
-            // Map the summary response to our computation shape
-            const data = result.summary;
-            const comp: Record<string, number> = {
-              totalDeduction: Number(data.total_deduction || 0),
-              definedPensionContribution: Number(data.pension_contribution || data.defined_pension_contribution || 0),
-              socialHealthInsuranceContribution: Number(data.shif_contribution || data.social_health_insurance || 0),
-              housingLevyContribution: Number(data.hl_contribution || data.housing_levy || 0),
-              postRetirementMedicalContribution: Number(data.pmf_contribution || data.post_retirement_medical || 0),
-              employmentIncome: Number(data.employment_income || data.total_employment_income || 0),
-              allowableTaxExemptionDisability: Number(data.disability_exemption || 0),
-              netTaxableIncome: Number(data.net_taxable_income || 0),
-              taxOnTaxableIncome: Number(data.tax_on_taxable_income || data.total_tax_payable || 0),
-              personalRelief: Number(data.personal_relief || 0),
-              insuranceRelief: Number(data.insurance_relief || 0),
-              taxCredits: Number(data.tax_credits || data.credits || 0),
-              payeDeductedFromSalary: Number(data.paye_deducted || data.total_payed_deducted || 0),
-              incomeTaxPaidInAdvance: Number(data.income_tax_advance || 0),
-              creditsTotalReliefDtaa: Number(data.dtaa_credits || 0),
-              taxRefundDue: Number(data.tax_refund_due || data.amount_payable_or_refundable || data.tax_due || 0),
-            };
-            setComputation(comp);
-            taxpayerStore.setItrField('taxComputation', comp);
-          } else {
-            setError(result.message || 'Failed to load tax summary');
-          }
-        } else {
+        if (!itrData.taxReturnId) {
           setError('Missing tax return ID. Please go back and try again.');
+          setLoading(false);
+          return;
+        }
+
+        // Prefer pre-computed data from getItrReturn (Phase 1.5) stored during employment-income step
+        const preComputed = itrData.taxComputation;
+        if (preComputed && Object.keys(preComputed).length > 0 && preComputed.netTaxableIncome !== undefined) {
+          setComputation(preComputed);
+          setLoading(false);
+          return;
+        }
+
+        // Fallback: fetch summary from itr-summary/{id}
+        const result = await getItrSummary(itrData.taxReturnId);
+        if (result.success && result.summary) {
+          // Map the summary response to our computation shape
+          const data = result.summary;
+          const comp: Record<string, number> = {
+            totalDeduction: Number(data.total_deduction || 0),
+            definedPensionContribution: Number(data.pension_contribution || data.defined_pension_contribution || 0),
+            socialHealthInsuranceContribution: Number(data.shif_contribution || data.social_health_insurance || 0),
+            housingLevyContribution: Number(data.hl_contribution || data.housing_levy || 0),
+            postRetirementMedicalContribution: Number(data.pmf_contribution || data.post_retirement_medical || 0),
+            employmentIncome: Number(data.employment_income || data.total_employment_income || 0),
+            allowableTaxExemptionDisability: Number(data.disability_exemption || 0),
+            netTaxableIncome: Number(data.net_taxable_income || 0),
+            taxOnTaxableIncome: Number(data.tax_on_taxable_income || data.total_tax_payable || 0),
+            personalRelief: Number(data.personal_relief || 0),
+            insuranceRelief: Number(data.insurance_relief || 0),
+            taxCredits: Number(data.tax_credits || data.credits || 0),
+            payeDeductedFromSalary: Number(data.paye_deducted || data.total_payed_deducted || 0),
+            incomeTaxPaidInAdvance: Number(data.income_tax_advance || 0),
+            creditsTotalReliefDtaa: Number(data.dtaa_credits || 0),
+            taxRefundDue: Number(data.tax_refund_due || data.amount_payable_or_refundable || data.tax_due || 0),
+          };
+          setComputation(comp);
+          taxpayerStore.setItrField('taxComputation', comp);
+        } else {
+          setError(result.message || 'Failed to load tax summary');
         }
       } catch (e: any) {
         setError(e.message || 'Unexpected error');

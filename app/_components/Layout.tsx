@@ -27,16 +27,46 @@ function SessionController() {
 
 /** KRA Support channels shown in the Help & Support modal */
 const SUPPORT_CHANNELS = [
+  // {
+  //   icon: Phone,
+  //   label: 'Call KRA',
+  //   detail: '0711 099 999',
+  //   description: 'Speak directly with a KRA officer',
+  //   color: 'bg-blue-50',
+  //   iconColor: 'text-blue-600',
+  //   action: 'tel:0711099999',
+  // },
+
+
   {
-    icon: Phone,
-    label: 'Call KRA',
-    detail: '0711 099 999',
-    description: 'Speak directly with a KRA officer',
-    color: 'bg-blue-50',
-    iconColor: 'text-blue-600',
-    action: 'tel:0711099999',
+    icon: HelpCircle,
+    label: 'Why KRA contacted you',
+    detail: 'Understand your notice',
+    description: 'Learn why KRA reached out to you',
+    color: 'bg-purple-50',
+    iconColor: 'text-purple-600',
+    action: 'https://www.kra.go.ke/contact-us',
   },
   {
+    icon: Phone,
+    label: 'Call back',
+    detail: 'Request a call back',
+    description: 'Have a KRA officer call you back',
+    color: 'bg-sky-50',
+    iconColor: 'text-sky-600',
+    action: 'tel:0711099999',
+  },
+
+  {
+    icon: Landmark,
+    label: 'Your Station',
+    detail: 'Walk in for assistance',
+    description: 'Visit your nearest KRA Service Centre',
+    color: 'bg-amber-50',
+    iconColor: 'text-amber-600',
+    action: 'https://www.kra.go.ke/our-online-services',
+  },
+    {
     icon: MessageCircle,
     label: 'WhatsApp Shuru',
     detail: '0711 099 999',
@@ -45,15 +75,15 @@ const SUPPORT_CHANNELS = [
     iconColor: 'text-green-600',
     action: 'https://wa.me/254711099999',
   },
-  {
-    icon: Landmark,
-    label: 'Visit Tax Station',
-    detail: 'Walk in for assistance',
-    description: 'Visit your nearest KRA Service Centre',
-    color: 'bg-amber-50',
-    iconColor: 'text-amber-600',
-    action: 'https://www.kra.go.ke/our-online-services',
-  },
+  // {
+  //   icon: Landmark,
+  //   label: 'Your Station',
+  //   detail: 'Find your nearest station',
+  //   description: 'Locate the KRA station serving you',
+  //   color: 'bg-orange-50',
+  //   iconColor: 'text-orange-600',
+  //   action: 'https://www.kra.go.ke/station-locator',
+  // },
 ] as const;
 
 export function Layout({ children, title, step, onBack, showMenu = false, showHeader = true, showFooter = true, phone }: LayoutProps) {
@@ -64,10 +94,10 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
   const [showHelpModal, setShowHelpModal] = useState(false);
 
   useEffect(() => {
-   setInternalPhone(getKnownPhone());
-   setHasSession(isSessionValid());
+    setInternalPhone(getKnownPhone());
+    setHasSession(isSessionValid());
   }, []);
-  
+
   // Session management - auto-refresh and timeout handling
   // usage moved to SessionController wrapped in Suspense
 
@@ -93,8 +123,8 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
     const message = isF88 ? 'Are you sure you want to go back to main menu?' : 'Are you sure you want to logout?';
     if (confirm(message)) {
       if (isF88) {
-         handleMenuClick();
-         return;
+        handleMenuClick();
+        return;
       }
 
       const phoneToUse = phone || internalPhone || getKnownPhone();
@@ -102,32 +132,32 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
       analytics.track('logout_click');
       clearUserSession();
       sessionStorage.clear();
-      
+
       const message = encodeURIComponent('Main menu');
       // Open WhatsApp with pre-filled message
       window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
     }
   };
 
-  
+
   const handleConnectAgent = async () => {
     const phoneToUse = phone || internalPhone || getKnownPhone();
     if (phoneToUse) analytics.setUserId(phoneToUse);
     analytics.track('connect_agent_click');
     const phoneForConnect = phoneToUse;
-    
+
     if (phoneForConnect) {
-       // Send interactive message
-       try {
-         await sendConnectToAgentMessage(phoneForConnect);
-         window.open(`https://wa.me/${whatsappNumber}`, '_blank');
-        
-       } catch (error) {
-         console.error('Failed to send connect agent message', error);
-         // Fallback to direct link if API fails
-      
-         window.open(`https://wa.me/${whatsappNumber}`, '_blank');
-       }
+      // Send interactive message
+      try {
+        await sendConnectToAgentMessage(phoneForConnect);
+        window.open(`https://wa.me/${whatsappNumber}`, '_blank');
+
+      } catch (error) {
+        console.error('Failed to send connect agent message', error);
+        // Fallback to direct link if API fails
+
+        window.open(`https://wa.me/${whatsappNumber}`, '_blank');
+      }
     } else {
       // Fallback if no phone known
       const message = encodeURIComponent('Connect to agent');
@@ -136,7 +166,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
   };
 
   const handleMainMenu = () => {
-   window.location.href = `/`;
+    window.location.href = `/`;
   };
 
   const handleHelpSupport = () => {
@@ -165,8 +195,8 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
               {onBack && (
                 <button
                   onClick={() => {
-        analytics.track('back_click');
-            onBack();
+                    analytics.track('back_click');
+                    onBack();
                   }}
                   className="p-1.5 hover:bg-gray-800 rounded-lg transition-colors"
                   aria-label="Go back"
@@ -202,14 +232,14 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
         <div className="bg-white border-t border-gray-200 sticky bottom-0 z-10">
           <div className="max-w-4xl mx-auto px-3 py-2">
             <div className={`grid gap-2 ${getFooterGridCols()}`}>
-              <button 
+              <button
                 onClick={handleMainMenu}
                 className="flex flex-col items-center justify-center gap-0.5 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium text-[10px]"
               >
                 <Home className="w-4 h-4" />
                 {isF88 ? 'Home' : 'Main Menu'}
               </button>
-              <button 
+              <button
                 onClick={handleHelpSupport}
                 className="flex flex-col items-center justify-center gap-0.5 py-2 bg-emerald-50 hover:bg-emerald-100 rounded-lg text-emerald-700 font-medium text-[10px]"
                 id="help-support-btn"
@@ -217,7 +247,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
                 <HelpCircle className="w-4 h-4" />
                 Help & Support
               </button>
-              <button 
+              <button
                 onClick={handleConnectAgent}
                 className="flex flex-col items-center justify-center gap-0.5 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-700 font-medium text-[10px]"
               >
@@ -225,7 +255,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
                 Connect Agent
               </button>
               {hasSession && (
-                <button 
+                <button
                   onClick={handleLogout}
                   className="flex flex-col items-center justify-center gap-0.5 py-2 bg-red-50 hover:bg-red-100 rounded-lg text-red-700 font-medium text-[10px]"
                 >
@@ -320,15 +350,15 @@ export function Card({ children, className = '' }: { children: ReactNode; classN
   );
 }
 
-export function Button({ 
-  children, 
-  onClick, 
+export function Button({
+  children,
+  onClick,
   variant = 'primary',
   type = 'button',
   disabled = false,
   className = '',
-}: { 
-  children: ReactNode; 
+}: {
+  children: ReactNode;
   onClick?: () => void;
   variant?: 'primary' | 'secondary' | 'danger';
   type?: 'button' | 'submit';
@@ -399,9 +429,8 @@ export function Input({
         min={min}
         inputMode={inputMode}
         maxLength={maxLength}
-        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-[var(--kra-red)] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed ${
-          error ? 'border-red-500 bg-red-50' : 'border-gray-300'
-        }`}
+        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-[var(--kra-red)] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed ${error ? 'border-red-500 bg-red-50' : 'border-gray-300'
+          }`}
       />
       {error && (
         <p className="mt-1 text-xs text-red-600 font-medium">{error}</p>
@@ -458,11 +487,11 @@ export function Select({
 
 export function TotalsCard({ subtotal, tax, total, taxLabel = 'VAT (16%)' }: { subtotal: number; tax: number; total: number; taxLabel?: string }) {
   const formatCurrency = (amount: number) => `KES ${amount.toLocaleString()}`;
-  
+
   return (
     <Card className="bg-gray-50">
       <div className="space-y-1">
-       
+
         <div className="border-t pt-1 flex justify-between font-medium text-sm">
           <span className="text-gray-900">Total Tax Due</span>
           <span className="text-[var(--kra-red)]">{formatCurrency(total)}</span>
@@ -510,9 +539,8 @@ export function DeclarationCheckbox({
 }) {
   return (
     <div className="space-y-3">
-      <label className={`flex gap-3 items-start p-3 rounded-lg border cursor-pointer transition-colors ${
-        checked ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200 hover:bg-gray-50'
-      } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}>
+      <label className={`flex gap-3 items-start p-3 rounded-lg border cursor-pointer transition-colors ${checked ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200 hover:bg-gray-50'
+        } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}>
         <input
           type="checkbox"
           checked={checked}
@@ -524,11 +552,11 @@ export function DeclarationCheckbox({
           {label}
         </span>
       </label>
-      
+
       {legalNote && (
-         <p className="text-xs text-gray-500 px-1">
-           {legalNote}
-         </p>
+        <p className="text-xs text-gray-500 px-1">
+          {legalNote}
+        </p>
       )}
     </div>
   );

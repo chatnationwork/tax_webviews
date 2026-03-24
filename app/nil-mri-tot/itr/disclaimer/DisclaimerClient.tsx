@@ -1,10 +1,10 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Layout, Button, Card } from '@/app/_components/Layout';
+import { Layout, Button, Select } from '@/app/_components/Layout';
 import { taxpayerStore } from '@/app/nil-mri-tot/_lib/store';
 import { useEffect, useState } from 'react';
-import { getItrFilingPeriods, getTaxpayerObligations, sendWhatsAppMessage, getStoredPhone } from '@/app/actions/nil-mri-tot';
+import { getItrFilingPeriods, getTaxpayerObligations, sendWhatsAppMessage, getStoredPhone, getItrConfig } from '@/app/actions/nil-mri-tot';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function DisclaimerClient() {
@@ -14,11 +14,12 @@ export default function DisclaimerClient() {
   
   const [mounted, setMounted] = useState(false);
   const [taxpayerInfo, setTaxpayerInfo] = useState<any>(null);
-  const [itrObligation, setItrObligation] = useState<{
-    obligationId: string;
-    obligationCode: string;
-    obligationName: string;
-  } | null>(null);
+  const [obligations, setObligations] = useState<
+    Array<{ obligationId: string; obligationCode: string; obligationName: string }>
+  >([]);
+  const [selectedObligationId, setSelectedObligationId] = useState('');
+  const itrObligation =
+    obligations.find((o) => o.obligationId === selectedObligationId) ?? null;
   const [loadingObligations, setLoadingObligations] = useState(false);
   const [filingPeriod, setFilingPeriod] = useState('');
   const [loadingPeriod, setLoadingPeriod] = useState(false);
@@ -34,6 +35,13 @@ export default function DisclaimerClient() {
     } else {
       setTaxpayerInfo(info);
     }
+
+    // Pre-load ITR config (tax rates, relief limits) for use later in the flow
+    getItrConfig().then((cfg) => {
+      if (cfg.success && cfg.config) {
+        taxpayerStore.setItrField('itrConfig', cfg.config);
+      }
+    }).catch(() => { /* non-fatal */ });
   }, [router, phone]);
 
   useEffect(() => {
@@ -48,18 +56,22 @@ export default function DisclaimerClient() {
             obs.obligationName.toLowerCase().includes('income tax')
           );
           if (itrObligations.length > 0) {
-            const o = itrObligations[0];
-            setItrObligation({
-              obligationId: o.obligationId,
-              obligationCode: o.obligationCode,
-              obligationName: o.obligationName,
-            });
+            setObligations(
+              itrObligations.map((o: any) => ({
+                obligationId: o.obligationId,
+                obligationCode: o.obligationCode,
+                obligationName: o.obligationName,
+              }))
+            );
           } else {
-            setItrObligation(null);
+            setObligations([]);
           }
+        } else {
+          setObligations([]);
         }
       } catch (err) {
         console.error('Failed to fetch obligations', err);
+        setObligations([]);
       } finally {
         setLoadingObligations(false);
       }
@@ -69,16 +81,20 @@ export default function DisclaimerClient() {
   }, [taxpayerInfo?.pin]);
 
   useEffect(() => {
-    if (!itrObligation || !taxpayerInfo?.pin) {
+    if (!selectedObligationId || !taxpayerInfo?.pin) {
       setFilingPeriod('');
+      setPeriodError('');
+      setLoadingPeriod(false);
       return;
     }
 
     const fetchPeriod = async () => {
       setLoadingPeriod(true);
+      setFilingPeriod('');
+      setPeriodError('');
       setError('');
       try {
-        const result = await getItrFilingPeriods(taxpayerInfo.pin, itrObligation.obligationId);
+        const result = await getItrFilingPeriods(taxpayerInfo.pin, selectedObligationId);
 
         if (result.success && result.periods && result.periods.length > 0) {
           setFilingPeriod(result.periods[0]);
@@ -100,7 +116,7 @@ export default function DisclaimerClient() {
     };
 
     fetchPeriod();
-  }, [itrObligation, taxpayerInfo?.pin]);
+  }, [selectedObligationId, taxpayerInfo?.pin]);
 
   if (!mounted || !taxpayerInfo) return null;
 
@@ -163,7 +179,7 @@ export default function DisclaimerClient() {
             <div className="flex items-center text-gray-500 gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
               <Loader2 className="w-4 h-4 animate-spin" />
             </div>
-          ) : !itrObligation ? (
+          ) : obligations.length === 0 ? (
             <>
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
                 <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -185,13 +201,19 @@ export default function DisclaimerClient() {
               </Button>
             </>
           ) : (
-            <Card className="p-3 space-y-2">
-              <p className="text-xs text-gray-500">Obligation</p>
-              <p className="text-sm font-medium text-gray-900">{itrObligation.obligationName}</p>
-            </Card>
+            <Select
+              label="Obligation"
+              value={selectedObligationId}
+              onChange={setSelectedObligationId}
+              required
+              options={obligations.map((o) => ({
+                value: o.obligationId,
+                label: o.obligationName,
+              }))}
+            />
           )}
 
-          {itrObligation && (
+          {selectedObligationId && (
             <div className="text-sm bg-gray-50 p-3 rounded-lg border border-gray-200">
               {loadingPeriod ? (
                 <div className="flex items-center text-gray-500 gap-2">
@@ -214,7 +236,7 @@ export default function DisclaimerClient() {
             </div>
           )}
 
-          {itrObligation && !loadingPeriod && !filingPeriod && (
+          {selectedObligationId && !loadingPeriod && !filingPeriod && (
             <Button
               onClick={() => handleFinish('no_period')}
               disabled={loading}

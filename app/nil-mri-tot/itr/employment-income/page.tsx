@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { getItrEmploymentDetails, createItrReturn } from '@/app/actions/nil-mri-tot';
+import { getItrEmploymentDetails, createItrReturn, getItrReturn } from '@/app/actions/nil-mri-tot';
 import { Loader2 } from 'lucide-react';
 
 const fmt = (n: number) =>
@@ -111,6 +111,26 @@ function EmploymentIncomeContent() {
         taxpayerStore.setItrField('taxReturnId', result.taxReturnId || null);
         taxpayerStore.setItrField('taxPayerId', result.taxPayerId || null);
         taxpayerStore.setItrField('taxObligationId', result.taxObligationId || null);
+
+        // Phase 1.5: Trigger backend tax computation with reliefs
+        // GET /api/tax-return-itr — computes personal relief, insurance relief,
+        // PAYE reconciliation etc. Must be called before fetching the summary.
+        if (result.taxPayerId && result.taxObligationId && itrData.filingPeriod) {
+          try {
+            const computationResult = await getItrReturn(
+              result.taxPayerId,
+              result.taxObligationId,
+              itrData.filingPeriod
+            );
+            if (computationResult.success && computationResult.computation) {
+              taxpayerStore.setItrField('taxComputation', computationResult.computation);
+            }
+          } catch (computeErr) {
+            // Non-fatal: summary page will still attempt getItrSummary as fallback
+            console.warn('getItrReturn failed, summary page will fallback to itr-summary:', computeErr);
+          }
+        }
+
         router.push(`/nil-mri-tot/itr/tax-computation${phoneParam}`);
       } else {
         setError(result.message || 'Failed to create ITR return. Please try again.');
@@ -209,7 +229,7 @@ function EmploymentIncomeContent() {
             disabled={loading || rows.length === 0 || creating}
             className="flex-1"
           >
-            {creating ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Creating Return...</> : 'Next'}
+            {creating ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Calculating Tax...</> : 'Next'}
           </Button>
         </div>
       </div>
