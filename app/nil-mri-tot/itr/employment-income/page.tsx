@@ -4,8 +4,9 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { getItrEmploymentDetails } from '@/app/actions/nil-mri-tot';
-import { Loader2 } from 'lucide-react';
+import { getItrEmploymentDetails, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
+import { getKnownPhone } from '@/app/_lib/session-store';
+import { Loader2, AlertTriangle } from 'lucide-react';
 
 const fmt = (n: number) =>
   `KES ${n.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
@@ -52,6 +53,7 @@ function EmploymentIncomeContent() {
   const [rows, setRows] = useState<IncomeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [finishing, setFinishing] = useState(false);
 
   const taxpayerInfo = taxpayerStore.getTaxpayerInfo();
   const phoneParam = phone ? `?phone=${encodeURIComponent(phone)}` : '';
@@ -113,6 +115,22 @@ function EmploymentIncomeContent() {
     router.push(`/nil-mri-tot/itr/return-information${phoneParam}`);
   };
 
+  const handleFinishNoIncome = async () => {
+    setFinishing(true);
+    try {
+      const recipientPhone = taxpayerStore.getMsisdn() || await getStoredPhone() || getKnownPhone();
+      if (recipientPhone && taxpayerInfo.pin) {
+        const message = `Dear ${taxpayerInfo.fullName || 'Taxpayer'},\n\nYour PIN: ${taxpayerInfo.pin} does not have a declared employer under sources of income. You are unable to file an Income Tax Return at this time.\n\nPlease visit the nearest KRA office or use iTax to declare your employer before filing.\n\nNo action is required at this time.`;
+        await sendWhatsAppMessage({ recipientPhone, message });
+      }
+    } catch (e) {
+      console.error('Failed to send WhatsApp notification', e);
+    } finally {
+      setFinishing(false);
+      router.push('/');
+    }
+  };
+
   return (
     <Layout
       title="File Tax Return"
@@ -136,9 +154,33 @@ function EmploymentIncomeContent() {
             <p className="text-xs text-red-600">{error}</p>
           </Card>
         ) : rows.length === 0 ? (
-          <Card className="p-6 text-center">
-            <p className="text-sm text-gray-500">No employment income records found</p>
-          </Card>
+          <div className="space-y-4">
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-amber-900">No Employer Declared</p>
+                <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+                  You have not declared an employer under sources of income. To file an Income Tax Return, you must first declare your employer on iTax or visit the nearest KRA office.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+              <span className="text-amber-600 text-lg mt-0.5">⚠</span>
+              <p className="text-sm text-amber-900 leading-relaxed">
+                <span className="font-semibold block mb-1">Please Note:</span>
+                This return type applies to taxpayers with <span className="font-semibold">employment income only</span>.
+              </p>
+            </div>
+
+            <Button
+              onClick={handleFinishNoIncome}
+              disabled={finishing}
+              className="w-full"
+            >
+              {finishing ? 'Finishing...' : 'Finish'}
+            </Button>
+          </div>
         ) : (
           <div className="space-y-3">
             {rows.map((row, idx) => (
