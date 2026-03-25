@@ -431,8 +431,6 @@ function EtimsCampaignPaymentContent() {
 					)}
 				</Card>
 
-
-
 				<Card className="p-6">
 					<h2 className="text-lg font-semibold text-gray-800 mb-4">
 						Payment Details
@@ -509,26 +507,26 @@ function EtimsCampaignPaymentContent() {
 								<p className="text-sm text-blue-700 mb-2">
 									Or complete payment via:
 								</p>
-								<a
-									href={checkoutUrl}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="text-sm text-blue-600 underline break-all">
-									{checkoutUrl}
-								</a>
+								<Button
+									variant="secondary"
+									onClick={() => window.open(checkoutUrl, "_blank")}
+									className="w-full">
+									Click here to pay
+								</Button>
 							</div>
 						)}
 
 						<Button
-							onClick={handlePayment}
+							onClick={checkoutUrl ? () => window.open(checkoutUrl, "_blank") : handlePayment}
 							disabled={
-								!isPrnValid ||
-								!isAmountValid ||
 								loading ||
-								detailsLoading ||
-								prnLoading ||
-								!!prnError ||
-								!currentPhone
+								(!checkoutUrl &&
+									(!isPrnValid ||
+										!isAmountValid ||
+										detailsLoading ||
+										prnLoading ||
+										!!prnError ||
+										!currentPhone))
 							}
 							className="w-full mt-2">
 							{loading ? (
