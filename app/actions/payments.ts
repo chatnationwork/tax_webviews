@@ -258,12 +258,13 @@ export async function makePayment(
   msisdn: string,
   prn: string
 ): Promise<MakePaymentResult> {
+  const cleanMsisdn = cleanPhoneNumber(msisdn);
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.post(
       `${BASE_URL}/make-payment`,
       {
-        msisdn: msisdn,
+        msisdn: cleanMsisdn,
         prn: prn,
       },
       { headers }
