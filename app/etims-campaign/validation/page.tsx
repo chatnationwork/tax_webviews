@@ -4,14 +4,14 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Loader2, AlertCircle } from "lucide-react";
 import { lookupById, getStoredPhone } from "@/app/actions/nil-mri-tot";
-import { taxpayerStore } from "../../_lib/store";
-import { Layout, Card, Button } from "../../../_components/Layout";
+import { taxpayerStore } from "../../nil-mri-tot/_lib/store";
+import { Layout, Card, Button } from "../../_components/Layout";
 import { IDInput } from "@/app/_components/KRAInputs";
 import { YearOfBirthInput } from "@/app/_components/YearOfBirthInput";
 import { analytics } from "@/app/_lib/analytics";
 import { getKnownPhone, saveKnownPhone } from "@/app/_lib/session-store";
 
-function MriValidationContent() {
+function EtimsCampaignValidationContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const pathname = usePathname();
@@ -24,15 +24,12 @@ function MriValidationContent() {
 	const [loading, setLoading] = useState(false);
 	const [checkingSession, setCheckingSession] = useState(true);
 
-	// Check session on mount
 	useEffect(() => {
 		const performSessionCheck = async () => {
 			try {
-				// First, try to get phone from various sources if not in URL
 				let currentPhone = phone;
 
 				if (!currentPhone) {
-					// Try localStorage first (using shared store)
 					try {
 						const localPhone = getKnownPhone();
 						if (localPhone) {
@@ -44,14 +41,12 @@ function MriValidationContent() {
 				}
 
 				if (!currentPhone) {
-					// Try server-side cookie
 					const storedPhone = await getStoredPhone();
 					if (storedPhone) {
 						currentPhone = storedPhone;
 					}
 				}
 
-				// If we found a phone, update URL if needed and persist it
 				if (currentPhone) {
 					if (currentPhone !== phone) {
 						router.replace(
@@ -84,23 +79,22 @@ function MriValidationContent() {
 				);
 			}
 
-			// Pass ID number and Year of Birth to the lookup API
-			// Using lookupById from nil actions which supports phone
 			const result = await lookupById(idNumber, phone, yob);
 
 			if (result.success) {
 				const taxpayer = {
 					fullName: result.name || "Unknown",
-					pin: result.pin || "Unknown", // PIN stores the ID number
+					pin: result.pin || "Unknown",
 					yob: parseInt(yob),
 				};
-				// Save to store
+
 				taxpayerStore.setTaxpayerInfo(
 					idNumber,
 					parseInt(yob),
 					taxpayer.fullName,
 					taxpayer.pin,
 				);
+
 				if (phone) analytics.setUserId(phone);
 				analytics.track(
 					"mri_validation_success",
@@ -108,18 +102,20 @@ function MriValidationContent() {
 					{ journey_start: true },
 				);
 
-				// Direct redirect to rental income, skipping obligation check
-				const nextUrl = `/nil-mri-tot/mri/rental-income${phone ? `?phone=${encodeURIComponent(phone)}` : ""}`;
-				router.push(nextUrl);
+				router.push(
+					`/etims-campaign/account${phone ? `?phone=${encodeURIComponent(phone)}` : ""}`,
+				);
 			} else {
 				setError(
 					result.error ||
 						"Invalid taxpayer credentials. Please check your details.",
 				);
 			}
-		} catch (err: any) {
+		} catch (err: unknown) {
 			setError(
-				err.message || "Failed to validate taxpayer. Please try again.",
+				err instanceof Error
+					? err.message
+					: "Failed to validate taxpayer. Please try again.",
 			);
 		} finally {
 			setLoading(false);
@@ -128,7 +124,7 @@ function MriValidationContent() {
 
 	if (checkingSession) {
 		return (
-			<Layout title="MRI Returns" showHeader={false} showFooter={false}>
+			<Layout title="eTIMS Campaign" showHeader={false} showFooter={false}>
 				<div className="min-h-[60vh] flex items-center justify-center">
 					<Loader2 className="w-8 h-8 animate-spin text-[var(--kra-red)]" />
 				</div>
@@ -138,9 +134,9 @@ function MriValidationContent() {
 
 	return (
 		<Layout
-			title="MRI Returns"
+			title="eTIMS Campaign"
 			step="Step 1: Validation"
-			onBack={() => router.push("/nil-mri-tot")}
+			onBack={() => router.push("/etims-campaign")}
 			showMenu>
 			<div className="max-w-xl mx-auto space-y-6">
 				<Card className="p-6">
@@ -192,7 +188,7 @@ function MriValidationContent() {
 	);
 }
 
-export default function MriValidationPage() {
+export default function EtimsCampaignValidationPage() {
 	return (
 		<Suspense
 			fallback={
@@ -200,7 +196,7 @@ export default function MriValidationPage() {
 					<Loader2 className="w-8 h-8 animate-spin text-[var(--kra-red)]" />
 				</div>
 			}>
-			<MriValidationContent />
+			<EtimsCampaignValidationContent />
 		</Suspense>
 	);
 }

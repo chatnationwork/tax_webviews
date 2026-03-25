@@ -1,68 +1,80 @@
-'use server';
+"use server";
 
-import logger from '@/lib/logger';
+import logger from "@/lib/logger";
 
-import axios from 'axios';
-import { cookies } from 'next/headers';
+import axios from "axios";
+import { cookies } from "next/headers";
 
 const BASE_URL = `${process.env.API_URL}/ussd`;
 
 // ============= Types =============
 
 export interface OTPResult {
-  success: boolean;
-  message: string;
-  code?: number;
-  token?: string;
-  error?: string;
+	success: boolean;
+	message: string;
+	code?: number;
+	token?: string;
+	error?: string;
 }
-
 export interface SendWhatsAppMessageParams {
-  recipientPhone: string;
-  message: string;
+	recipientPhone: string;
+	message: string;
 }
 
 export interface SendWhatsAppMessageResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
+	success: boolean;
+	messageId?: string;
+	error?: string;
+}
+
+export interface SendEtimsZeroAmountParams {
+	recipientPhone: string;
+	name: string;
+	obligationName: string;
 }
 
 export interface SendWhatsAppDocumentParams {
-  recipientPhone: string;
-  documentUrl: string;
-  caption: string;
-  filename: string;
+	recipientPhone: string;
+	documentUrl: string;
+	caption: string;
+	filename: string;
 }
 
 export interface SendWhatsAppDocumentResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
+	success: boolean;
+	messageId?: string;
+	error?: string;
 }
 
-import { trackMessageSent } from '../_lib/analytics-server';
-
-
+import { trackMessageSent } from "../_lib/analytics-server";
 
 // ============= Helper Functions =============
 
 // ============= Helper Functions =============
 
-import { cleanPhoneNumber } from '../_lib/utils';
+import { cleanPhoneNumber } from "../_lib/utils";
 export async function getAuthHeaders() {
+	const cookieStore = await cookies();
+	const token =
+		cookieStore.get("etims_auth_token")?.value ||
+		cookieStore.get("auth_token")?.value;
 
-  const cookieStore = await cookies();
-  const token = cookieStore.get('etims_auth_token')?.value || cookieStore.get('auth_token')?.value;
-  
-  logger.info('getAuthHeaders - Token found:', !!token, 'Available cookies:', cookieStore.getAll().map(c => c.name).join(', '));
-  
-  return {
-    'Content-Type': 'application/json',
-    'x-source-for': 'whatsapp',
-    'x-forwarded-for': 'whatsapp',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-  };
+	logger.info(
+		"getAuthHeaders - Token found:",
+		!!token,
+		"Available cookies:",
+		cookieStore
+			.getAll()
+			.map(c => c.name)
+			.join(", "),
+	);
+
+	return {
+		"Content-Type": "application/json",
+		"x-source-for": "whatsapp",
+		"x-forwarded-for": "whatsapp",
+		...(token ? { Authorization: `Bearer ${token}` } : {}),
+	};
 }
 
 // ============= Auth Actions =============
@@ -72,164 +84,177 @@ export async function getAuthHeaders() {
  * POST /api/ussd/otp
  */
 export async function generateOTP(msisdn: string): Promise<OTPResult> {
-  const cleanNumber = cleanPhoneNumber(msisdn);
+	const cleanNumber = cleanPhoneNumber(msisdn);
 
-  try {
-    const response = await axios.post(
-      `${BASE_URL}/otp`,
-      { msisdn: cleanNumber },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-source-for': 'whatsapp',
-        },
-        timeout: 30000,
-      }
-    );
+	try {
+		const response = await axios.post(
+			`${BASE_URL}/otp`,
+			{ msisdn: cleanNumber },
+			{
+				headers: {
+					"Content-Type": "application/json",
+					"x-source-for": "whatsapp",
+				},
+				timeout: 30000,
+			},
+		);
 
-    logger.info('Generate OTP response:', response.data);
+		logger.info("Generate OTP response:", response.data);
 
-    return {
-      success: true,
-      message: response.data.message || 'OTP sent successfully',
-      code: response.data.code,
-    };
-  } catch (error: any) {
-    logger.error('Generate OTP error:', error.response?.data || error.message);
-    
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Failed to send OTP',
-      error: error.response?.data?.message
-    };
-  }
+		return {
+			success: true,
+			message: response.data.message || "OTP sent successfully",
+			code: response.data.code,
+		};
+	} catch (error: any) {
+		logger.error(
+			"Generate OTP error:",
+			error.response?.data || error.message,
+		);
+
+		return {
+			success: false,
+			message: error.response?.data?.message || "Failed to send OTP",
+			error: error.response?.data?.message,
+		};
+	}
 }
 
 /**
  * Validate OTP code and set session cookie
  * POST /api/ussd/validate-otp
  */
-export async function validateOTP(msisdn: string, otp: string): Promise<OTPResult> {
-  const cleanNumber = cleanPhoneNumber(msisdn);
+export async function validateOTP(
+	msisdn: string,
+	otp: string,
+): Promise<OTPResult> {
+	const cleanNumber = cleanPhoneNumber(msisdn);
 
-  try {
-    const response = await axios.post(
-      `${BASE_URL}/validate-otp`,
-      { 
-        msisdn: cleanNumber,
-        otp: otp.trim().toUpperCase(),
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-source-for': 'whatsapp',
-        },
-        timeout: 30000,
-      }
-    );
+	try {
+		const response = await axios.post(
+			`${BASE_URL}/validate-otp`,
+			{
+				msisdn: cleanNumber,
+				otp: otp.trim().toUpperCase(),
+			},
+			{
+				headers: {
+					"Content-Type": "application/json",
+					"x-source-for": "whatsapp",
+				},
+				timeout: 30000,
+			},
+		);
 
-    logger.info('Validate OTP response:', response.data);
+		logger.info("Validate OTP response:", response.data);
 
-    // Check for success (varies by API, sometimes success: false, sometimes code: 0)
-    const isSuccess = response.data.success !== false && response.data.code !== 0;
+		// Check for success (varies by API, sometimes success: false, sometimes code: 0)
+		const isSuccess =
+			response.data.success !== false && response.data.code !== 0;
 
-    if (isSuccess) {
-      const token = response.data.token;
-      if (token) {
-        const cookieStore = await cookies();
-        
-        // Set consolidated auth token
-        cookieStore.set({
-          name: 'etims_auth_token',
-          value: token,
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: 30 * 60, // 30 minutes
-          path: '/',
-        });
+		if (isSuccess) {
+			const token = response.data.token;
+			if (token) {
+				const cookieStore = await cookies();
 
-        // Set legacy auth token for compatibility
-        cookieStore.set({
-            name: 'auth_token',
-            value: token,
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 30 * 60, // 30 minutes
-            path: '/',
-        });
+				// Set consolidated auth token
+				cookieStore.set({
+					name: "etims_auth_token",
+					value: token,
+					httpOnly: true,
+					secure: process.env.NODE_ENV === "production",
+					maxAge: 30 * 60, // 30 minutes
+					path: "/",
+				});
 
-        // Store phone number
-        cookieStore.set({
-            name: 'phone_Number', // Legacy name used in payments/pin-registration
-            value: cleanNumber,
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60 * 24 * 7, // 7 days
-            path: '/',
-        });
-      }
-    }
+				// Set legacy auth token for compatibility
+				cookieStore.set({
+					name: "auth_token",
+					value: token,
+					httpOnly: true,
+					secure: process.env.NODE_ENV === "production",
+					maxAge: 30 * 60, // 30 minutes
+					path: "/",
+				});
 
-    return {
-      success: isSuccess,
-      message: response.data.message || (isSuccess ? 'OTP validated successfully' : 'Invalid OTP'),
-      code: response.data.code,
-      token: response.data.token
-    };
-  } catch (error: any) {
-    logger.error('Validate OTP error:', error.response?.data || error.message);
-    
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Invalid OTP',
-      error: error.response?.data?.message
-    };
-  }
+				// Store phone number
+				cookieStore.set({
+					name: "phone_Number", // Legacy name used in payments/pin-registration
+					value: cleanNumber,
+					httpOnly: true,
+					secure: process.env.NODE_ENV === "production",
+					maxAge: 60 * 60 * 24 * 7, // 7 days
+					path: "/",
+				});
+			}
+		}
+
+		return {
+			success: isSuccess,
+			message:
+				response.data.message ||
+				(isSuccess ? "OTP validated successfully" : "Invalid OTP"),
+			code: response.data.code,
+			token: response.data.token,
+		};
+	} catch (error: any) {
+		logger.error(
+			"Validate OTP error:",
+			error.response?.data || error.message,
+		);
+
+		return {
+			success: false,
+			message: error.response?.data?.message || "Invalid OTP",
+			error: error.response?.data?.message,
+		};
+	}
 }
 
 /**
  * Check if the user has a valid session and slide expiration
  */
 export async function checkServerSession(): Promise<boolean> {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('etims_auth_token') || cookieStore.get('auth_token');
-    
-    if (token) {
-      logger.info('Token found:', token.value);
-      // Sliding expiration: refresh cookies
-      const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 30 * 60, // 30 minutes
-        path: '/'
-      };
-      
-      cookieStore.set('etims_auth_token', token.value, options);
-      cookieStore.set('auth_token', token.value, options);
-      return true;
-    }
-    
-    return false;
+	const cookieStore = await cookies();
+	const token =
+		cookieStore.get("etims_auth_token") || cookieStore.get("auth_token");
+
+	if (token) {
+		logger.info("Token found:", token.value);
+		// Sliding expiration: refresh cookies
+		const options = {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			maxAge: 30 * 60, // 30 minutes
+			path: "/",
+		};
+
+		cookieStore.set("etims_auth_token", token.value, options);
+		cookieStore.set("auth_token", token.value, options);
+		return true;
+	}
+
+	return false;
 }
 
 /**
  * Logout the user by clearing the session tokens
  */
 export async function logout(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete('etims_auth_token');
-  cookieStore.delete('auth_token');
-  // We explicitly keep 'phone_Number' intact for convenience
+	const cookieStore = await cookies();
+	cookieStore.delete("etims_auth_token");
+	cookieStore.delete("auth_token");
+	// We explicitly keep 'phone_Number' intact for convenience
 }
 
 /**
  * Get the stored phone number from session (server-side)
  */
 export async function getStoredPhoneServer(): Promise<string | null> {
-  logger.info('getStoredPhoneServer');
-    const cookieStore = await cookies();
-    logger.info('Stored phone number:', cookieStore.get('phone_Number')?.value );
-    return cookieStore.get('phone_Number')?.value || null;
+	logger.info("getStoredPhoneServer");
+	const cookieStore = await cookies();
+	logger.info("Stored phone number:", cookieStore.get("phone_Number")?.value);
+	return cookieStore.get("phone_Number")?.value || null;
 }
 
 /**
@@ -237,18 +262,18 @@ export async function getStoredPhoneServer(): Promise<string | null> {
  * called when user lands with ?phone=xxx or updates it
  */
 export async function savePhoneToCookie(phone: string): Promise<void> {
-    const cookieStore = await cookies();
-    const cleanNumber = cleanPhoneNumber(phone);
-    
-    // Store phone number
-    cookieStore.set({
-        name: 'phone_Number', 
-        value: cleanNumber,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-        path: '/',
-    });
+	const cookieStore = await cookies();
+	const cleanNumber = cleanPhoneNumber(phone);
+
+	// Store phone number
+	cookieStore.set({
+		name: "phone_Number",
+		value: cleanNumber,
+		httpOnly: true,
+		secure: process.env.NODE_ENV === "production",
+		maxAge: 60 * 60 * 24 * 7, // 7 days
+		path: "/",
+	});
 }
 
 // ============= WhatsApp Actions =============
@@ -257,132 +282,148 @@ export async function savePhoneToCookie(phone: string): Promise<void> {
  * Send a text message via WhatsApp to a user
  */
 export async function sendWhatsAppMessage(
-  params: SendWhatsAppMessageParams
+	params: SendWhatsAppMessageParams,
 ): Promise<SendWhatsAppMessageResult> {
-  const { recipientPhone, message } = params;
+	const { recipientPhone, message } = params;
 
-  if (!recipientPhone || !message) {
-    return { success: false, error: 'Recipient phone and message are required' };
-  }
+	if (!recipientPhone || !message) {
+		return {
+			success: false,
+			error: "Recipient phone and message are required",
+		};
+	}
 
-  const finalNumber = cleanPhoneNumber(recipientPhone);
+	const finalNumber = cleanPhoneNumber(recipientPhone);
 
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  
-  if (!token || !phoneNumberId) {
-    logger.error('WhatsApp API credentials not configured');
-    return { success: false, error: 'WhatsApp sending not configured' };
-  }
+	const token = process.env.WHATSAPP_ACCESS_TOKEN;
+	const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
-  const url = `https://crm.chatnation.co.ke/api/meta/v21.0/${phoneNumberId}/messages`;
+	if (!token || !phoneNumberId) {
+		logger.error("WhatsApp API credentials not configured");
+		return { success: false, error: "WhatsApp sending not configured" };
+	}
 
-  const payload = {
-    messaging_product: "whatsapp",
-    recipient_type: "individual",
-    to: finalNumber,
-    type: "text",
-    text: {
-      preview_url: false,
-      body: message
-    }
-  };
+	const url = `https://crm.chatnation.co.ke/api/meta/v21.0/${phoneNumberId}/messages`;
 
-  logger.info('Sending WhatsApp message to:', finalNumber);
+	const payload = {
+		messaging_product: "whatsapp",
+		recipient_type: "individual",
+		to: finalNumber,
+		type: "text",
+		text: {
+			preview_url: false,
+			body: message,
+		},
+	};
 
-  try {
-    const response = await axios.post(url, payload, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 30000
-    });
+	logger.info("Sending WhatsApp message to:", finalNumber);
 
-    // Track analytics
-    await trackMessageSent({
-      message_id: response.data.messages?.[0]?.id,
-      recipient_phone: finalNumber,
-      message_type: 'text',
-      content: message
-    });
+	try {
+		const response = await axios.post(url, payload, {
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json",
+			},
+			timeout: 30000,
+		});
 
-    return {
-      success: true,
-      messageId: response.data.messages?.[0]?.id
-    };
-  } catch (error: any) {
-    logger.error('Error sending WhatsApp message:', error.response?.data || error.message);
-    return {
-      success: false,
-      error: error.response?.data?.error?.message || 'Failed to send message via WhatsApp'
-    };
-  }
+		// Track analytics
+		await trackMessageSent({
+			message_id: response.data.messages?.[0]?.id,
+			recipient_phone: finalNumber,
+			message_type: "text",
+			content: message,
+		});
+
+		return {
+			success: true,
+			messageId: response.data.messages?.[0]?.id,
+		};
+	} catch (error: any) {
+		logger.error(
+			"Error sending WhatsApp message:",
+			error.response?.data || error.message,
+		);
+		return {
+			success: false,
+			error:
+				error.response?.data?.error?.message ||
+				"Failed to send message via WhatsApp",
+		};
+	}
 }
 
 /**
  * Send a document (PDF) via WhatsApp
  */
 export async function sendWhatsAppDocument(
-  params: SendWhatsAppDocumentParams
+	params: SendWhatsAppDocumentParams,
 ): Promise<SendWhatsAppMessageResult> {
-  const { recipientPhone, documentUrl, caption, filename } = params;
+	const { recipientPhone, documentUrl, caption, filename } = params;
 
-  if (!recipientPhone || !documentUrl) {
-    return { success: false, error: 'Recipient phone and document URL are required' };
-  }
+	if (!recipientPhone || !documentUrl) {
+		return {
+			success: false,
+			error: "Recipient phone and document URL are required",
+		};
+	}
 
-  const finalNumber = cleanPhoneNumber(recipientPhone);
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  
-  if (!token || !phoneNumberId) {
-    return { success: false, error: 'WhatsApp configuration missing' };
-  }
+	const finalNumber = cleanPhoneNumber(recipientPhone);
+	const token = process.env.WHATSAPP_ACCESS_TOKEN;
+	const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
-  const url = `https://crm.chatnation.co.ke/api/meta/v21.0/${phoneNumberId}/messages`;
+	if (!token || !phoneNumberId) {
+		return { success: false, error: "WhatsApp configuration missing" };
+	}
 
-  const payload = {
-    messaging_product: "whatsapp",
-    recipient_type: "individual",
-    to: finalNumber,
-    type: "document",
-    document: {
-      link: documentUrl,
-      caption: caption,
-      filename: filename
-    }
-  };
+	const url = `https://crm.chatnation.co.ke/api/meta/v21.0/${phoneNumberId}/messages`;
 
-  try {
-    const response = await axios.post(url, payload, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 30000
-    });
+	const payload = {
+		messaging_product: "whatsapp",
+		recipient_type: "individual",
+		to: finalNumber,
+		type: "document",
+		document: {
+			link: documentUrl,
+			caption: caption,
+			filename: filename,
+		},
+	};
 
-    // Track analytics
-    await trackMessageSent({
-      message_id: response.data.messages?.[0]?.id,
-      recipient_phone: finalNumber,
-      message_type: 'document',
-      document_url: documentUrl,
-      document_filename: filename
-    });
+	try {
+		const response = await axios.post(url, payload, {
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json",
+			},
+			timeout: 30000,
+		});
 
-    return {
-      success: true,
-      messageId: response.data.messages?.[0]?.id
-    };
-  } catch (error: any) {
-    logger.error('Error sending WhatsApp document:', error.response?.data || error.message);
-    return {
-      success: false,
-      error: error.response?.data?.error?.message || 'Failed to send document'
-    };
-  }
+		// Track analytics
+		await trackMessageSent({
+			message_id: response.data.messages?.[0]?.id,
+			recipient_phone: finalNumber,
+			message_type: "document",
+			document_url: documentUrl,
+			document_filename: filename,
+		});
+
+		return {
+			success: true,
+			messageId: response.data.messages?.[0]?.id,
+		};
+	} catch (error: any) {
+		logger.error(
+			"Error sending WhatsApp document:",
+			error.response?.data || error.message,
+		);
+		return {
+			success: false,
+			error:
+				error.response?.data?.error?.message ||
+				"Failed to send document",
+		};
+	}
 }
 
 // Template senders can be migrated here as needed, but for now base functions are key
@@ -390,173 +431,201 @@ export async function sendWhatsAppDocument(
 /**
  * Send "Connect to agent" interactive message
  */
-export async function sendConnectToAgentMessage(recipientPhone: string): Promise<SendWhatsAppMessageResult> {
-  const cleanNumber = cleanPhoneNumber(recipientPhone).replace(/^254/, '');
-  const finalNumber = cleanPhoneNumber(recipientPhone);
+export async function sendConnectToAgentMessage(
+	recipientPhone: string,
+): Promise<SendWhatsAppMessageResult> {
+	const cleanNumber = cleanPhoneNumber(recipientPhone).replace(/^254/, "");
+	const finalNumber = cleanPhoneNumber(recipientPhone);
 
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const domain = 'https://crm.chatnation.co.ke';
-  const version = 'v21.0';
-  
-  if (!token || !phoneNumberId) {
-    logger.error('WhatsApp API credentials not configured');
-    return { success: false, error: 'WhatsApp sending not configured' };
-  }
+	const token = process.env.WHATSAPP_ACCESS_TOKEN;
+	const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+	const domain = "https://crm.chatnation.co.ke";
+	const version = "v21.0";
 
-  const url = `${domain}/api/meta/${version}/${phoneNumberId}/messages`;
+	if (!token || !phoneNumberId) {
+		logger.error("WhatsApp API credentials not configured");
+		return { success: false, error: "WhatsApp sending not configured" };
+	}
 
-  const payload = {
-    messaging_product: "whatsapp",
-    recipient_type: "individual",
-    to: finalNumber,
-    type: "interactive",
-    interactive: {
-        type: "button",
-        header: {
-            type: "text",
-            text: "Connect to Agent"
-        },
-        body: {
-            text: "Do you want to speak with a customer support agent?"
-        },
-        footer: {
-            text: "Select an option"
-        },
-        action: {
-            buttons: [
-                {
-                    type: "reply",
-                    reply: {
-                        id: "Connect to Agent",
-                        title: "Connect to Agent"
-                    }
-                },
-                {
-                    type: "reply",
-                    reply: {
-                        id: "Main Menu",
-                        title: "Main Menu"
-                    }
-                }
-            ]
-        }
-    }
-  };
+	const url = `${domain}/api/meta/${version}/${phoneNumberId}/messages`;
 
-  try {
-    const response = await axios.post(url, payload, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 30000
-    });
+	const payload = {
+		messaging_product: "whatsapp",
+		recipient_type: "individual",
+		to: finalNumber,
+		type: "interactive",
+		interactive: {
+			type: "button",
+			header: {
+				type: "text",
+				text: "Connect to Agent",
+			},
+			body: {
+				text: "Do you want to speak with a customer support agent?",
+			},
+			footer: {
+				text: "Select an option",
+			},
+			action: {
+				buttons: [
+					{
+						type: "reply",
+						reply: {
+							id: "Connect to Agent",
+							title: "Connect to Agent",
+						},
+					},
+					{
+						type: "reply",
+						reply: {
+							id: "Main Menu",
+							title: "Main Menu",
+						},
+					},
+				],
+			},
+		},
+	};
 
-    // Track analytics
-    await trackMessageSent({
-      message_id: response.data.messages?.[0]?.id,
-      recipient_phone: finalNumber,
-      message_type: 'interactive',
-      interactive_type: 'button',
-      interactive_id: 'Connect to Agent'
-    });
+	try {
+		const response = await axios.post(url, payload, {
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json",
+			},
+			timeout: 30000,
+		});
 
-    return {
-      success: true,
-      messageId: response.data.messages?.[0]?.id
-    };
-  } catch (error: any) {
-    logger.error('Error sending Connect Agent message:', error.response?.data || error.message);
-    return {
-      success: false,
-      error: error.response?.data?.error?.message || 'Failed to send message'
-    };
-  }
+		// Track analytics
+		await trackMessageSent({
+			message_id: response.data.messages?.[0]?.id,
+			recipient_phone: finalNumber,
+			message_type: "interactive",
+			interactive_type: "button",
+			interactive_id: "Connect to Agent",
+		});
+
+		return {
+			success: true,
+			messageId: response.data.messages?.[0]?.id,
+		};
+	} catch (error: any) {
+		logger.error(
+			"Error sending Connect Agent message:",
+			error.response?.data || error.message,
+		);
+		return {
+			success: false,
+			error:
+				error.response?.data?.error?.message ||
+				"Failed to send message",
+		};
+	}
 }
 /**
  * Send "Connect to agent" interactive message for a specific service
  */
-export async function sendServiceAgentConnectMessage(recipientPhone: string, serviceName: string): Promise<SendWhatsAppMessageResult> {
-  const finalNumber = cleanPhoneNumber(recipientPhone);
+export async function sendServiceAgentConnectMessage(
+	recipientPhone: string,
+	serviceName: string,
+): Promise<SendWhatsAppMessageResult> {
+	const finalNumber = cleanPhoneNumber(recipientPhone);
 
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const domain = 'https://crm.chatnation.co.ke';
-  const version = 'v21.0';
-  
-  if (!token || !phoneNumberId) {
-    logger.error('WhatsApp API credentials not configured');
-    return { success: false, error: 'WhatsApp sending not configured' };
-  }
+	const token = process.env.WHATSAPP_ACCESS_TOKEN;
+	const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+	const domain = "https://crm.chatnation.co.ke";
+	const version = "v21.0";
 
-  const url = `${domain}/api/meta/${version}/${phoneNumberId}/messages`;
+	if (!token || !phoneNumberId) {
+		logger.error("WhatsApp API credentials not configured");
+		return { success: false, error: "WhatsApp sending not configured" };
+	}
 
-  const payload = {
-    messaging_product: "whatsapp",
-    recipient_type: "individual",
-    to: finalNumber,
-    type: "interactive",
-    interactive: {
-        type: "button",
-        header: {
-            type: "text",
-            text: "Request Assistance"
-        },
-        body: {
-            text: `You requested help with *${serviceName}*. Do you want to speak with a customer support agent?`
-        },
-        footer: {
-            text: "Select an option"
-        },
-        action: {
-            buttons: [
-                {
-                    type: "reply",
-                    reply: {
-                        id: `Agent Help: ${serviceName}`,
-                        title: "Connect to Agent"
-                    }
-                },
-                {
-                    type: "reply",
-                    reply: {
-                        id: "Main Menu",
-                        title: "Main Menu"
-                    }
-                }
-            ]
-        }
-    }
-  };
+	const url = `${domain}/api/meta/${version}/${phoneNumberId}/messages`;
 
-  try {
-    const response = await axios.post(url, payload, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 30000
-    });
+	const payload = {
+		messaging_product: "whatsapp",
+		recipient_type: "individual",
+		to: finalNumber,
+		type: "interactive",
+		interactive: {
+			type: "button",
+			header: {
+				type: "text",
+				text: "Request Assistance",
+			},
+			body: {
+				text: `You requested help with *${serviceName}*. Do you want to speak with a customer support agent?`,
+			},
+			footer: {
+				text: "Select an option",
+			},
+			action: {
+				buttons: [
+					{
+						type: "reply",
+						reply: {
+							id: `Agent Help: ${serviceName}`,
+							title: "Connect to Agent",
+						},
+					},
+					{
+						type: "reply",
+						reply: {
+							id: "Main Menu",
+							title: "Main Menu",
+						},
+					},
+				],
+			},
+		},
+	};
 
-    // Track analytics
-    await trackMessageSent({
-      message_id: response.data.messages?.[0]?.id,
-      recipient_phone: finalNumber,
-      message_type: 'interactive',
-      interactive_type: 'button',
-      interactive_id: `Agent Help: ${serviceName}`
-    });
+	try {
+		const response = await axios.post(url, payload, {
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json",
+			},
+			timeout: 30000,
+		});
 
-    return {
-      success: true,
-      messageId: response.data.messages?.[0]?.id
-    };
-  } catch (error: any) {
-    logger.error('Error sending Service Agent message:', error.response?.data || error.message);
-    return {
-      success: false,
-      error: error.response?.data?.error?.message || 'Failed to send message'
-    };
-  }
+		// Track analytics
+		await trackMessageSent({
+			message_id: response.data.messages?.[0]?.id,
+			recipient_phone: finalNumber,
+			message_type: "interactive",
+			interactive_type: "button",
+			interactive_id: `Agent Help: ${serviceName}`,
+		});
+
+		return {
+			success: true,
+			messageId: response.data.messages?.[0]?.id,
+		};
+	} catch (error: any) {
+		logger.error(
+			"Error sending Service Agent message:",
+			error.response?.data || error.message,
+		);
+		return {
+			success: false,
+			error:
+				error.response?.data?.error?.message ||
+				"Failed to send message",
+		};
+	}
+}
+
+/**
+ * Send a notification for zero eTIMS amount
+ */
+export async function sendEtimsZeroAmountMessage(
+	params: SendEtimsZeroAmountParams,
+): Promise<SendWhatsAppMessageResult> {
+	const { recipientPhone, name, obligationName } = params;
+
+	const message = `Hello ${name || "Taxpayer"},\n\nWe have confirmed that you have no pending amount for your *${obligationName || "eTIMS"}* obligation. Your account is up to date.\n\nThank you for choosing KRA.`;
+
+	return sendWhatsAppMessage({ recipientPhone, message });
 }
