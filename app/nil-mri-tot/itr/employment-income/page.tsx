@@ -229,22 +229,23 @@ function EmploymentIncomeContent() {
           </Card>
         )}
 
-        <div className="flex gap-2 pt-2">
-          <Button
-            variant="secondary"
-            onClick={() => { taxpayerStore.clear(); router.push('/nil-mri-tot'); }}
-            className="flex-1"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleNext}
-            disabled={loading || rows.length === 0}
-            className="flex-1"
-          >
-            Next
-          </Button>
-        </div>
+        {!loading && rows.length > 0 ? (
+          <div className="flex gap-2 pt-2">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                taxpayerStore.clear();
+                router.push('/nil-mri-tot');
+              }}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleNext} className="flex-1">
+              Next
+            </Button>
+          </div>
+        ) : null}
       </div>
     </Layout>
   );
