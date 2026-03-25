@@ -235,49 +235,6 @@ function ReturnInformationContent() {
           <p className="text-gray-400 text-xs">Step 2/3 — Return Information</p>
         </div>
 
-        {/* Deductions */}
-        <Card className="space-y-3 border border-gray-200">
-          <p className="text-sm font-semibold text-gray-800 inline-flex items-center gap-2">
-            <Wallet className="w-4 h-4 text-[var(--kra-red)]" />
-            Deductions
-          </p>
-
-          <Input
-            label="Defined / Pension Contribution"
-            value={pension}
-            onChange={setPension}
-            type="number"
-            placeholder="0"
-            helperText={limits?.pension?.max ? `Max KES ${limits.pension.max.toLocaleString()}` : undefined}
-            error={deductionError(pension, limits?.pension?.max)}
-          />
-          <Input
-            label="Social Health Insurance (SHIF) Contribution"
-            value={shif}
-            onChange={setShif}
-            type="number"
-            placeholder="0"
-            helperText={limits?.hlevy?.max ? `Max KES ${limits.hlevy.max.toLocaleString()}` : undefined}
-            error={deductionError(shif, limits?.hlevy?.max)}
-          />
-          <Input
-            label="Housing Levy Contribution"
-            value={hl}
-            onChange={setHl}
-            type="number"
-            placeholder="0"
-          />
-          <Input
-            label="Post-Retirement Medical Fund Contribution"
-            value={pmf}
-            onChange={setPmf}
-            type="number"
-            placeholder="0"
-            helperText={limits?.prmc?.max ? `Max KES ${limits.prmc.max.toLocaleString()}` : undefined}
-            error={deductionError(pmf, limits?.prmc?.max)}
-          />
-        </Card>
-
         {/* Insurance */}
         <Card className="space-y-3 border border-gray-200">
           <div className="flex items-center justify-between">
