@@ -876,6 +876,16 @@ export async function sendWhatsAppMessage(
   return sharedSendWhatsAppMessage(params);
 }
 
+/**
+ * Send WhatsApp image
+ */
+export async function sendWhatsAppImage(
+  params: { recipientPhone: string; imageUrl: string; caption?: string }
+): Promise<SendWhatsAppMessageResult> {
+  const { sendWhatsAppImage: sharedSendWhatsAppImage } = await import('./auth');
+  return sharedSendWhatsAppImage(params);
+}
+
 // ============= Liabilities =============
 
 export interface Liability {
@@ -1609,10 +1619,10 @@ export async function renderItrFilingCard(variables: {
   filingPeriod: string;
   taxDue: string;
   footer: string;
-}): Promise<{ base64: string; mimeType: string } | { error: string }> {
+}): Promise<{ url: string; mimeType: string } | { error: string }> {
   try {
     const response = await axios.post(
-      `${process.env.API_URL}/hypecard-templates/render-stateless`,
+      `${process.env.API_URL}/hypecard-templates/render-stateless-url`,
       {
         templateId: process.env.ITR_FILING_CARD_TEMPLATE_ID,
         variables,
@@ -1625,7 +1635,7 @@ export async function renderItrFilingCard(variables: {
         timeout: 15000,
       }
     );
-    return { base64: response.data.image, mimeType: response.data.mimeType };
+    return { url: response.data.url, mimeType: response.data.mimeType };
   } catch (err) {
     logger.error('[renderItrFilingCard]', err);
     return { error: 'Filing card generation failed' };

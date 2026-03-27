@@ -6,7 +6,7 @@ import logger from '@/lib/logger';
 export interface WhatsAppAnalyticsProps {
   message_id?: string;
   recipient_phone: string;
-  message_type: 'text' | 'template' | 'interactive' | 'document' | 'other';
+  message_type: 'text' | 'template' | 'interactive' | 'document' | 'image' | 'other';
   content?: string; // For text messages
   template_name?: string; // For templates
   document_url?: string; // For documents
