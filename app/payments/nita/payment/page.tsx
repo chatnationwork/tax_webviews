@@ -9,6 +9,16 @@ import { Layout, Card, Button, Input } from '../../../_components/Layout';
 import { PINInput } from '@/app/_components/KRAInputs';
 import { analytics } from '@/app/_lib/analytics';
 
+const NITA_PER_EMPLOYEE_KES = 50;
+
+function parsePositiveInteger(value: string): number | null {
+  const trimmed = value.trim();
+  if (!/^\d+$/.test(trimmed)) return null;
+  const n = Number.parseInt(trimmed, 10);
+  if (n < 1) return null;
+  return n;
+}
+
 function NitaPaymentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -21,7 +31,7 @@ function NitaPaymentContent() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [taxPeriodFrom, setTaxPeriodFrom] = useState('');
   const [taxPeriodTo, setTaxPeriodTo] = useState('');
-  const [amount, setAmount] = useState('');
+  const [numberOfEmployees, setNumberOfEmployees] = useState('');
   
   // UI state
   const [loading, setLoading] = useState(false);
@@ -75,7 +85,11 @@ function NitaPaymentContent() {
 
   const isPhoneValid = phoneNumber.replace(/\D/g, '').length >= 9;
   const isDateValid = taxPeriodFrom && taxPeriodTo && new Date(taxPeriodFrom) <= new Date(taxPeriodTo);
-  const isFormValid = isPinValid && isPhoneValid && isDateValid && amount;
+  const employeeCount = parsePositiveInteger(numberOfEmployees);
+  const totalAmountKes =
+    employeeCount !== null ? NITA_PER_EMPLOYEE_KES * employeeCount : null;
+  const isFormValid =
+    isPinValid && isPhoneValid && isDateValid && employeeCount !== null;
 
   // Real-time date validation
   useEffect(() => {
@@ -100,9 +114,8 @@ function NitaPaymentContent() {
       return;
     }
 
-    const amountNum = Number(amount);
-    if (isNaN(amountNum) || amountNum <= 0) {
-      setError('Please enter a valid amount.');
+    if (employeeCount === null || totalAmountKes === null) {
+      setError('Please enter a valid number of employees (whole number, at least 1).');
       return;
     }
 
@@ -119,7 +132,7 @@ function NitaPaymentContent() {
         pin.trim().toUpperCase(),
         formatDateForApi(taxPeriodFrom),
         formatDateForApi(taxPeriodTo),
-        amount
+        String(totalAmountKes)
       );
 
       if (!prnRes.success || !prnRes.prn) {
@@ -135,7 +148,7 @@ function NitaPaymentContent() {
       const formattedPhone = formatPhoneForApi(phoneNumber);
       const whatsappMessage = `🏭 *NITA Payment PRN Generated*\n\n` +
         `PRN: *${prnRes.prn}*\n` +
-        `Amount: KES ${Number(amount).toLocaleString()}\n` +
+        `Employees: ${employeeCount} × KES ${NITA_PER_EMPLOYEE_KES.toLocaleString()} = KES ${totalAmountKes.toLocaleString()}\n` +
         `Tax Period: ${taxPeriodFrom} to ${taxPeriodTo}\n\n` +
         `Please complete your M-Pesa payment or use the online checkout link.`;
       
@@ -152,7 +165,7 @@ function NitaPaymentContent() {
       if (payRes.success) {
         // Store payment details for result page
         taxpayerStore.setTaxpayerInfo('', 0, '', pin.trim().toUpperCase());
-        taxpayerStore.setPaymentDetails(taxPeriodFrom, taxPeriodTo, amountNum);
+        taxpayerStore.setPaymentDetails(taxPeriodFrom, taxPeriodTo, totalAmountKes);
         taxpayerStore.setPrn(prnRes.prn);
         if (payRes.checkoutUrl) taxpayerStore.setCheckoutUrl(payRes.checkoutUrl);
         taxpayerStore.setPaymentStatus('success', 'Payment initiated. Check your phone for the M-Pesa prompt.');
@@ -160,7 +173,16 @@ function NitaPaymentContent() {
         setPaymentStatus('Payment initiated. Check your phone for M-Pesa prompt.');
         
         analytics.setUserId(formattedPhone);
-        analytics.track('nita_payment_started', { amount: amountNum, prn: prnRes.prn }, { journey_start: true });
+        analytics.track(
+          'nita_payment_started',
+          {
+            amount: totalAmountKes,
+            employees: employeeCount,
+            perEmployeeKes: NITA_PER_EMPLOYEE_KES,
+            prn: prnRes.prn,
+          },
+          { journey_start: true }
+        );
 
         setTimeout(() => {
           router.push('/payments/nita/result');
@@ -238,13 +260,22 @@ function NitaPaymentContent() {
             </div>
 
             <Input
-              label="Amount (KES)"
-              value={amount}
-              onChange={setAmount}
+              label="Number of employees"
+              value={numberOfEmployees}
+              onChange={setNumberOfEmployees}
               type="number"
-              placeholder="Enter amount"
+              min="1"
+              step="1"
+              inputMode="numeric"
+              placeholder="e.g., 10"
               required
+              helperText={`KES ${NITA_PER_EMPLOYEE_KES.toLocaleString()} per employee`}
             />
+            {totalAmountKes !== null && (
+              <p className="text-sm font-medium text-gray-800">
+                Total amount: KES {totalAmountKes.toLocaleString()}
+              </p>
+            )}
 
             {(error || dateError) && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">

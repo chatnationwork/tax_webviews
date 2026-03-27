@@ -147,3 +147,42 @@ export function shouldUseConfirmation(serviceKey: string): boolean {
 export function getServiceConfig(serviceKey: string): ServiceConfig | undefined {
   return SERVICES_CONFIG[serviceKey];
 }
+
+/**
+ * All NEXT_PUBLIC_SERVICE_* env vars, collected at build time.
+ * Maps normalised key (e.g. "NIL_FILING") → value string.
+ * We grab every matching var once so the runtime lookup is a simple object read.
+ */
+const SERVICE_ENV_FLAGS: Record<string, string> = Object.entries(
+  process.env
+)
+  .filter(([k]) => k.startsWith("NEXT_PUBLIC_SERVICE_"))
+  .reduce<Record<string, string>>((acc, [k, v]) => {
+    acc[k.replace("NEXT_PUBLIC_SERVICE_", "")] = v ?? "";
+    return acc;
+  }, {});
+
+/**
+ * Converts a SERVICE_URLS key to its env-var suffix.
+ * e.g. "NIL Filing" → "NIL_FILING", "eSlip" → "ESLIP"
+ */
+function toEnvSuffix(serviceKey: string): string {
+  return serviceKey.toUpperCase().replace(/\s+/g, "_");
+}
+
+/**
+ * Determines whether a self-serve (green) menu item should be visible.
+ *
+ * Rules:
+ *  - NEXT_PUBLIC_SERVICE_<KEY>=false  → hidden
+ *  - NEXT_PUBLIC_SERVICE_<KEY>=true   → visible
+ *  - env var not set at all           → visible (default)
+ *
+ * Only meaningful for items that have an entry in SERVICE_URLS (self-serve).
+ * Assisted (blue) items are unaffected because they are never checked.
+ */
+export function isServiceVisible(serviceKey: string): boolean {
+  const flag = SERVICE_ENV_FLAGS[toEnvSuffix(serviceKey)];
+  if (flag === undefined) return true; // not set → show
+  return flag.toLowerCase() !== "false";
+}

@@ -69,3 +69,12 @@ P051303997M	A004887718J	21076073
 P051304021J	A005997448T	31780687
 
 A001240599S	25278195
+
+
+
+inoice_alert_buyer
+buyer_alert_for_invoice_status_update
+alert_seller_invoice_buyer_initiated
+invoice_credit_doc
+invoice_credit_doc_partial_full
+download_invoices

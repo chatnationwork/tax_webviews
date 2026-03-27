@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { shouldUseConfirmation } from "@/app/_lib/services-config";
+import { shouldUseConfirmation, isServiceVisible } from "@/app/_lib/services-config";
 import { analytics } from "@/app/_lib/analytics";
 import { saveKnownPhone } from "@/app/_lib/session-store";
 import { savePhoneToCookie } from "@/app/actions/auth";
@@ -179,6 +179,21 @@ function HomeContent() {
 
   const isAvailable = (key: string) => key in SERVICE_URLS;
 
+  /**
+   * Build visible categories by filtering out self-serve items disabled via env.
+   * Assisted (blue) items are never filtered. Empty categories are dropped.
+   */
+  const visibleCategories = SERVICE_CATEGORIES
+    .map((cat) => ({
+      ...cat,
+      items: cat.items.filter((item) => {
+        // Only filter self-serve (green) items — assisted ones always show
+        if (!isAvailable(item.key)) return true;
+        return isServiceVisible(item.key);
+      }),
+    }))
+    .filter((cat) => cat.items.length > 0);
+
   return (
     <Layout title="KRA Services" phone={phone}>
       {/* Toast */}
@@ -190,7 +205,7 @@ function HomeContent() {
 
       {/* Service grid */}
       <div className="space-y-2.5">
-        {SERVICE_CATEGORIES.map((category, index) => (
+        {visibleCategories.map((category, index) => (
           <div
             key={index}
             className="bg-white rounded-lg border border-gray-100 p-2.5"
