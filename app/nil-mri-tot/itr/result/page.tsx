@@ -6,7 +6,7 @@ import { Layout, Card } from '../../../_components/Layout';
 import { ResultActions } from '../../../_components/ResultActions';
 import { taxpayerStore } from '../../_lib/store';
 import { CheckCircle, AlertCircle } from 'lucide-react';
-import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
+import { getStoredPhone, sendWhatsAppMessage, renderItrFilingCard } from '@/app/actions/nil-mri-tot';
 import { getKnownPhone } from '@/app/_lib/session-store';
 import { JourneyCompletionTracker } from '../../nil/result/JourneyCompletionTracker';
 
@@ -19,6 +19,7 @@ function ItrResultContent() {
   const [mounted, setMounted] = useState(false);
   const notificationSentRef = useRef(false);
   const [whatsAppSent, setWhatsAppSent] = useState(false);
+  const [filingCardBase64, setFilingCardBase64] = useState<string | null>(null);
 
   useEffect(() => {
     const info = taxpayerStore.getTaxpayerInfo();
@@ -41,6 +42,17 @@ function ItrResultContent() {
             const message = `Dear ${info.fullName || 'Taxpayer'},\n\nYour Income Tax Return has been filed successfully.\n\nPIN: ${info.pin}\nReceipt: ${itr.receiptNumber || 'N/A'}\nFiling Period: ${itr.filingPeriod}\nTax Due: KES ${taxDue}\n\nPlease keep this for your records.`;
 
             await sendWhatsAppMessage({ recipientPhone, message });
+            const filingCard = await renderItrFilingCard({
+              name: info.fullName || 'Taxpayer',
+              pin: info.pin,
+              receipt: itr.receiptNumber || 'N/A',
+              filingPeriod: itr.filingPeriod || '',
+              taxDue: `KES ${taxDue}`,
+              footer: 'Please keep this for your records.',
+            });
+            if ('base64' in filingCard) {
+              setFilingCardBase64(filingCard.base64);
+            }
             setWhatsAppSent(true);
           }
         } catch (err) {
@@ -96,6 +108,22 @@ function ItrResultContent() {
                     <p className="text-lg font-mono text-green-800">{itrData.receiptNumber}</p>
                   </div>
                 ) : null}
+                {filingCardBase64 && (
+                  <div className="mt-4 w-full flex flex-col items-center gap-2">
+                    <img
+                      src={`data:image/png;base64,${filingCardBase64}`}
+                      alt="ITR Filing Card"
+                      className="w-full max-w-sm rounded-xl shadow-md"
+                    />
+                    <a
+                      href={`data:image/png;base64,${filingCardBase64}`}
+                      download="itr-filing-card.png"
+                      className="text-sm text-green-700 underline"
+                    >
+                      Download Filing Card
+                    </a>
+                  </div>
+                )}
               </div>
               <p className="text-xs text-blue-800 bg-blue-100/50 px-4 py-2 rounded-full mt-4">
                 {whatsAppSent ? '✓ Confirmation sent to your registered number' : 'Sending confirmation...'}

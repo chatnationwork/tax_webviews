@@ -1601,3 +1601,33 @@ export async function getDisabilityExemption(
     };
   }
 }
+
+export async function renderItrFilingCard(variables: {
+  name: string;
+  pin: string;
+  receipt: string;
+  filingPeriod: string;
+  taxDue: string;
+  footer: string;
+}): Promise<{ base64: string; mimeType: string } | { error: string }> {
+  try {
+    const response = await axios.post(
+      `${process.env.API_URL}/hypecard-templates/render-stateless`,
+      {
+        templateId: process.env.ITR_FILING_CARD_TEMPLATE_ID,
+        variables,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.INTERNAL_API_KEY,
+        },
+        timeout: 15000,
+      }
+    );
+    return { base64: response.data.image, mimeType: response.data.mimeType };
+  } catch (err) {
+    logger.error('[renderItrFilingCard]', err);
+    return { error: 'Filing card generation failed' };
+  }
+}
