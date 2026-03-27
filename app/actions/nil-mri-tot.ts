@@ -1624,7 +1624,7 @@ export async function renderItrFilingCard(variables: {
     const response = await axios.post(
       `${process.env.API_URL}/hypecard-templates/render-stateless-url`,
       {
-        templateId: process.env.ITR_FILING_CARD_TEMPLATE_ID,
+        templateName: 'itr_filing_card',
         variables,
       },
       {
