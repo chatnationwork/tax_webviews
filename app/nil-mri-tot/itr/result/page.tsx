@@ -44,10 +44,6 @@ function ItrResultContent() {
             const filingCard = await renderItrFilingCard({
               name: info.fullName || 'Taxpayer',
               pin: info.pin,
-              receipt: itr.receiptNumber || 'N/A',
-              filingPeriod: itr.filingPeriod || '',
-              taxDue: `KES ${taxDue}`,
-              footer: 'Please keep this for your records.',
             });
 
             if (filingCard && 'url' in filingCard && filingCard.url) {

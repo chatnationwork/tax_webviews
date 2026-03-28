@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { getItrEmploymentDetails, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
+import { getItrEmploymentDetails, getStoredPhone, sendWhatsAppMessage, renderNoEmployerCard, sendWhatsAppImage } from '@/app/actions/nil-mri-tot';
 import { getKnownPhone } from '@/app/_lib/session-store';
 import { Loader2, AlertTriangle } from 'lucide-react';
 
@@ -121,7 +121,21 @@ function EmploymentIncomeContent() {
       const recipientPhone = taxpayerStore.getMsisdn() || await getStoredPhone() || getKnownPhone();
       if (recipientPhone && taxpayerInfo.pin) {
         const message = `Dear ${taxpayerInfo.fullName || 'Taxpayer'},\n\nYour PIN: ${taxpayerInfo.pin} does not have a declared employer under sources of income. You are unable to file an Income Tax Return at this time.\n\nPlease visit the nearest KRA office or use iTax to declare your employer before filing.\n\nNo action is required at this time.`;
-        await sendWhatsAppMessage({ recipientPhone, message });
+        
+        const filingCard = await renderNoEmployerCard({
+          name: taxpayerInfo.fullName || 'Taxpayer',
+          pin: taxpayerInfo.pin,
+        });
+
+        if (filingCard && 'url' in filingCard && filingCard.url) {
+          await sendWhatsAppImage({
+            recipientPhone,
+            imageUrl: filingCard.url,
+            caption: message
+          });
+        } else {
+          await sendWhatsAppMessage({ recipientPhone, message });
+        }
       }
     } catch (e) {
       console.error('Failed to send WhatsApp notification', e);

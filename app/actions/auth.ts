@@ -468,6 +468,8 @@ export async function sendWhatsAppImage(
 		},
 	};
 
+	logger.info("Sending WhatsApp image payload:", JSON.stringify(payload, null, 2));
+
 	try {
 		const response = await axios.post(url, payload, {
 			headers: {
