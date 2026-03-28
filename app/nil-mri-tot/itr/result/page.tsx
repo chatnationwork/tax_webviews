@@ -30,9 +30,11 @@ function ItrResultContent() {
 
     const sendNotification = async () => {
       const itr = taxpayerStore.getItrData();
+      console.log('[ITR Result] sendNotification guard:', { hasError: !!itr.error, pin: info.pin, itrData: JSON.stringify(itr).slice(0, 200) });
       if (!itr.error && info.pin) {
         try {
           const recipientPhone = taxpayerStore.getMsisdn() || await getStoredPhone() || getKnownPhone();
+          console.log('[ITR Result] recipientPhone:', recipientPhone);
           if (recipientPhone) {
             const taxDue = Number(itr.taxComputation?.taxRefundDue || 0).toLocaleString('en-KE', {
               minimumFractionDigits: 2,
@@ -40,29 +42,36 @@ function ItrResultContent() {
             });
             const message = `Dear ${info.fullName || 'Taxpayer'},\n\nYour Income Tax Return has been filed successfully.\n\nPIN: ${info.pin}\nReceipt: ${itr.receiptNumber || 'N/A'}\nFiling Period: ${itr.filingPeriod}\nTax Due: KES ${taxDue}\n\nPlease keep this for your records.`;
 
-            // 1. Generate Hypecard URL
+            // 1. Generate Hypecard URL (only name & pin for the image)
+            console.log('[ITR Result] Generating Hypecard with:', { name: info.fullName, pin: info.pin });
             const filingCard = await renderItrFilingCard({
               name: info.fullName || 'Taxpayer',
               pin: info.pin,
             });
+            console.log('[ITR Result] filingCard result:', filingCard);
 
             if (filingCard && 'url' in filingCard && filingCard.url) {
-              // 2. Send as Image message with caption
-              await sendWhatsAppImage({
+              // 2. Send as Image message with full caption
+              console.log('[ITR Result] Sending WhatsApp image with caption...');
+              const imgResult = await sendWhatsAppImage({
                 recipientPhone,
                 imageUrl: filingCard.url,
                 caption: message
               });
+              console.log('[ITR Result] sendWhatsAppImage result:', imgResult);
             } else {
               // Fallback to text if card generation failed
+              console.log('[ITR Result] Card generation failed, falling back to text');
               await sendWhatsAppMessage({ recipientPhone, message });
             }
 
             setWhatsAppSent(true);
           }
         } catch (err) {
-          console.error('Failed to send WhatsApp notification', err);
+          console.error('[ITR Result] Failed to send WhatsApp notification', err);
         }
+      } else {
+        console.log('[ITR Result] Skipping notification - guard failed');
       }
     };
 
