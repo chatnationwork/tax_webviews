@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { FileText, FileMinus, UserCheck } from 'lucide-react';
 import { clearSalesInvoice, clearCreditNote, clearBuyerInitiated } from '../etims/_lib/store';
+import { useConfig } from '@/app/_lib/runtime-config';
 
 /**
  * Shows the 3 main eTIMS actions in a horizontal layout
@@ -61,7 +62,7 @@ export function QuickMenu() {
  * WhatsApp Link Button - Opens WhatsApp with a pre-filled message
  */
 export function WhatsAppButton({ label = 'Open in WhatsApp' }: { label?: string }) {
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+  const { whatsappNumber } = useConfig();
   const message = encodeURIComponent('Main menu');
   
   return (

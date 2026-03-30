@@ -23,7 +23,7 @@ export async function getContactTags(
 		throw new Error("Phone number is required");
 	}
 
-	const apiKey = process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY;
+	const apiKey = process.env.ANALYTICS_WRITE_KEY;
 
 	if (!apiKey) {
 		throw new Error("Analytics API key not configured");

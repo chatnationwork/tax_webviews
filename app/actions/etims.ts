@@ -32,7 +32,7 @@ import {
 import logger from '@/lib/logger';
 
 const BASE_URL = `${process.env.API_URL}/ussd`;
-const ETIMS_APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+const ETIMS_APP_URL = process.env.APP_URL;
 logger.info(`BASE_URL: ${BASE_URL}`);
 
 const getAuthHeaders = async () => {
@@ -86,7 +86,7 @@ const getApiErrorMessage = (error: any, context: string = 'API'): string => {
 const getProxyUrl = (targetUrl: string, token: string | undefined): string => {
   if (!targetUrl) return targetUrl;
   if (!ETIMS_APP_URL) {
-    logger.warn('NEXT_PUBLIC_APP_URL not set, PDF proxy may not work for WhatsApp');
+    logger.warn('APP_URL not set, PDF proxy may not work for WhatsApp');
     return targetUrl;
   }
 

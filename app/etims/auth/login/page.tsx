@@ -2,14 +2,14 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useConfig } from '@/app/_lib/runtime-config';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { generateOTP, verifyOTP } from '../../../actions/etims';
 import { saveUserSession } from '../../_lib/store';
 import { Loader2, MessageSquare, Shield } from 'lucide-react';
 
-const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
-
 function LoginContent() {
+  const { whatsappNumber } = useConfig();
   const router = useRouter();
   const searchParams = useSearchParams();
   const phoneNumber = searchParams.get('number') || '';

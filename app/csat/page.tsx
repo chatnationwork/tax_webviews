@@ -4,11 +4,13 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../_components/Layout';
 import { analytics } from '@/app/_lib/analytics';
+import { useConfig } from '@/app/_lib/runtime-config';
 import { submitCsatFeedback } from '../actions/csat';
 import { Star, CheckCircle, MessageSquare } from 'lucide-react';
 
 export default function CsatPage() {
   const router = useRouter();
+  const { whatsappNumber } = useConfig();
   const [rating, setRating] = useState<number>(0);
   const [currHover, setCurrHover] = useState<number>(0);
   const [feedback, setFeedback] = useState('');
@@ -78,7 +80,7 @@ export default function CsatPage() {
             </Button>
             
             <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent('Main menu')}`}
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Main menu')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-medium rounded-xl transition-colors"

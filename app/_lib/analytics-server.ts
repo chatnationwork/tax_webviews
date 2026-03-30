@@ -54,7 +54,7 @@ export interface AnalyticsBatch {
   write_key?: string;
 }
 
-const ANALYTICS_ENDPOINT =process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT;
+const ANALYTICS_ENDPOINT = process.env.ANALYTICS_ENDPOINT;
 
 /**
  * Track a message sent event to the analytics service.
@@ -89,7 +89,7 @@ export async function trackMessageSent(props: WhatsAppAnalyticsProps): Promise<v
     // Construct properties
     const properties: any = {
       message_id: message_id || `temp-${uuidv4()}`, // Fallback if regular ID missing (e.g. error case or mock)
-      from: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER,
+      from: process.env.WHATSAPP_NUMBER,
       to: cleanPhone,
       type: message_type,
     };
@@ -141,7 +141,7 @@ export async function trackMessageSent(props: WhatsAppAnalyticsProps): Promise<v
     await axios.post(ANALYTICS_ENDPOINT, payload, {
       headers: {
         'Content-Type': 'application/json',
-        'X-Write-Key': process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY || ''
+        'X-Write-Key': process.env.ANALYTICS_WRITE_KEY || ''
       },
       timeout: 5000 // Short timeout to not block too long
     });
@@ -189,7 +189,7 @@ export async function trackCsatSubmitted(props: CSATAnalyticsProps): Promise<voi
             channel: channel || 'webview',
             page: {
                 path: '/csat',
-                url: `${process.env.NEXT_PUBLIC_APP_URL}/csat`
+                url: `${process.env.APP_URL}/csat`
             }
         },
         properties: {
@@ -203,7 +203,7 @@ export async function trackCsatSubmitted(props: CSATAnalyticsProps): Promise<voi
     const payload: AnalyticsBatch = {
         batch: [event],
         sent_at: new Date().toISOString(),
-        write_key: process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY
+        write_key: process.env.ANALYTICS_WRITE_KEY
     };
 
     logger.info('[Analytics] Sending csat_submitted event:', event.event_id, JSON.stringify(payload));
@@ -211,7 +211,7 @@ export async function trackCsatSubmitted(props: CSATAnalyticsProps): Promise<voi
     await axios.post(ANALYTICS_ENDPOINT, payload, {
         headers: {
             'Content-Type': 'application/json',
-            'X-Write-Key': process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY || ''
+            'X-Write-Key': process.env.ANALYTICS_WRITE_KEY || ''
         },
         timeout: 5000
     });

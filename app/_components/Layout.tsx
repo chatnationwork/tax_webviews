@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useState, Suspense } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useConfig } from '@/app/_lib/runtime-config';
 import {
   ArrowLeft,
   Menu,
@@ -119,8 +120,10 @@ type HelpSupportModalProps = {
   phone?: string | null;
 };
 
+const HIDDEN_HELP_ITEMS = new Set(['request-callback', 'why-contacted']);
+
 function HelpSupportModal({ open, onClose, onTrackClick, phone }: HelpSupportModalProps) {
-  const items = buildHelpModalItems();
+  const items = buildHelpModalItems().filter((i) => !HIDDEN_HELP_ITEMS.has(i.id));
 
   if (!open) {
     return null;
@@ -211,7 +214,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
   // Session management - auto-refresh and timeout handling
   // usage moved to SessionController wrapped in Suspense
 
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+  const { whatsappNumber } = useConfig();
   const isF88 = pathname?.startsWith('/f88');
 
   // Get the base page for the current route (first path segment)
@@ -226,7 +229,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
     if (phoneToUse) analytics.setUserId(phoneToUse);
     analytics.track('main_menu_click');
     const basePage = getBasePage();
-    router.push(basePage);
+    router.push(phoneToUse ? `${basePage}?phone=${encodeURIComponent(phoneToUse)}` : basePage);
   };
 
   const handleLogout = () => {
@@ -276,7 +279,8 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
   };
 
   const handleMainMenu = () => {
-    window.location.href = `/`;
+    const phoneToUse = phone || internalPhone || getKnownPhone();
+    window.location.href = phoneToUse ? `/?phone=${encodeURIComponent(phoneToUse)}` : '/';
   };
 
   const handleHelpSupport = () => {

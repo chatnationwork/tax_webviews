@@ -7,9 +7,11 @@ import { taxpayerStore } from '../../_lib/store';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { fileNilReturn, getFilingPeriods, getTaxpayerObligations, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
 import { analytics } from '@/app/_lib/analytics';
+import { useConfig } from '@/app/_lib/runtime-config';
 import { getKnownPhone } from '@/app/_lib/session-store';
 
 function NilVerifyContent() {
+  const { whatsappNumber } = useConfig();
   const router = useRouter();
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone');
@@ -344,7 +346,7 @@ No action is required at this time.`;
                   <p className="text-xs text-red-600">{error}</p>
                 </div>
                 <a
-                  href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER }?xtext=${encodeURIComponent('Main menu')}`}
+                  href={`https://wa.me/${whatsappNumber}?xtext=${encodeURIComponent('Main menu')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#25D366] hover:bg-[#128C7E] text-white text-sm font-medium rounded-lg transition-colors"

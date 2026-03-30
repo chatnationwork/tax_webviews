@@ -11,6 +11,7 @@ import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Layout, Card } from '@/app/_components/Layout';
 import { analytics } from '@/app/_lib/analytics';
+import { useConfig } from '@/app/_lib/runtime-config';
 import { sendCampaignTemplates } from '@/app/actions/campaign';
 import { Info, BookOpen, Smartphone, MessageCircle, ChevronRight } from 'lucide-react';
 
@@ -62,6 +63,7 @@ const CAMPAIGN_BUTTONS = [
 function CampaignHubContent() {
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone') || '';
+  const { analyticsWriteKey } = useConfig();
 
   /**
    * Update the delivery status of the campaign to this user.
@@ -74,7 +76,7 @@ function CampaignHubContent() {
     if (localStorage.getItem(storageKey)) return;
     localStorage.setItem(storageKey, new Date().toISOString());
 
-    const apiKey = process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY || '';
+    const apiKey = analyticsWriteKey || '';
     const url = `https://analytics.chatnationbot.com/api/dashboard/webhooks/whatsapp-status?phone=${encodeURIComponent(phone)}`;
 
     fetch(url, {

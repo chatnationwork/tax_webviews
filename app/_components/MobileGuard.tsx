@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { Smartphone } from 'lucide-react';
+import { useConfig } from '@/app/_lib/runtime-config';
 
 export default function MobileGuard({ children }: { children: React.ReactNode }) {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const { allowDesktopTesting } = useConfig();
 
   useEffect(() => {
     const checkMobile = () => {
-      // Check for environment override
-      if (process.env.NEXT_PUBLIC_ALLOW_DESKTOP_TESTING === 'true') {
+      if (allowDesktopTesting) {
         setIsMobile(true);
         return;
       }

@@ -6,6 +6,7 @@ import { shouldUseConfirmation, isServiceVisible } from "@/app/_lib/services-con
 import { analytics } from "@/app/_lib/analytics";
 import { saveKnownPhone } from "@/app/_lib/session-store";
 import { savePhoneToCookie } from "@/app/actions/auth";
+import { useConfig } from "@/app/_lib/runtime-config";
 
 // Service URL mappings - maps service names to their external URLs
 // {{phone}} will be replaced with the actual phone number of the user
@@ -128,6 +129,7 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const phone = searchParams.get("phone") || "";
   const [toast, setToast] = useState<string | null>(null);
+  const { whatsappNumber, services } = useConfig();
 
   // Persist phone number from URL to localStorage for other pages to access
   useEffect(() => {
@@ -156,7 +158,6 @@ function HomeContent() {
        // Connect to Agent logic for unmapped services
        if (phone) analytics.setUserId(phone);
        analytics.track("service_agent_connect", { service_name: serviceKey });
-       const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
        
        if (phone) {
          try {
@@ -189,7 +190,7 @@ function HomeContent() {
       items: cat.items.filter((item) => {
         // Only filter self-serve (green) items — assisted ones always show
         if (!isAvailable(item.key)) return true;
-        return isServiceVisible(item.key);
+        return isServiceVisible(item.key, services);
       }),
     }))
     .filter((cat) => cat.items.length > 0);
@@ -202,6 +203,18 @@ function HomeContent() {
           {toast}
         </div>
       )}
+
+      {/* Legend */}
+      <div className="flex items-center gap-4 text-[9px] text-gray-500 px-1">
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-2 h-2 rounded-sm bg-green-200 border border-green-300" />
+          Self Service
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-2 h-2 rounded-sm bg-blue-200 border border-blue-300" />
+          Connect to Agent
+        </span>
+      </div>
 
       {/* Service grid */}
       <div className="space-y-2.5">

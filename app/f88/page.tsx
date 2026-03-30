@@ -24,6 +24,7 @@ import { Layout } from '../_components/Layout';
 import { PINInput } from '../_components/KRAInputs';
 import { DateInput } from '../_components/YearOfBirthInput';
 import { analytics } from '../_lib/analytics';
+import { useConfig } from '@/app/_lib/runtime-config';
 
 // Form Context
 const FormContext = createContext<any>(null);
@@ -1720,6 +1721,7 @@ const TaxComputation = () => {
 const CompletionScreen = () => {
   const router = useRouter();
   const { formData, setCurrentStep, setGlobalSuccess, setGlobalError } = useFormContext();
+  const { whatsappNumber } = useConfig();
   const [sendingForm, setSendingForm] = useState(false);
   const [sendingSlip, setSendingSlip] = useState(false);
   const [formSent, setFormSent] = useState(false);
@@ -1731,8 +1733,6 @@ const CompletionScreen = () => {
     if (phone) analytics.setUserId(phone);
     analytics.track('f88_declaration_completed', { ref_no: formData.ref_no }, { journey_end: true });
   }, []);
-
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '254780aborx';
 
   const handleSendF88Form = async () => {
     setSendingForm(true);

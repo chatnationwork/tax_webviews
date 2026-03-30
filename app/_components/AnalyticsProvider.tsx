@@ -4,17 +4,14 @@ import { useEffect, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { analytics } from '@/app/_lib/analytics';
 import { getKnownPhone } from '@/app/_lib/session-store';
+import { useConfig } from '@/app/_lib/runtime-config';
 
 function AnalyticsTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { analyticsWriteKey, analyticsEndpoint } = useConfig();
 
-  // Initialize analytics once
   useEffect(() => {
-    // You should use an environment variable here
-    const writeKey = process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY || 'default-write-key';
-    
-    // We try to grab URL params if we are in browser
     let campaignId = undefined;
     let handshakeToken = undefined;
     if (typeof window !== 'undefined') {
@@ -23,8 +20,12 @@ function AnalyticsTracker() {
         handshakeToken = urlParams.get('handshake_token') || undefined;
     }
 
-    analytics.init(writeKey, { campaignId, handshakeToken });
-  }, []);
+    analytics.init(analyticsWriteKey ?? '', {
+      endpoint: analyticsEndpoint,
+      campaignId,
+      handshakeToken,
+    });
+  }, [analyticsWriteKey, analyticsEndpoint]);
 
   // Track page views on route change
   useEffect(() => {

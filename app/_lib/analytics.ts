@@ -52,7 +52,7 @@ class AnalyticsClient {
   private userId: string | undefined;
   private handshakeToken: string | undefined;
   private campaignId: string | undefined;
-  private endpoint: string = process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT || '';
+  private endpoint: string = '';
   private initialized: boolean = false;
 
   constructor() {
@@ -61,8 +61,9 @@ class AnalyticsClient {
     }
   }
 
-  public init(writeKey: string, options?: { handshakeToken?: string; campaignId?: string }) {
+  public init(writeKey: string, options?: { handshakeToken?: string; campaignId?: string; endpoint?: string }) {
     this.writeKey = writeKey;
+    if (options?.endpoint) this.endpoint = options.endpoint;
     if (options?.handshakeToken) this.handshakeToken = options.handshakeToken;
     if (options?.campaignId) this.campaignId = options.campaignId;
     this.initialized = true;
