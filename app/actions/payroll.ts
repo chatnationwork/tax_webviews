@@ -312,22 +312,39 @@ export async function validateEmployeeDetails(
 ): Promise<ValidateEmployeeResult> {
   const token = await getAuthToken();
 
+  logger.info('Validating employee details:', {
+    employerPin,
+    employeeIdNumber,
+    employeeKraPin,
+    firstName,
+    employerTaxPayerId,
+    employeeType
+  });
+
+  logger.info('Token:', token);
+  logger.info('URL:', `${BASE_URL}/payroll/employee/personal-details/validate`);
+
   try {
-    const response = await axios.post(
+    const response = await axios.get(
       `${BASE_URL}/payroll/employee/personal-details/validate`,
       {
-        pin: employerPin,
-        gui: employeeIdNumber,
-        type: employeeType,
-        first_name: firstName,
-        employer_tax_payer_id: employerTaxPayerId,
-        tax_payer_pin: employeeKraPin
-      },
-      { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        params: {
+          pin: employerPin,
+          gui: employeeIdNumber,
+          type: employeeType,
+          first_name: firstName,
+          employer_tax_payer_id: employerTaxPayerId,
+          tax_payer_pin: employeeKraPin
+        },
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      }
     );
+
+    logger.info('Response:', response.data);
     
     return { success: true, data: response.data };
   } catch (error: any) {
+    logger.error('Error:', error.response?.data || error.message);
     return {
       success: false,
       error: error.response?.data?.message || error.response?.data?.error || error.message
