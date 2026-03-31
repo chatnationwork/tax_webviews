@@ -5,6 +5,8 @@ import { AnalyticsProvider } from "@/app/_components/AnalyticsProvider";
 import MobileGuard from "@/app/_components/MobileGuard";
 import { ConfigProvider, type RuntimeConfig } from "@/app/_lib/runtime-config";
 
+export const dynamic = "force-dynamic";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
