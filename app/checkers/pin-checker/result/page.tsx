@@ -12,6 +12,17 @@ interface PinResult {
   station: string;
 }
 
+/**
+ * Masks a name by replacing characters after the first letter with asterisks
+ */
+function maskName(name: string) {
+  if (!name) return '';
+  return name
+    .split(' ')
+    .map(word => (word.length > 0 ? word[0] + '*'.repeat(word.length - 1) : ''))
+    .join(' ');
+}
+
 function PinResultContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -69,7 +80,7 @@ function PinResultContent() {
               <User className="w-5 h-5 text-gray-500" />
               <div>
                 <p className="text-xs text-gray-500">Taxpayer's Name</p>
-                <p className="text-sm font-medium text-gray-900">{result.taxpayerName}</p>
+                <p className="text-sm font-medium text-gray-900">{maskName(result.taxpayerName)}</p>
               </div>
             </div>
 
