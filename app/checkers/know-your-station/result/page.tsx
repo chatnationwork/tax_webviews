@@ -7,6 +7,17 @@ import { ResultActions } from '../../../_components/ResultActions';
 import { Loader2, CheckCircle, User, MapPin, IdCard } from 'lucide-react';
 import { analytics } from '@/app/_lib/analytics';
 
+/**
+ * Masks a name by replacing characters after the first letter with asterisks
+ */
+function maskName(name: string) {
+  if (!name) return '';
+  return name
+    .split(' ')
+    .map(word => (word.length > 0 ? word[0] + '*'.repeat(word.length - 1) : ''))
+    .join(' ');
+}
+
 interface StationResult {
   taxpayerName: string;
   pin: string;
@@ -84,7 +95,7 @@ function KnowYourStationResultContent() {
               <User className="w-5 h-5 text-gray-500" />
               <div>
                 <p className="text-xs text-gray-500">Taxpayer's Name</p>
-                <p className="text-sm font-medium text-gray-900">{result.taxpayerName}</p>
+                <p className="text-sm font-medium text-gray-900">{maskName(result.taxpayerName)}</p>
               </div>
             </div>
           </div>
