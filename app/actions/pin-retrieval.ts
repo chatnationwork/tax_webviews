@@ -20,7 +20,6 @@ export interface PinRetrievalResult {
     name: string;
     pin: string;
     idNumber: string;
-    obligations: string[];
   };
 }
 
@@ -30,82 +29,64 @@ export interface PinRetrievalResult {
  * Retrieve KRA PIN by ID Number
  */
 export async function retrievePinById(
-  pinOrId: string,
-  msisdn: string,
-): Promise<PinRetrievalResult> {
-  if (!pinOrId) return { success: false, error: "ID number is required" };
-  if (!msisdn) return { success: false, error: "Phone number is required" };
+  idNumber: string,
+  phoneNumber: string,
 
-  const cleanNumber = cleanPhoneNumber(msisdn);
+): Promise<PinRetrievalResult> {
+  if (!idNumber || idNumber.trim().length < 6) {
+    return { success: false, error: 'ID number must be at least 6 characters' };
+  }
+  if (!phoneNumber) {
+    return { success: false, error: 'Phone number is required' };
+  }
+ 
+
+  // Clean phone number
+  const cleanNumber = cleanPhoneNumber(phoneNumber);
+
+  logger.info('Looking up ID:', idNumber, 'Phone:', cleanNumber);
 
   try {
-    // Rely on auth headers for the session
     const headers = await getAuthHeaders();
-
-    // Add the specific whatsapp source header
-    const requestHeaders = {
-      ...headers,
-      "x-forwarded-for": "whatsapp",
-      accept: "application/json",
-    };
-
-    logger.info(`Calling Retrieval API: ${BASE_URL}/buyer-initiated/lookup`);
-
     const response = await axios.post(
-      `${BASE_URL}/buyer-initiated/lookup`,
-      { pin_or_id: pinOrId.trim() },
-      {
-        headers: requestHeaders,
-        timeout: 30000,
+      `${BASE_URL}/id-lookup`,
+      { 
+        id_number: idNumber.trim(),
+        msisdn: cleanNumber
       },
+      { 
+        headers, 
+        timeout: 30000 
+      }
     );
 
-    logger.info(
-      "PIN Retrieval API response:",
-      JSON.stringify(response.data, null, 2),
-    );
+    logger.info('ID lookup response:', JSON.stringify(response.data, null, 2));
 
-    const result = response.data;
+    // Check if we got a valid response with data
+    if (response.data && response.data.name && response.data.yob) {
 
-    // Success if code is 3 (Valid ID Number)
-    if (result && result.code === 3) {
-      // Send WhatsApp Template Result (Fire and forget)
-
-      sendPinRetrievalTemplate(
-        cleanNumber,
-        result.name,
-        result.pin,
-        result.obligations || [],
-      ).catch((err) => logger.error("WhatsApp Background Error:", err));
+      let pin = response.data.pin;
 
       return {
-        success: true,
+        success: true,  
+        error: "",
         data: {
-          code: result.code,
-          message: result.message,
-          name: result.name,
-          pin: result.pin,
-          idNumber: pinOrId.trim(),
-          obligations: result.obligations || [],
-        },
+          code: 3,
+          message: "ID lookup successful",
+          name: response.data.name,
+          pin: pin,
+          idNumber: idNumber.trim(),
+        }
+      }
+    } else {
+      return { 
+        success: false, 
+        error: response.data.message || 'ID lookup failed or invalid response' 
       };
     }
-
-    return {
-      success: false,
-      error: result.message || "Invalid ID Number or record not found",
-    };
   } catch (error: any) {
-    logger.error(
-      "PIN Retrieval API Error:",
-      error.response?.data || error.message,
-    );
-    return {
-      success: false,
-      error:
-        error.response?.data?.message ||
-        "Failed to retrieve your PIN. Please try again later.",
-    };
+    logger.error('ID lookup error:', error.response?.data || error.message);
+    return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
   }
 }
 
