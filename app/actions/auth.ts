@@ -163,7 +163,7 @@ export async function validateOTP(
 					value: token,
 					httpOnly: true,
 					secure: process.env.NODE_ENV === "production",
-					maxAge: 30 * 60, // 30 minutes
+					maxAge: 10 * 60, // 30 minutes
 					path: "/",
 				});
 
@@ -173,7 +173,7 @@ export async function validateOTP(
 					value: token,
 					httpOnly: true,
 					secure: process.env.NODE_ENV === "production",
-					maxAge: 30 * 60, // 30 minutes
+					maxAge: 10 * 60, // 30 minutes
 					path: "/",
 				});
 
@@ -225,7 +225,7 @@ export async function checkServerSession(): Promise<boolean> {
 		const options = {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === "production",
-			maxAge: 30 * 60, // 30 minutes
+			maxAge: 10 * 60, // 30 minutes
 			path: "/",
 		};
 
