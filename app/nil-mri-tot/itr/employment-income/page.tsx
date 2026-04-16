@@ -54,6 +54,7 @@ function EmploymentIncomeContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [finishing, setFinishing] = useState(false);
+  const [noEmployerMessage, setNoEmployerMessage] = useState('');
 
   const taxpayerInfo = taxpayerStore.getTaxpayerInfo();
   const phoneParam = phone ? `?phone=${encodeURIComponent(phone)}` : '';
@@ -78,6 +79,9 @@ function EmploymentIncomeContent() {
 
         const result = await getItrEmploymentDetails(taxpayerInfo.pin, returnYear);
         if (result.success && result.rows) {
+          if (result.rows.length === 0 && result.message) {
+            setNoEmployerMessage(result.message);
+          }
           setRows(result.rows);
           taxpayerStore.setItrField('employmentIncomeRows', result.rows);
 
@@ -174,7 +178,7 @@ function EmploymentIncomeContent() {
               <div>
                 <p className="text-sm font-semibold text-amber-900">No Employer Declared</p>
                 <p className="text-xs text-amber-800 mt-1 leading-relaxed">
-                  You have not declared an employer under sources of income. To file an Income Tax Return, you must first declare your employer on iTax or visit the nearest KRA office.
+                  {noEmployerMessage || 'You have not declared an employer under sources of income. To file an Income Tax Return, you must first declare your employer on iTax or visit the nearest KRA office.'}
                 </p>
               </div>
             </div>
