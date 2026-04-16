@@ -125,7 +125,7 @@ export default function AhlResultPage() {
         {/* Payment Details */}
         <Card className="p-4 space-y-2">
           <h3 className="text-sm font-semibold text-gray-800 mb-2">Payment Summary</h3>
-          <IdentityStrip label="Taxpayer" value={taxpayerInfo.fullName || taxpayerInfo.pin} />
+         
           <IdentityStrip label="PIN" value={taxpayerInfo.pin} />
           {taxpayerInfo.taxPeriodFrom && (
             <IdentityStrip label="Period From" value={taxpayerInfo.taxPeriodFrom} />
