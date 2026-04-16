@@ -23,6 +23,7 @@ function ItrVerifyContent() {
   >([]);
   const [selectedObligationId, setSelectedObligationId] = useState('');
   const [loadingObligations, setLoadingObligations] = useState(false);
+  const [obligationsMessage, setObligationsMessage] = useState('');
 
   // Filing period
   const [filingPeriod, setFilingPeriod] = useState('');
@@ -62,12 +63,16 @@ function ItrVerifyContent() {
               obligationName: o.obligationName,
             }))
           );
+          if (itrObligations.length === 0) {
+            setObligationsMessage(result.message || '');
+          }
           // Auto-select if exactly one ITR obligation
           if (itrObligations.length === 1) {
             setSelectedObligationId(itrObligations[0].obligationId);
           }
         } else {
           setObligations([]);
+          setObligationsMessage(result.message || '');
         }
       } catch (err) {
         console.error('Failed to fetch obligations', err);
@@ -194,7 +199,7 @@ function ItrVerifyContent() {
                 <div>
                   <p className="text-sm font-medium text-gray-900">No Eligible ITR Filing</p>
                   <p className="text-xs text-gray-700 mt-1">
-                    Based on our records, you do not currently have an Income Tax obligation eligible for ITR filing.
+                    {obligationsMessage || 'Based on our records, you do not currently have an Income Tax obligation eligible for ITR filing.'}
                   </p>
                 </div>
               </div>

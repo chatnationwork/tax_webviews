@@ -303,6 +303,7 @@ export async function getTaxpayerObligations(
     return {
       success: true,
       obligations: obligations,
+      message: data.message,
     };
   } catch (error: any) {
     logger.error('Get Obligations Error:', error.response?.data || error.message);
