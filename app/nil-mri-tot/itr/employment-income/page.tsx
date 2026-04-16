@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { getItrEmploymentDetails, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
+import { getItrEmploymentDetails, getStoredPhone, sendWhatsAppMessage, renderNoEmployerCard, sendWhatsAppImage } from '@/app/actions/nil-mri-tot';
 import { getKnownPhone } from '@/app/_lib/session-store';
 import { Loader2, AlertTriangle } from 'lucide-react';
 
@@ -54,6 +54,7 @@ function EmploymentIncomeContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [finishing, setFinishing] = useState(false);
+  const [noEmployerMessage, setNoEmployerMessage] = useState('');
 
   const taxpayerInfo = taxpayerStore.getTaxpayerInfo();
   const phoneParam = phone ? `?phone=${encodeURIComponent(phone)}` : '';
@@ -78,6 +79,9 @@ function EmploymentIncomeContent() {
 
         const result = await getItrEmploymentDetails(taxpayerInfo.pin, returnYear);
         if (result.success && result.rows) {
+          if (result.rows.length === 0 && result.message) {
+            setNoEmployerMessage(result.message);
+          }
           setRows(result.rows);
           taxpayerStore.setItrField('employmentIncomeRows', result.rows);
 
@@ -121,7 +125,21 @@ function EmploymentIncomeContent() {
       const recipientPhone = taxpayerStore.getMsisdn() || await getStoredPhone() || getKnownPhone();
       if (recipientPhone && taxpayerInfo.pin) {
         const message = `Dear ${taxpayerInfo.fullName || 'Taxpayer'},\n\nYour PIN: ${taxpayerInfo.pin} does not have a declared employer under sources of income. You are unable to file an Income Tax Return at this time.\n\nPlease visit the nearest KRA office or use iTax to declare your employer before filing.\n\nNo action is required at this time.`;
-        await sendWhatsAppMessage({ recipientPhone, message });
+        
+        const filingCard = await renderNoEmployerCard({
+          name: taxpayerInfo.fullName || 'Taxpayer',
+          pin: taxpayerInfo.pin,
+        });
+
+        if (filingCard && 'url' in filingCard && filingCard.url) {
+          await sendWhatsAppImage({
+            recipientPhone,
+            imageUrl: filingCard.url,
+            caption: message
+          });
+        } else {
+          await sendWhatsAppMessage({ recipientPhone, message });
+        }
       }
     } catch (e) {
       console.error('Failed to send WhatsApp notification', e);
@@ -160,7 +178,7 @@ function EmploymentIncomeContent() {
               <div>
                 <p className="text-sm font-semibold text-amber-900">No Employer Declared</p>
                 <p className="text-xs text-amber-800 mt-1 leading-relaxed">
-                  You have not declared an employer under sources of income. To file an Income Tax Return, you must first declare your employer on iTax or visit the nearest KRA office.
+                  {noEmployerMessage || 'You have not declared an employer under sources of income. To file an Income Tax Return, you must first declare your employer on iTax or visit the nearest KRA office.'}
                 </p>
               </div>
             </div>

@@ -40,6 +40,12 @@ export interface SendWhatsAppDocumentParams {
 	filename: string;
 }
 
+export interface SendWhatsAppImageParams {
+	recipientPhone: string;
+	imageUrl: string;
+	caption?: string;
+}
+
 export interface SendWhatsAppDocumentResult {
 	success: boolean;
 	messageId?: string;
@@ -422,6 +428,78 @@ export async function sendWhatsAppDocument(
 			error:
 				error.response?.data?.error?.message ||
 				"Failed to send document",
+		};
+	}
+}
+
+/**
+ * Send an image via WhatsApp
+ */
+export async function sendWhatsAppImage(
+	params: SendWhatsAppImageParams,
+): Promise<SendWhatsAppMessageResult> {
+	const { recipientPhone, imageUrl, caption } = params;
+
+	if (!recipientPhone || !imageUrl) {
+		return {
+			success: false,
+			error: "Recipient phone and image URL are required",
+		};
+	}
+
+	const finalNumber = cleanPhoneNumber(recipientPhone);
+	const token = process.env.WHATSAPP_ACCESS_TOKEN;
+	const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+	if (!token || !phoneNumberId) {
+		return { success: false, error: "WhatsApp configuration missing" };
+	}
+
+	const url = `https://crm.chatnation.co.ke/api/meta/v21.0/${phoneNumberId}/messages`;
+
+	const payload = {
+		messaging_product: "whatsapp",
+		recipient_type: "individual",
+		to: finalNumber,
+		type: "image",
+		image: {
+			link: imageUrl,
+			caption: caption,
+		},
+	};
+
+	logger.info("Sending WhatsApp image payload:", JSON.stringify(payload, null, 2));
+
+	try {
+		const response = await axios.post(url, payload, {
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json",
+			},
+			timeout: 30000,
+		});
+
+		// Track analytics
+		await trackMessageSent({
+			message_id: response.data.messages?.[0]?.id,
+			recipient_phone: finalNumber,
+			message_type: "image",
+			content: caption,
+		});
+
+		return {
+			success: true,
+			messageId: response.data.messages?.[0]?.id,
+		};
+	} catch (error: any) {
+		logger.error(
+			"Error sending WhatsApp image:",
+			error.response?.data || error.message,
+		);
+		return {
+			success: false,
+			error:
+				error.response?.data?.error?.message || "Failed to send image",
 		};
 	}
 }
