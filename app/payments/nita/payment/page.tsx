@@ -1,13 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { Loader2, AlertCircle } from 'lucide-react';
-import { getStoredPhone, generateNitaPayment, makePayment, sendWhatsAppMessage } from '@/app/actions/payments';
-import { taxpayerStore } from '../../_lib/store';
-import { Layout, Card, Button, Input } from '../../../_components/Layout';
-import { PINInput } from '@/app/_components/KRAInputs';
-import { analytics } from '@/app/_lib/analytics';
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { Loader2, AlertCircle } from "lucide-react";
+import {
+  getStoredPhone,
+  generateNitaPayment,
+  makePayment,
+  sendWhatsAppMessage,
+} from "@/app/actions/payments";
+import { taxpayerStore } from "../../_lib/store";
+import { Layout, Card, Button, Input } from "../../../_components/Layout";
+import { PINInput } from "@/app/_components/KRAInputs";
+import { analytics } from "@/app/_lib/analytics";
 
 const NITA_PER_EMPLOYEE_KES = 50;
 
@@ -23,22 +28,22 @@ function NitaPaymentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const phoneFromUrl = searchParams.get('phone') || '';
-  
+  const phoneFromUrl = searchParams.get("phone") || "";
+
   // Form state
-  const [pin, setPin] = useState('');
+  const [pin, setPin] = useState("");
   const [isPinValid, setIsPinValid] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [taxPeriodFrom, setTaxPeriodFrom] = useState('');
-  const [taxPeriodTo, setTaxPeriodTo] = useState('');
-  const [numberOfEmployees, setNumberOfEmployees] = useState('');
-  
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [taxPeriodFrom, setTaxPeriodFrom] = useState("");
+  const [taxPeriodTo, setTaxPeriodTo] = useState("");
+  const [numberOfEmployees, setNumberOfEmployees] = useState("");
+
   // UI state
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [dateError, setDateError] = useState('');
-  const [paymentStatus, setPaymentStatus] = useState('');
-  const [prn, setPrn] = useState('');
+  const [error, setError] = useState("");
+  const [dateError, setDateError] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState("");
+  const [prn, setPrn] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
 
   // Check session and prefill phone on mount
@@ -54,37 +59,41 @@ function NitaPaymentContent() {
             setPhoneNumber(storedPhone);
           }
         }
-        
+
         setCheckingSession(false);
       } catch (err) {
-        console.error('Session check failed', err);
+        console.error("Session check failed", err);
         setCheckingSession(false);
       }
     };
-    
+
     initialize();
   }, [pathname, phoneFromUrl, router]);
 
   // Format phone number for API (ensure 254 prefix)
   const formatPhoneForApi = (phone: string): string => {
-    let cleanNumber = phone.trim().replace(/[^\d]/g, '');
-    if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
-    else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
+    let cleanNumber = phone.trim().replace(/[^\d]/g, "");
+    if (cleanNumber.startsWith("0"))
+      cleanNumber = "254" + cleanNumber.substring(1);
+    else if (!cleanNumber.startsWith("254")) cleanNumber = "254" + cleanNumber;
     return cleanNumber;
   };
 
   // Convert date to DD-MM-YYYY format for API
   const formatDateForApi = (dateString: string): string => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
 
-  const isPhoneValid = phoneNumber.replace(/\D/g, '').length >= 9;
-  const isDateValid = taxPeriodFrom && taxPeriodTo && new Date(taxPeriodFrom) <= new Date(taxPeriodTo);
+  const isPhoneValid = phoneNumber.replace(/\D/g, "").length >= 9;
+  const isDateValid =
+    taxPeriodFrom &&
+    taxPeriodTo &&
+    new Date(taxPeriodFrom) <= new Date(taxPeriodTo);
   const employeeCount = parsePositiveInteger(numberOfEmployees);
   const totalAmountKes =
     employeeCount !== null ? NITA_PER_EMPLOYEE_KES * employeeCount : null;
@@ -95,106 +104,128 @@ function NitaPaymentContent() {
   useEffect(() => {
     if (taxPeriodFrom && taxPeriodTo) {
       if (new Date(taxPeriodFrom) > new Date(taxPeriodTo)) {
-        setDateError('Tax Period From must be earlier than or equal to Tax Period To');
+        setDateError(
+          "Tax Period From must be earlier than or equal to Tax Period To",
+        );
       } else {
-        setDateError('');
+        setDateError("");
       }
     } else {
-      setDateError('');
+      setDateError("");
     }
   }, [taxPeriodFrom, taxPeriodTo]);
 
   const handlePayment = async () => {
     if (!isFormValid) {
-      if (taxPeriodFrom && taxPeriodTo && new Date(taxPeriodFrom) > new Date(taxPeriodTo)) {
-        setError('Tax Period From must be earlier than Tax Period To.');
+      if (
+        taxPeriodFrom &&
+        taxPeriodTo &&
+        new Date(taxPeriodFrom) > new Date(taxPeriodTo)
+      ) {
+        setError("Tax Period From must be earlier than Tax Period To.");
       } else {
-        setError('Please fill in all required fields correctly.');
+        setError("Please fill in all required fields correctly.");
       }
       return;
     }
 
     if (employeeCount === null || totalAmountKes === null) {
-      setError('Please enter a valid number of employees (whole number, at least 1).');
+      setError(
+        "Please enter a valid number of employees (whole number, at least 1).",
+      );
       return;
     }
 
     setLoading(true);
-    setError('');
-    setPaymentStatus('');
-    setPrn('');
+    setError("");
+    setPaymentStatus("");
+    setPrn("");
 
     try {
       // 1. Generate PRN
-      setPaymentStatus('Generating PRN...');
-      
+      setPaymentStatus("Generating PRN...");
+
       const prnRes = await generateNitaPayment(
         pin.trim().toUpperCase(),
         formatDateForApi(taxPeriodFrom),
         formatDateForApi(taxPeriodTo),
-        String(totalAmountKes)
+        String(totalAmountKes),
       );
 
       if (!prnRes.success || !prnRes.prn) {
-        setError(prnRes.message || 'Failed to generate PRN');
+        setError(prnRes.message || "Failed to generate PRN");
         setLoading(false);
         return;
       }
 
       setPrn(prnRes.prn);
-      setPaymentStatus('PRN Generated. Sending notification...');
+      setPaymentStatus("PRN Generated. Sending notification...");
 
       // Send WhatsApp notification with PRN
       const formattedPhone = formatPhoneForApi(phoneNumber);
-      const whatsappMessage = `🏭 *NITA Payment PRN Generated*\n\n` +
+      const whatsappMessage =
+        `*NITA Payment PRN Generated*\n\n` +
         `PRN: *${prnRes.prn}*\n` +
         `Employees: ${employeeCount} × KES ${NITA_PER_EMPLOYEE_KES.toLocaleString()} = KES ${totalAmountKes.toLocaleString()}\n` +
         `Tax Period: ${taxPeriodFrom} to ${taxPeriodTo}\n\n` +
         `Please complete your M-Pesa payment or use the online checkout link.`;
-      
+
       await sendWhatsAppMessage({
         recipientPhone: formattedPhone,
-        message: whatsappMessage
+        message: whatsappMessage,
       });
 
-      setPaymentStatus('Initiating payment...');
+      setPaymentStatus("Initiating payment...");
 
       // 2. Make Payment
       const payRes = await makePayment(formattedPhone, prnRes.prn);
-      
+
       if (payRes.success) {
         // Store payment details for result page
-        taxpayerStore.setTaxpayerInfo('', 0, '', pin.trim().toUpperCase());
-        taxpayerStore.setPaymentDetails(taxPeriodFrom, taxPeriodTo, totalAmountKes);
+        taxpayerStore.setTaxpayerInfo("", 0, "", pin.trim().toUpperCase());
+        taxpayerStore.setPaymentDetails(
+          taxPeriodFrom,
+          taxPeriodTo,
+          totalAmountKes,
+        );
         taxpayerStore.setPrn(prnRes.prn);
-        if (payRes.checkoutUrl) taxpayerStore.setCheckoutUrl(payRes.checkoutUrl);
-        taxpayerStore.setPaymentStatus('success', 'Payment initiated. Check your phone for the M-Pesa prompt.');
-        
-        setPaymentStatus('Payment initiated. Check your phone for M-Pesa prompt.');
-        
+        if (payRes.checkoutUrl)
+          taxpayerStore.setCheckoutUrl(payRes.checkoutUrl);
+        taxpayerStore.setPaymentStatus(
+          "success",
+          "Payment initiated. Check your phone for the M-Pesa prompt.",
+        );
+
+        setPaymentStatus(
+          "Payment initiated. Check your phone for M-Pesa prompt.",
+        );
+
         analytics.setUserId(formattedPhone);
         analytics.track(
-          'nita_payment_started',
+          "nita_payment_started",
           {
             amount: totalAmountKes,
             employees: employeeCount,
             perEmployeeKes: NITA_PER_EMPLOYEE_KES,
             prn: prnRes.prn,
           },
-          { journey_start: true }
+          { journey_start: true },
         );
 
         setTimeout(() => {
-          router.push('/payments/nita/result');
+          router.push("/payments/nita/result");
         }, 2000);
       } else {
         taxpayerStore.setPrn(prnRes.prn);
-        if (payRes.checkoutUrl) taxpayerStore.setCheckoutUrl(payRes.checkoutUrl);
-        taxpayerStore.setPaymentStatus('failed', payRes.message);
-        setError(`PRN generated (${prnRes.prn}), but payment failed: ${payRes.message}`);
+        if (payRes.checkoutUrl)
+          taxpayerStore.setCheckoutUrl(payRes.checkoutUrl);
+        taxpayerStore.setPaymentStatus("failed", payRes.message);
+        setError(
+          `PRN generated (${prnRes.prn}), but payment failed: ${payRes.message}`,
+        );
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred while processing payment');
+      setError(err.message || "An error occurred while processing payment");
     } finally {
       setLoading(false);
     }
@@ -211,11 +242,17 @@ function NitaPaymentContent() {
   }
 
   return (
-    <Layout title="NITA Payments" onBack={() => router.push('/payments')} showMenu>
+    <Layout
+      title="NITA Payments"
+      onBack={() => router.push("/payments")}
+      showMenu
+    >
       <div className="max-w-xl mx-auto space-y-6">
         <Card className="p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Payment Details</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            Payment Details
+          </h2>
+
           <div className="space-y-4">
             <PINInput
               label="KRA PIN"
@@ -225,15 +262,17 @@ function NitaPaymentContent() {
               helperText="PIN must be exactly 11 characters (e.g., A012345678Z)"
             />
 
-            <Input 
+            <Input
               label="Mobile Number (for M-Pesa)"
               value={phoneNumber}
-              onChange={(val) => setPhoneNumber(val.replace(/[^\d+]/g, ''))}
+              onChange={(val) => setPhoneNumber(val.replace(/[^\d+]/g, ""))}
               placeholder="e.g., 0712345678"
               type="tel"
               required
             />
-            <p className="text-xs text-gray-500 -mt-2">Number that will receive M-Pesa prompt</p>
+            <p className="text-xs text-gray-500 -mt-2">
+              Number that will receive M-Pesa prompt
+            </p>
 
             <div>
               <label className="block text-xs text-gray-600 mb-1 font-medium">
@@ -287,7 +326,9 @@ function NitaPaymentContent() {
             {prn && (
               <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                 <p className="font-bold text-green-700">PRN Generated: {prn}</p>
-                {paymentStatus && <p className="text-sm text-green-600">{paymentStatus}</p>}
+                {paymentStatus && (
+                  <p className="text-sm text-green-600">{paymentStatus}</p>
+                )}
               </div>
             )}
 
@@ -297,9 +338,12 @@ function NitaPaymentContent() {
               className="w-full mt-2"
             >
               {loading ? (
-                <><Loader2 className="w-4 h-4 animate-spin inline mr-2" />{paymentStatus || 'Processing...'}</>
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
+                  {paymentStatus || "Processing..."}
+                </>
               ) : (
-                'Pay'
+                "Pay"
               )}
             </Button>
           </div>
@@ -311,7 +355,13 @@ function NitaPaymentContent() {
 
 export default function NitaPaymentPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[var(--kra-red)]" /></div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[var(--kra-red)]" />
+        </div>
+      }
+    >
       <NitaPaymentContent />
     </Suspense>
   );

@@ -67,7 +67,6 @@ function EtimsCampaignPaymentContent() {
 	const [currentPhone, setCurrentPhone] = useState(phone);
 	const [prn, setPrn] = useState("");
 	const [amount, setAmount] = useState("");
-	const [checkoutUrl, setCheckoutUrl] = useState("");
 	const [data, setData] = useState<ContactTagsResponse["data"]>();
 	const [prnLoading, setPrnLoading] = useState(false);
 	const [prnError, setPrnError] = useState("");
@@ -291,6 +290,7 @@ function EtimsCampaignPaymentContent() {
 		setError("");
 		setLoading(true);
 		setPaymentStatus("");
+		let redirectAfterSuccess = false;
 
 		try {
 			if (!currentPhone) {
@@ -304,9 +304,7 @@ function EtimsCampaignPaymentContent() {
 			const payRes = await makePayment(currentPhone, prn.trim());
 
 			if (payRes.success) {
-				if (payRes.checkoutUrl) {
-					setCheckoutUrl(payRes.checkoutUrl);
-				}
+				redirectAfterSuccess = true;
 				taxpayerStore.setTaxpayerInfo(
 					"",
 					0,
@@ -314,11 +312,18 @@ function EtimsCampaignPaymentContent() {
 					data?.tag_json?.pin_no || data?.pin || "",
 				);
 
-				const amountValue = Number(data?.tag_json?.taxable_amount || 0);
+				const enteredAmount = Number(amount);
+				const fallbackDue = Number(data?.tag_json?.taxable_amount || 0);
+				const storedAmount =
+					Number.isFinite(enteredAmount) && enteredAmount > 0
+						? enteredAmount
+						: Number.isFinite(fallbackDue)
+							? fallbackDue
+							: 0;
 				taxpayerStore.setPaymentDetails(
 					deriveFinancialYear(data),
 					deriveFinancialYear(data),
-					Number.isFinite(amountValue) ? amountValue : 0,
+					storedAmount,
 				);
 				taxpayerStore.setPrn(prn.trim());
 				if (payRes.checkoutUrl) {
@@ -343,6 +348,10 @@ function EtimsCampaignPaymentContent() {
 					},
 					{ journey_start: true },
 				);
+
+				setTimeout(() => {
+					router.push("/etims-campaign/result");
+				}, 2000);
 			} else {
 				const errorMessage =
 					typeof payRes.message === "object"
@@ -364,7 +373,9 @@ function EtimsCampaignPaymentContent() {
 					: "Failed to initiate payment. Please try again.",
 			);
 		} finally {
-			setLoading(false);
+			if (!redirectAfterSuccess) {
+				setLoading(false);
+			}
 		}
 	};
 
@@ -494,39 +505,16 @@ function EtimsCampaignPaymentContent() {
 							</div>
 						)}
 
-						{paymentStatus && !error && (
-							<div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-								<p className="text-sm text-green-700">
-									{paymentStatus}
-								</p>
-							</div>
-						)}
-
-						{checkoutUrl && (
-							<div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-								<p className="text-sm text-blue-700 mb-2">
-									Or complete payment via:
-								</p>
-								<Button
-									variant="secondary"
-									onClick={() => window.open(checkoutUrl, "_blank")}
-									className="w-full">
-									Click here to pay
-								</Button>
-							</div>
-						)}
-
 						<Button
-							onClick={checkoutUrl ? () => window.open(checkoutUrl, "_blank") : handlePayment}
+							onClick={handlePayment}
 							disabled={
 								loading ||
-								(!checkoutUrl &&
-									(!isPrnValid ||
-										!isAmountValid ||
-										detailsLoading ||
-										prnLoading ||
-										!!prnError ||
-										!currentPhone))
+								!isPrnValid ||
+								!isAmountValid ||
+								detailsLoading ||
+								prnLoading ||
+								!!prnError ||
+								!currentPhone
 							}
 							className="w-full mt-2">
 							{loading ? (
