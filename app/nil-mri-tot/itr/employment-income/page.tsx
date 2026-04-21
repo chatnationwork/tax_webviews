@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
@@ -46,6 +46,15 @@ const CURRENCY_KEYS = new Set<keyof IncomeRow>([
   'amountOfTaxDeductedPaye', 'taxPayableOnTaxableSalary',
 ]);
 
+function getEmptyStateTitle(message: string): string {
+  const normalizedMessage = message.toLowerCase();
+  if (normalizedMessage.includes('paye credit')) return 'No PAYE Credits Found';
+  if (normalizedMessage.includes('previous period') && normalizedMessage.includes('not filed')) {
+    return 'Previous Return Not Filed';
+  }
+  return 'No Employer Declared';
+}
+
 function EmploymentIncomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -55,6 +64,7 @@ function EmploymentIncomeContent() {
   const [error, setError] = useState('');
   const [finishing, setFinishing] = useState(false);
   const [noEmployerMessage, setNoEmployerMessage] = useState('');
+  const hasLoadedEmploymentRef = useRef(false);
 
   const taxpayerInfo = taxpayerStore.getTaxpayerInfo();
   const phoneParam = phone ? `?phone=${encodeURIComponent(phone)}` : '';
@@ -64,6 +74,8 @@ function EmploymentIncomeContent() {
       router.push('/nil-mri-tot/itr/validation');
       return;
     }
+    if (hasLoadedEmploymentRef.current) return;
+    hasLoadedEmploymentRef.current = true;
 
     const load = async () => {
       setLoading(true);
@@ -176,7 +188,9 @@ function EmploymentIncomeContent() {
             <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-amber-900">No Employer Declared</p>
+                <p className="text-sm font-semibold text-amber-900">
+                  {getEmptyStateTitle(noEmployerMessage)}
+                </p>
                 <p className="text-xs text-amber-800 mt-1 leading-relaxed">
                   {noEmployerMessage || 'You have not declared an employer under sources of income. To file an Income Tax Return, you must first declare your employer on iTax or visit the nearest KRA office.'}
                 </p>

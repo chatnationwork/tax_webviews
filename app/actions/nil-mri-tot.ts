@@ -1211,7 +1211,7 @@ export async function getItrEmploymentDetails(
       success: true,
       rows,
       itExemptionCertDetails,
-      message: rows.length === 0 ? (data.message || undefined) : undefined,
+      message: rows.length === 0 ? (data.message || data.Message || undefined) : undefined,
       summary: {
         totalPAYEDeducted: Number(data.totalPAYEDeducted || 0),
         totalTaxPayable: Number(data.totalTaxPayable || 0),
