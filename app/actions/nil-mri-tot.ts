@@ -265,8 +265,16 @@ export async function getTaxpayerObligations(
   pin: string
 ): Promise<TaxpayerObligationsResult> {
   try {
+    const url = `${BASE_URL}/tax-payer-obligations/${pin}`;
+
+    logger.info('Obligations URL:', url);
+
     const headers = await getApiHeaders(true);
-    const response = await axios.get(`${BASE_URL}/tax-payer-obligations/${pin}`,
+
+    logger.info('Obligations headers:', headers);
+
+  
+    const response = await axios.get(url,
       {
         headers
       }

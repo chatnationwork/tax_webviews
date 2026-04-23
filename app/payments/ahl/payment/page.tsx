@@ -133,7 +133,7 @@ function AhlPaymentContent() {
 
       // Send WhatsApp notification with PRN
       const formattedPhone = formatPhoneForApi(phoneNumber);
-      const whatsappMessage = `🏠 *AHL Payment PRN Generated*\n\n` +
+      const whatsappMessage = `*AHL Payment PRN Generated*\n\n` +
         `PRN: *${prnRes.prn}*\n` +
         `Amount: KES ${Number(amount).toLocaleString()}\n` +
         `Tax Period: ${taxPeriodFrom} to ${taxPeriodTo}\n\n` +
