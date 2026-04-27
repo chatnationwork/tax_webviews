@@ -97,11 +97,11 @@ function TEMVExportationContent() {
         ]);
         const toOpts = (arr: any[], codeKey = 'code', nameKey = 'name') =>
           Array.isArray(arr)
-            ? arr.map((x: any) => ({ value: x[codeKey] ?? x.id, label: x[nameKey] ?? x[codeKey] }))
+            ? arr.map((x: any) => ({ value: String(x[codeKey] ?? x.id), label: x[nameKey] ?? String(x[codeKey]) }))
             : [];
         setCountries(toOpts(ctRes?.data ?? ctRes));
         setEntryPoints(toOpts(epRes?.data ?? epRes));
-        setVehicleTypes(toOpts(vtRes?.data ?? vtRes));
+        setVehicleTypes(toOpts(vtRes?.entries ?? vtRes?.data ?? vtRes, 'code', 'description'));
       } catch {
         // non-blocking
       } finally {
