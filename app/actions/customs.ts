@@ -278,6 +278,90 @@ export async function getF88FormUrl(refNo: string) {
   return `${BASE_URL}/customs/passenger-declaration/${refNo}/download-form`;
 }
 
+// ─── TIMV / TEMV Certificate Actions ────────────────────────────────────────
+
+export async function createCertificate(type: 'TIMV' | 'TEMV') {
+  try {
+    const response = await axios.post(`${BASE_URL}/customs/certificate`, { type });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+export async function updateCertificate(formData: FormData) {
+  try {
+    const response = await axios.put(`${BASE_URL}/customs/certificate/update`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+export async function getCertificate(ref_no: string) {
+  try {
+    const response = await axios.get(`${BASE_URL}/customs/certificate/view`, {
+      params: { ref_no },
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+export async function submitCertificate(ref_no: string) {
+  try {
+    const response = await axios.post(`${BASE_URL}/customs/certificate/submit`, { ref_no });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+export async function validateVehicle(regno: string) {
+  try {
+    const response = await axios.get(`${BASE_URL}/customs/certificate/validate-vehicle`, {
+      params: { regno },
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+export async function verifyOwner(code: string, reg_no: string) {
+  try {
+    const response = await axios.post(`${BASE_URL}/customs/certificate/verify-owner`, { code, reg_no });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+export async function getCertCounties() {
+  try {
+    const response = await axios.get(`${BASE_URL}/counties`);
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+export async function getVehicleTypes() {
+  try {
+    const response = await axios.get(`${BASE_URL}/customs/vehicles`, {
+      params: { group: 'vehicle_type', page_size: 100 },
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 // Send document via WhatsApp (using same pattern as auth.ts)
 export async function sendDocumentViaWhatsapp(payload: {
   whatsappNumber: string;

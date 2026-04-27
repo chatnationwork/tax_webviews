@@ -37,7 +37,10 @@ const SERVICE_URLS: Record<string, string> = {
   Station: "/checkers/know-your-station?phone={{phone}}",
   "Import Check": "/checkers/import-certificate?phone={{phone}}",
   Payroll: "/payroll?phone={{phone}}",
- 
+
+  // Customs certificates (open access — OTP provides TEMV access control)
+  "TIMV": "/timv",
+  "TEMV": "/temv",
 };
 
 // Service categories with clearer labels
