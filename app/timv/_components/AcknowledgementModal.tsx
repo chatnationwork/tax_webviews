@@ -8,9 +8,10 @@ interface AcknowledgementModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => Promise<void>;
+  error?: string;
 }
 
-export function AcknowledgementModal({ isOpen, onClose, onConfirm }: AcknowledgementModalProps) {
+export function AcknowledgementModal({ isOpen, onClose, onConfirm, error }: AcknowledgementModalProps) {
   const [checked, setChecked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -53,6 +54,10 @@ export function AcknowledgementModal({ isOpen, onClose, onConfirm }: Acknowledge
             I agree to the declaration above and confirm the accuracy of all submitted information.
           </span>
         </label>
+
+        {error && (
+          <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
+        )}
 
         <div className="flex gap-2 pt-1">
           <Button variant="secondary" onClick={onClose} className="flex-1">

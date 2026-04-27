@@ -39,6 +39,7 @@ function TEMVPreviewContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     if (!session?.ref_no) {
@@ -60,8 +61,13 @@ function TEMVPreviewContent() {
   }, [session, router]);
 
   const handleSubmit = async () => {
-    await submitCertificate(session!.ref_no);
-    router.push('/temv/result');
+    setSubmitError('');
+    try {
+      await submitCertificate(session!.ref_no);
+      router.push('/temv/result');
+    } catch (err: unknown) {
+      setSubmitError(err instanceof Error ? err.message : 'Submission failed. Please try again.');
+    }
   };
 
   if (!session?.ref_no) return null;
@@ -176,8 +182,9 @@ function TEMVPreviewContent() {
 
       <AcknowledgementModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => { setModalOpen(false); setSubmitError(''); }}
         onConfirm={handleSubmit}
+        error={submitError}
       />
     </Layout>
   );

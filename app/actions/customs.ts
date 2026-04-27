@@ -8,23 +8,30 @@ const BASE_URL = process.env.API_URL;
 
 // Helper to handle API errors
 const handleApiError = (error: any) => {
-  logger.error('API Error:', error.response?.data || error.message);
-  
-  // Extract error message - handle both string and object formats
+  const responseData = error.response?.data;
+  logger.error('API Error:', {
+    status: error.response?.status,
+    url: error.config?.url,
+    data: responseData,
+  });
+
   let errorMessage = 'An error occurred while communicating with the server';
-  
-  const responseMessage = error.response?.data?.message;
+
+  const responseMessage = responseData?.message;
   if (responseMessage) {
     if (typeof responseMessage === 'string') {
       errorMessage = responseMessage;
     } else if (typeof responseMessage === 'object' && responseMessage.message) {
-      // Handle { code: '...', message: '...' } format
       errorMessage = responseMessage.message;
     }
+  } else if (typeof responseData === 'string' && responseData.length < 200) {
+    errorMessage = responseData;
+  } else if (responseData?.error) {
+    errorMessage = typeof responseData.error === 'string' ? responseData.error : JSON.stringify(responseData.error);
   } else if (error.message && typeof error.message === 'string') {
     errorMessage = error.message;
   }
-  
+
   throw new Error(errorMessage);
 };
 
@@ -354,6 +361,37 @@ export async function getVehicleTypes() {
     const response = await axios.get(`${BASE_URL}/customs/vehicles`, {
       params: { group: 'vehicle_type', page_size: 100 },
     });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+export async function getVehicleMakes() {
+  try {
+    const response = await axios.get(`${BASE_URL}/customs/vehicles`, {
+      params: { group: 'vehicle_make', page_size: 500 },
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+export async function getVehicleModels(parentCode?: string) {
+  try {
+    const params: Record<string, any> = { group: 'vehicle_model', page_size: 500 };
+    if (parentCode) params.parent_code = parentCode;
+    const response = await axios.get(`${BASE_URL}/customs/vehicles`, { params });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+export async function getTowns() {
+  try {
+    const response = await axios.get(`${BASE_URL}/towns`);
     return response.data;
   } catch (error) {
     handleApiError(error);

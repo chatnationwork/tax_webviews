@@ -20,7 +20,6 @@ const FUEL_TYPES = [
   { value: 'DSL', label: 'Diesel' },
   { value: 'ELC', label: 'Electric' },
   { value: 'HYB', label: 'Hybrid' },
-  { value: 'GAS', label: 'LPG/Gas' },
 ];
 
 function daysBetween(a: string, b: string): string {
@@ -333,7 +332,7 @@ function TEMVExportationContent() {
                 </div>
               )}
 
-              {!otpSent && (
+              {otpSent && (
                 <button
                   type="button"
                   onClick={() => {
