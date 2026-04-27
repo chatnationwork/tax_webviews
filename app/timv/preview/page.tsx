@@ -108,18 +108,9 @@ function TIMVPreviewContent() {
 
             <Card className="p-0">
               <div className="px-4 py-3 border-b border-gray-100">
-                <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Vehicle &amp; Travel Details</p>
+                <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Travel Details</p>
               </div>
               <div className="px-4 pb-1">
-                <PreviewRow label="Reg Number" value={vd.vehicle_reg_no} />
-                <PreviewRow label="Make" value={vd.make} />
-                <PreviewRow label="Model" value={vd.model} />
-                <PreviewRow label="Year" value={vd.year_of_manufacture} />
-                <PreviewRow label="Colour" value={vd.color} />
-                <PreviewRow label="Chassis No" value={vd.chassis_no} />
-                <PreviewRow label="Engine No" value={vd.engine_no} />
-                <PreviewRow label="Fuel Type" value={vd.fuel_type} />
-                <PreviewRow label="Reg Country" value={vd.registration_country} />
                 <PreviewRow label="Entry Port" value={vd.entry_port} />
                 <PreviewRow label="Exit Port" value={vd.exit_port} />
                 <PreviewRow label="Date of Entry" value={vd.date_of_entry} />
@@ -127,16 +118,44 @@ function TIMVPreviewContent() {
                 <PreviewRow label="Period of Stay" value={vd.period_of_stay ? `${vd.period_of_stay} days` : undefined} />
                 <PreviewRow label="Dest. County" value={vd.destination_county} />
                 <PreviewRow label="Dest. Town" value={vd.destination_town} />
-                <PreviewRow label="With Trailer" value={vd.with_trailer} />
-                <PreviewRow label="Trailer Reg No" value={vd.trailer_reg_no} />
-                <FileRow label="Logbook" value={vd.log_book_attachment} />
-                <FileRow label="Insurance" value={vd.insurance_attachment} />
               </div>
             </Card>
 
             <Card className="p-0">
               <div className="px-4 py-3 border-b border-gray-100">
-                <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Traveler Details</p>
+                <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Vehicle Details</p>
+              </div>
+              <div className="px-4 pb-1">
+                <PreviewRow label="Reg Number" value={vd.vehicle_reg_no} />
+                <PreviewRow label="Vehicle Class" value={vd.vehicle_class} />
+                <PreviewRow label="Vehicle Type" value={vd.vehicle_type} />
+                <PreviewRow label="Make" value={vd.make} />
+                <PreviewRow label="Model" value={vd.model} />
+                <PreviewRow label="Year" value={vd.year_of_manufacture} />
+                <PreviewRow label="Colour" value={vd.color} />
+                <PreviewRow label="Chassis No" value={vd.chassis_no} />
+                <PreviewRow label="Logbook No" value={vd.logbook_no} />
+                <PreviewRow label="Engine No" value={vd.engine_no} />
+                <PreviewRow label="Engine Capacity" value={vd.engine_capacity ? `${vd.engine_capacity} cc` : undefined} />
+                <PreviewRow label="Fuel Type" value={vd.fuel_type} />
+                <PreviewRow label="Seating Capacity" value={vd.seating_capacity} />
+                <PreviewRow label="Axles" value={vd.axles} />
+                <PreviewRow label="Tare Weight" value={vd.tare_weight ? `${vd.tare_weight} kg` : undefined} />
+                <PreviewRow label="Value of Vehicle" value={vd.value_of_vehicle ? `KES ${vd.value_of_vehicle}` : undefined} />
+                <PreviewRow label="Reg Country" value={vd.registration_country} />
+                <PreviewRow label="With Trailer" value={vd.with_trailer} />
+                <PreviewRow label="Trailer Reg No" value={vd.trailer_reg_no} />
+                <FileRow label="Insurance" value={vd.insurance_attachment} />
+                <FileRow label="Inspection Cert" value={vd.inspection_certificate_attachment} />
+                <FileRow label="Transit Good Licence" value={vd.transit_good_licence} />
+                <FileRow label="Log Book" value={vd.log_book_attachment} />
+                <FileRow label="Road Safety Licence" value={vd.road_safety_licence_attachment} />
+              </div>
+            </Card>
+
+            <Card className="p-0">
+              <div className="px-4 py-3 border-b border-gray-100">
+                <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Owner's Details</p>
               </div>
               <div className="px-4 pb-1">
                 <PreviewRow label="Owner Name" value={td.owner_name} />
@@ -144,29 +163,68 @@ function TIMVPreviewContent() {
                 <PreviewRow label="Passport/ID" value={td.owner_passport} />
                 <PreviewRow label="Phone" value={td.owner_phone} />
                 <PreviewRow label="Email" value={td.owner_email} />
-                <PreviewRow label="Owner is Driver" value={td.is_owner} />
+                <FileRow label="Owner ID" value={td.owner_id_attachment} />
+                <FileRow label="Owner Driving License" value={td.owner_driving_license} />
+              </div>
+            </Card>
+
+            <Card className="p-0">
+              <div className="px-4 py-3 border-b border-gray-100">
+                <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Driver's Details</p>
+              </div>
+              <div className="px-4 pb-1">
+                <PreviewRow label="Owner is Driver" value={td.is_owner === 'yes' ? 'Yes' : 'No'} />
                 {td.is_owner === 'no' && (
                   <>
                     <PreviewRow label="Driver Name" value={td.driver_name} />
                     <PreviewRow label="Driver Nationality" value={td.driver_nationality} />
                     <PreviewRow label="Driver Passport" value={td.driver_passport} />
+                    <PreviewRow label="Driver Phone" value={td.driver_phone} />
+                    <PreviewRow label="Driver Email" value={td.driver_email} />
+                    <FileRow label="Driver ID" value={td.driver_id_attachment} />
+                    <FileRow label="Driver Licence" value={td.driver_driving_licence} />
+                    <FileRow label="Authority Letter" value={td.authority_letter_attachment} />
                   </>
                 )}
-                <PreviewRow label="Carnet" value={td.is_carnet} />
+              </div>
+            </Card>
+
+            <Card className="p-0">
+              <div className="px-4 py-3 border-b border-gray-100">
+                <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Carnet Details</p>
+              </div>
+              <div className="px-4 pb-1">
+                <PreviewRow label="Has Carnet" value={td.is_carnet === 'yes' ? 'Yes' : 'No'} />
                 {td.is_carnet === 'yes' && (
                   <>
                     <PreviewRow label="Carnet No" value={td.carnet_no} />
                     <PreviewRow label="Carnet Expiry" value={td.carnet_expiry_date} />
                     <PreviewRow label="Issuing Country" value={td.issuing_country} />
+                    <PreviewRow label="Issuing Association" value={td.issuing_associations} />
+                    <PreviewRow label="Association Phone" value={td.issuing_association_phone} />
+                    <PreviewRow label="Association Email" value={td.issuing_association_email} />
+                    <PreviewRow label="Association Fax" value={td.issuing_association_fax} />
+                    <FileRow label="Carnet Doc" value={td.carnet_document_attachment} />
                   </>
                 )}
-                <PreviewRow label="Accessories" value={td.has_accessories} />
-                <FileRow label="Owner ID" value={td.owner_id_attachment} />
-                <FileRow label="Driver ID" value={td.driver_id_attachment} />
-                <FileRow label="Driver Licence" value={td.driver_driving_licence} />
-                <FileRow label="Carnet Doc" value={td.carnet_document_attachment} />
               </div>
             </Card>
+
+            {td.has_accessories === 'yes' && Array.isArray(td.accessories) && td.accessories.length > 0 && (
+              <Card className="p-0">
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Accessories</p>
+                </div>
+                <div className="px-4 pb-1">
+                  {td.accessories.map((acc: any, i: number) => (
+                    <div key={i} className="flex items-start justify-between py-2 border-b border-gray-100 last:border-0">
+                      <span className="text-xs text-gray-500 w-2/5 shrink-0">{acc.description}</span>
+                      <span className="text-xs text-gray-900">KES {acc.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
           </>
         )}
 

@@ -71,7 +71,8 @@ function TIMVImportationContent() {
   const [allTowns, setAllTowns] = useState<{ county_code: number; name: string }[]>([]);
   const [vehicleTypes, setVehicleTypes] = useState<Opt[]>([]);
   const [makes, setMakes] = useState<Opt[]>([]);
-  const [allModels, setAllModels] = useState<{ code: string; description: string; parent_code: string }[]>([]);
+  const [modelOptions, setModelOptions] = useState<Opt[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
   const [lookupsLoading, setLookupsLoading] = useState(true);
 
   // Travel
@@ -109,7 +110,8 @@ function TIMVImportationContent() {
 
   // Files
   const [insuranceFile, setInsuranceFile] = useState<File | null>(null);
-  const [logbookFile, setLogbookFile] = useState<File | null>(null); // inspection cert or transit good license
+  const [inspectionFile, setInspectionFile] = useState<File | null>(null);
+  const [transitFile, setTransitFile] = useState<File | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -123,13 +125,12 @@ function TIMVImportationContent() {
     const load = async () => {
       setLookupsLoading(true);
       try {
-        const [ctRes, epRes, coRes, vtRes, mkRes, mdRes, tnRes] = await Promise.all([
+        const [ctRes, epRes, coRes, vtRes, mkRes, tnRes] = await Promise.all([
           getCountries(),
           getEntryPoints(),
           getCertCounties(),
           getVehicleTypes(),
           getVehicleMakes(),
-          getVehicleModels(),
           getTowns(),
         ]);
 
@@ -151,13 +152,6 @@ function TIMVImportationContent() {
         setVehicleTypes(toOpts(vtRes?.entries ?? vtRes?.data ?? vtRes, 'code', 'description'));
         setMakes(toOpts(mkRes?.entries ?? mkRes?.data ?? mkRes, 'code', 'description'));
 
-        const rawModels: any[] = mdRes?.entries ?? mdRes?.data ?? mdRes ?? [];
-        setAllModels(
-          Array.isArray(rawModels)
-            ? rawModels.map(x => ({ code: x.code, description: x.description, parent_code: x.parent_code }))
-            : [],
-        );
-
         setAllTowns(Array.isArray(tnRes) ? tnRes : tnRes?.data ?? []);
       } catch {
         // non-blocking
@@ -168,12 +162,18 @@ function TIMVImportationContent() {
     load();
   }, [session, router]);
 
-  // Derived: models filtered by selected make
-  const modelOptions: Opt[] = make
-    ? allModels
-        .filter(m => m.parent_code === make)
-        .map(m => ({ value: m.code, label: m.description }))
-    : [];
+  // Fetch models from API when make changes
+  useEffect(() => {
+    if (!make) { setModelOptions([]); return; }
+    setModelsLoading(true);
+    getVehicleModels(make)
+      .then(res => {
+        const raw: any[] = res?.entries ?? res?.data ?? [];
+        setModelOptions(Array.isArray(raw) ? raw.map(x => ({ value: x.code, label: x.description })) : []);
+      })
+      .catch(() => {})
+      .finally(() => setModelsLoading(false));
+  }, [make]);
 
   // Derived: towns filtered by selected county's numeric code
   const selectedCountyObj = counties.find(c => c.value === destCounty);
@@ -197,7 +197,6 @@ function TIMVImportationContent() {
     if (!chassisNo) errs.chassisNo = 'Required';
     if (!logbookNo) errs.logbookNo = 'Required';
     if (!insuranceFile) errs.insuranceFile = 'Required';
-    if (!logbookFile) errs.logbookFile = 'Required';
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -234,7 +233,8 @@ function TIMVImportationContent() {
     fd.append('vehicle_details[with_trailer]', withTrailer);
     if (withTrailer === 'yes') fd.append('vehicle_details[trailer_reg_no]', trailerRegNo);
     if (insuranceFile) fd.append('vehicle_details[insurance_attachment]', insuranceFile);
-    if (logbookFile) fd.append('vehicle_details[log_book_attachment]', logbookFile);
+    if (inspectionFile) fd.append('vehicle_details[inspection_certificate_attachment]', inspectionFile);
+    if (transitFile) fd.append('vehicle_details[transit_good_licence]', transitFile);
     return fd;
   };
 
@@ -299,13 +299,22 @@ function TIMVImportationContent() {
               onChange={v => { setDestCounty(v); setDestTown(''); }}
               options={counties}
             />
-            <Select
-              label="Destination Town"
-              value={destTown}
-              onChange={setDestTown}
-              options={townOptions}
-              disabled={!destCounty}
-            />
+            {destCounty && townOptions.length === 0 ? (
+              <Input
+                label="Destination Town"
+                value={destTown}
+                onChange={setDestTown}
+                placeholder="Enter town name"
+              />
+            ) : (
+              <Select
+                label="Destination Town"
+                value={destTown}
+                onChange={setDestTown}
+                options={townOptions}
+                disabled={!destCounty}
+              />
+            )}
           </div>
         </Card>
 
@@ -366,11 +375,11 @@ function TIMVImportationContent() {
             </div>
             <div>
               <Select
-                label="Model"
+                label={modelsLoading ? 'Model (loading…)' : 'Model'}
                 value={model}
                 onChange={setModel}
                 options={modelOptions}
-                disabled={!make}
+                disabled={!make || modelsLoading}
                 required
               />
               {fieldErrors.model && <p className="text-xs text-red-500 mt-0.5">{fieldErrors.model}</p>}
@@ -405,22 +414,18 @@ function TIMVImportationContent() {
             required
             error={fieldErrors.insuranceFile}
           />
-          <div className="border border-gray-200 rounded-lg p-3 space-y-3">
-            <p className="text-xs font-medium text-gray-600">Either Or <span className="text-red-500">*</span></p>
-            <div className="grid grid-cols-2 gap-3">
-              <FileUpload
-                label="Upload Inspection Certificate"
-                value={logbookFile}
-                onChange={v => { setLogbookFile(v); }}
-                error={!logbookFile ? fieldErrors.logbookFile : undefined}
-              />
-              <FileUpload
-                label="Upload Transit Good License"
-                value={null}
-                onChange={v => { if (v) setLogbookFile(v); }}
-                error={undefined}
-              />
-            </div>
+            <p className="text-xs font-medium text-gray-600">Either Or <span className="text-red-500">*</span></p>          <div className="grid grid-cols-2 gap-3">
+            
+            <FileUpload
+              label="Upload Inspection Certificate"
+              value={inspectionFile}
+              onChange={setInspectionFile}
+            />
+            <FileUpload
+              label="Upload Transit Good License"
+              value={transitFile}
+              onChange={setTransitFile}
+            />
           </div>
         </Card>
 

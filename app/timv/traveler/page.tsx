@@ -39,6 +39,7 @@ function TIMVTravelerContent() {
   const [accessories, setAccessories] = useState<Accessory[]>([]);
 
   const [ownerIdFile, setOwnerIdFile] = useState<File | null>(null);
+  const [ownerLicenceFile, setOwnerLicenceFile] = useState<File | null>(null);
   const [driverIdFile, setDriverIdFile] = useState<File | null>(null);
   const [driverLicenceFile, setDriverLicenceFile] = useState<File | null>(null);
   const [authorityLetterFile, setAuthorityLetterFile] = useState<File | null>(null);
@@ -117,6 +118,7 @@ function TIMVTravelerContent() {
 
     // File attachments
     if (ownerIdFile) fd.append('traveler_details[owner_id_attachment]', ownerIdFile);
+    if (ownerLicenceFile) fd.append('traveler_details[owner_driving_license]', ownerLicenceFile);
     if (isOwner === 'no') {
       if (driverIdFile) fd.append('traveler_details[driver_id_attachment]', driverIdFile);
       if (driverLicenceFile) fd.append('traveler_details[driver_driving_licence]', driverLicenceFile);
@@ -158,25 +160,43 @@ function TIMVTravelerContent() {
 
         {/* Owner */}
         <Card className="space-y-3">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Vehicle Owner</p>
-          <Input label="Full Name" value={ownerName} onChange={setOwnerName} required />
-          <Select label="Nationality" value={ownerNationality} onChange={setOwnerNationality} options={countries} required />
-          <Input label="Passport / ID Number" value={ownerPassport} onChange={setOwnerPassport} />
-          <Input label="Phone" type="tel" value={ownerPhone} onChange={setOwnerPhone} placeholder="+254…" />
-          <Input label="Email" type="email" value={ownerEmail} onChange={setOwnerEmail} />
-          <Select
-            label="Is the owner driving the vehicle?"
-            value={isOwner}
-            onChange={setIsOwner}
-            options={[{ value: 'yes', label: 'Yes — owner is the driver' }, { value: 'no', label: 'No — different driver' }]}
-          />
-          <FileUpload label="Owner ID Attachment" value={ownerIdFile} onChange={setOwnerIdFile} />
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Owner's Details</p>
+          <Input label="Owner's Name" value={ownerName} onChange={setOwnerName} required />
+          <Select label="Owner's Nationality" value={ownerNationality} onChange={setOwnerNationality} options={countries} required />
+          <Input label="Owner's Passport Number, Issued By (Country)" value={ownerPassport} onChange={setOwnerPassport} required />
+          <Input label="Owner's Phone Number" type="tel" value={ownerPhone} onChange={setOwnerPhone} placeholder="+254…" required />
+          <Input label="Owner's Email Address" type="email" value={ownerEmail} onChange={setOwnerEmail} required />
+          <FileUpload label="Upload Owner's ID/Passport" value={ownerIdFile} onChange={setOwnerIdFile} required />
+          <FileUpload label="Upload Owner's Driving License" value={ownerLicenceFile} onChange={setOwnerLicenceFile} />
         </Card>
 
-        {/* Driver (conditional) */}
+        {/* Driver toggle */}
+        <Card className="space-y-3">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Driver's Details</p>
+          <div>
+            <p className="text-xs font-medium text-gray-700 mb-1">Is owner the driver? <span className="text-red-500">*</span></p>
+            <div className="flex gap-4">
+              {[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }].map(opt => (
+                <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="isOwner"
+                    value={opt.value}
+                    checked={isOwner === opt.value}
+                    onChange={() => setIsOwner(opt.value)}
+                    className="accent-[var(--kra-red)]"
+                  />
+                  <span className="text-xs text-gray-700">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        {/* Driver fields (conditional) */}
         {isOwner === 'no' && (
           <Card className="space-y-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Driver Details</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Driver's Details</p>
             <Input label="Full Name" value={driverName} onChange={setDriverName} required />
             <Select label="Nationality" value={driverNationality} onChange={setDriverNationality} options={countries} required />
             <Input label="Passport / ID Number" value={driverPassport} onChange={setDriverPassport} />
