@@ -4,7 +4,6 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle, FileText } from 'lucide-react';
 import { Layout, Card, Button } from '../../_components/Layout';
-import { StepIndicator } from '../../timv/_components/StepIndicator';
 import { AcknowledgementModal } from '../../timv/_components/AcknowledgementModal';
 import { getCertSession } from '../../_lib/cert-store';
 import { getCertificate, submitCertificate } from '../../actions/customs';
@@ -78,7 +77,6 @@ function TEMVPreviewContent() {
       showMenu
     >
       <div className="space-y-4">
-        <StepIndicator current={3} labels={['Exportation', 'Traveler', 'Preview']} />
 
         {loading ? (
           <Card className="flex items-center justify-center p-8">

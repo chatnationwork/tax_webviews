@@ -4,7 +4,6 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Layout, Card, Input, Select, Button } from '../../_components/Layout';
-import { StepIndicator } from '../../timv/_components/StepIndicator';
 import { FileUpload } from '../../timv/_components/FileUpload';
 import { AccessoriesList, Accessory } from '../../timv/_components/AccessoriesList';
 import { getCertSession, appendVehicleMetadata } from '../../_lib/cert-store';
@@ -152,7 +151,6 @@ function TEMVTravelerContent() {
       showMenu
     >
       <div className="space-y-4">
-        <StepIndicator current={2} labels={['Exportation', 'Traveler', 'Preview']} />
 
         <Card className="space-y-3">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Vehicle Owner</p>

@@ -4,7 +4,6 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Layout, Card, Input, Select, Button } from '../../_components/Layout';
-import { StepIndicator } from '../_components/StepIndicator';
 import { FileUpload } from '../_components/FileUpload';
 import { AccessoriesList, Accessory } from '../_components/AccessoriesList';
 import { getCertSession, appendVehicleMetadata } from '../../_lib/cert-store';
@@ -156,7 +155,6 @@ function TIMVTravelerContent() {
       showMenu
     >
       <div className="space-y-4">
-        <StepIndicator current={2} labels={['Importation', 'Traveler', 'Preview']} />
 
         {/* Owner */}
         <Card className="space-y-3">

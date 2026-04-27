@@ -4,7 +4,6 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle, CheckCircle, Send } from 'lucide-react';
 import { Layout, Card, Input, Select, Button } from '../../_components/Layout';
-import { StepIndicator } from '../../timv/_components/StepIndicator';
 import { FileUpload } from '../../timv/_components/FileUpload';
 import { getCertSession, saveCertSession, flattenToFormData } from '../../_lib/cert-store';
 import {
@@ -256,7 +255,6 @@ function TEMVExportationContent() {
       showMenu
     >
       <div className="space-y-4">
-        <StepIndicator current={1} labels={['Exportation', 'Traveler', 'Preview']} />
 
         {lookupsLoading && (
           <div className="flex items-center gap-2 text-xs text-gray-500">

@@ -5,9 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Layout, Card, Input, Select, Button } from '../../_components/Layout';
 import { FileUpload } from '../_components/FileUpload';
-import { getCertSession, saveCertSession, clearCertSession } from '../../_lib/cert-store';
+import { getCertSession } from '../../_lib/cert-store';
 import {
-  createCertificate,
   updateCertificate,
   getCountries,
   getEntryPoints,
@@ -31,7 +30,7 @@ function daysBetween(a: string, b: string): string {
 
 function TIMVImportationContent() {
   const router = useRouter();
-  const [session, setSession] = useState(() => getCertSession());
+  const [session] = useState(() => getCertSession());
 
   const [countries, setCountries] = useState<{ value: string; label: string }[]>([]);
   const [entryPoints, setEntryPoints] = useState<{ value: string; label: string }[]>([]);
@@ -72,19 +71,13 @@ function TIMVImportationContent() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    if (!session?.ref_no) {
+      router.replace('/timv');
+      return;
+    }
     const load = async () => {
       setLookupsLoading(true);
       try {
-        let activeSession = session;
-        if (!activeSession?.ref_no) {
-          clearCertSession();
-          const res = await createCertificate('TIMV');
-          const ref_no = res?.data?.ref_no ?? res?.ref_no;
-          if (!ref_no) throw new Error('No reference number returned by server.');
-          saveCertSession({ ref_no, type: 'TIMV' });
-          activeSession = { ref_no, type: 'TIMV' };
-          setSession(activeSession);
-        }
         const [ctRes, epRes, coRes, vtRes] = await Promise.all([
           getCountries(),
           getEntryPoints(),
@@ -99,15 +92,14 @@ function TIMVImportationContent() {
         setEntryPoints(toOpts(epRes?.data ?? epRes));
         setCounties(toOpts(coRes?.data ?? coRes));
         setVehicleTypes(toOpts(vtRes?.data ?? vtRes));
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'Failed to initialise application.');
+      } catch {
+        // lookups failing shouldn't block the form
       } finally {
         setLookupsLoading(false);
       }
     };
     load();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [session, router]);
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -182,7 +174,7 @@ function TIMVImportationContent() {
     <Layout
       title="TIMV — Importation"
       step="Step 1 of 3"
-      onBack={() => router.push('/')}
+      onBack={() => router.push('/timv')}
       showMenu
     >
       <div className="space-y-4">
