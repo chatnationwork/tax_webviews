@@ -41,6 +41,7 @@ const SERVICE_URLS: Record<string, string> = {
   // Customs certificates (open access — OTP provides TEMV access control)
   "TIMV": "/timv",
   "TEMV": "/temv",
+  "Extend TIMV": "/timv-extension",
 };
 
 // Service categories with clearer labels
