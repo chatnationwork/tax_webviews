@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense, useRef } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button, DeclarationCheckbox } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { createItrReturn, getItrReturn, getItrSummary, fileItrReturn } from '@/app/actions/nil-mri-tot';
-import type { ItrState } from '../../_lib/definitions';
-import { Loader2, Pencil } from 'lucide-react';
+import { getItrSummary, fileItrReturn } from '@/app/actions/nil-mri-tot';
+import { Loader2 } from 'lucide-react';
 
 const fmt = (n: number) => `KES ${Math.abs(n).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
 const toNumber = (value: unknown): number => {
@@ -111,19 +110,10 @@ function TaxComputationContent() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [certified, setCertified] = useState(false);
-  const [editingField, setEditingField] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState('');
 
   const itrData = taxpayerStore.getItrData();
   const taxpayerInfo = taxpayerStore.getTaxpayerInfo();
   const phoneParam = phone ? `?phone=${encodeURIComponent(phone)}` : '';
-
-  const editableFields: { key: string; storeKey: keyof ItrState; label: string }[] = [
-    { key: 'definedPensionContribution', storeKey: 'pensionContribution', label: 'Defined / Pension Contribution' },
-    { key: 'socialHealthInsuranceContribution', storeKey: 'shifContribution', label: 'Social Health Insurance Contribution' },
-    { key: 'housingLevyContribution', storeKey: 'hlContribution', label: 'Housing Levy Contribution' },
-    { key: 'postRetirementMedicalContribution', storeKey: 'pmfContribution', label: 'Post-Retirement Medical Contribution' },
-  ];
 
   /** Fetch the backend-computed summary. Falls back to client-side if unavailable. */
   const fetchSummary = useCallback(async () => {
@@ -164,52 +154,6 @@ function TaxComputationContent() {
     }
     fetchSummary();
   }, []);
-
-  /** When an editable deduction is saved, re-create the draft and re-fetch */
-  const handleEditSave = async (fieldKey: string, storeKey: string) => {
-    if (!computation) return;
-    const newValue = Number(editValue);
-    taxpayerStore.setItrField(storeKey as any, newValue);
-    setEditingField(null);
-    setEditValue('');
-
-    // Re-create the return with updated deductions, then re-fetch summary
-    setLoading(true);
-    setError('');
-    try {
-      const data = taxpayerStore.getItrData();
-      const createResult = await createItrReturn({
-        pin: taxpayerInfo.pin,
-        period: data.filingPeriod,
-        returnType: 'normal',
-        pensionContribution: data.pensionContribution,
-        shifContribution: data.shifContribution,
-        hlContribution: data.hlContribution,
-        pmfContribution: data.pmfContribution,
-        insurancePolicies: data.hasInsurancePolicy ? data.insurancePolicies : [],
-        disabilityCertificates: data.disabilityCertificates || [],
-        employmentIncome: data.employmentIncomeRows,
-        mortgages: data.mortgages || [],
-      });
-
-      if (createResult.success) {
-        if (createResult.taxReturnId) taxpayerStore.setItrField('taxReturnId', createResult.taxReturnId);
-        if (createResult.taxPayerId) taxpayerStore.setItrField('taxPayerId', createResult.taxPayerId);
-        if (createResult.taxObligationId) taxpayerStore.setItrField('taxObligationId', createResult.taxObligationId);
-
-        // Trigger backend recomputation
-        const updatedItr = taxpayerStore.getItrData();
-        if (updatedItr.taxPayerId && updatedItr.taxObligationId && updatedItr.filingPeriod) {
-          try { await getItrReturn(updatedItr.taxPayerId, updatedItr.taxObligationId, updatedItr.filingPeriod); } catch {}
-        }
-      }
-
-      await fetchSummary();
-    } catch (e: any) {
-      setError(e.message || 'Failed to update');
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -272,37 +216,16 @@ function TaxComputationContent() {
     }
   };
 
-  const ComputationRow = ({ label, value, editable = false, bold = false, fieldKey, storeKey }: {
-    label: string; value: number; editable?: boolean; bold?: boolean; fieldKey?: string; storeKey?: string;
+  const ComputationRow = ({ label, value, bold = false }: {
+    label: string; value: number; bold?: boolean;
   }) => (
     <div className={`flex items-center justify-between py-2 border-b border-gray-100 last:border-0 ${bold ? 'font-semibold' : ''}`}>
       <div className="flex items-center gap-2 flex-1">
         <span className={`text-xs ${bold ? 'text-gray-900 font-semibold' : 'text-gray-600'}`}>{label}</span>
-        {editable && fieldKey && storeKey && editingField !== fieldKey && (
-          <button type="button" onClick={() => { setEditingField(fieldKey); setEditValue(String(value)); }}
-            className="text-[10px] text-blue-500 hover:text-blue-700 flex items-center gap-0.5">
-            <Pencil className="w-2.5 h-2.5" /> Edit
-          </button>
-        )}
       </div>
-      {editable && fieldKey && storeKey && editingField === fieldKey ? (
-        <div className="flex items-center gap-1">
-          <input
-            type="number"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            className="w-28 px-2 py-1 text-xs border border-[var(--kra-red)] rounded focus:outline-none"
-            aria-label={label}
-            autoFocus
-          />
-          <button type="button" onClick={() => handleEditSave(fieldKey, storeKey)} className="text-[10px] text-green-600 font-medium hover:text-green-800">Save</button>
-          <button type="button" onClick={() => setEditingField(null)} className="text-[10px] text-gray-400 hover:text-gray-600">✕</button>
-        </div>
-      ) : (
-        <span className={`text-xs ${bold ? 'text-gray-900 font-semibold' : 'text-gray-800'} ${value < 0 ? 'text-green-600' : ''}`}>
-          {value < 0 ? `-${fmt(value)}` : fmt(value)}
-        </span>
-      )}
+      <span className={`text-xs ${bold ? 'text-gray-900 font-semibold' : 'text-gray-800'} ${value < 0 ? 'text-green-600' : ''}`}>
+        {value < 0 ? `-${fmt(value)}` : fmt(value)}
+      </span>
     </div>
   );
 
@@ -332,9 +255,10 @@ function TaxComputationContent() {
           <Card className="divide-y divide-gray-100">
             <ComputationRow label="Employment Income" value={computation.employmentIncome} bold />
             <ComputationRow label="Total Deduction" value={computation.totalDeduction} bold />
-            {editableFields.map(f => (
-              <ComputationRow key={f.key} label={f.label} value={computation[f.key]} editable fieldKey={f.key} storeKey={f.storeKey} />
-            ))}
+            <ComputationRow label="Defined / Pension Contribution" value={computation.definedPensionContribution} />
+            <ComputationRow label="Social Health Insurance Contribution" value={computation.socialHealthInsuranceContribution} />
+            <ComputationRow label="Housing Levy Contribution" value={computation.housingLevyContribution} />
+            <ComputationRow label="Post-Retirement Medical Contribution" value={computation.postRetirementMedicalContribution} />
             {computation.mortgageInterest > 0 && (
               <ComputationRow label="Mortgage Interest" value={computation.mortgageInterest} />
             )}
