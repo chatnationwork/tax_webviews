@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button, Input, Select } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { validateInsurancePin, createItrReturn, getItrReturn } from '@/app/actions/nil-mri-tot';
+import { validateInsurancePin } from '@/app/actions/nil-mri-tot';
 import { Loader2, Plus, Trash2, Shield, CircleDot } from 'lucide-react';
 import type { ItrConfigLimits, DisabilityCertDetail } from '../../_lib/definitions';
 
@@ -123,11 +123,8 @@ function ReturnInformationContent() {
     taxpayerStore.setItrField('insurancePolicies', updated);
   };
 
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState('');
-
   // --- Navigation ---
-  const handleNext = async () => {
+  const handleNext = () => {
     // Save all deduction values to store
     taxpayerStore.setItrField('pensionContribution', Number(pension) || 0);
     taxpayerStore.setItrField('shifContribution', Number(shif) || 0);
@@ -140,59 +137,7 @@ function ReturnInformationContent() {
     } else {
       taxpayerStore.setItrField('disabilityCertificates', []);
     }
-
-    // Create the ITR draft and trigger backend computation before navigating
-    setCreating(true);
-    setCreateError('');
-    try {
-      const data = taxpayerStore.getItrData();
-      const result = await createItrReturn({
-        pin: taxpayerInfo.pin,
-        period: data.filingPeriod,
-        returnType: 'normal',
-        pensionContribution: Number(pension) || 0,
-        shifContribution: Number(shif) || 0,
-        hlContribution: Number(hl) || 0,
-        pmfContribution: Number(pmf) || 0,
-        insurancePolicies: hasInsurance ? data.insurancePolicies : [],
-        disabilityCertificates: [],
-        employmentIncome: data.employmentIncomeRows,
-        mortgages: [],
-      });
-
-      if (!result.success) {
-        setCreateError(result.message || '');
-        return;
-      }
-
-      taxpayerStore.setItrField('taxReturnId', result.taxReturnId || null);
-      taxpayerStore.setItrField('taxPayerId', result.taxPayerId || null);
-      taxpayerStore.setItrField('taxObligationId', result.taxObligationId || null);
-
-      if (result.arrays) {
-        taxpayerStore.setItrField('itrReturnMortgages', result.arrays.mortgages);
-        taxpayerStore.setItrField('itrReturnInsurancePolicies', result.arrays.insurancePolicies);
-        taxpayerStore.setItrField('itrReturnCarBenefits', result.arrays.carBenefits);
-        taxpayerStore.setItrField('itrReturnDisabilityCerts', result.arrays.disabilityCertificates);
-        taxpayerStore.setItrField('taxReturnRef', result.arrays.taxReturnRef);
-        taxpayerStore.setItrField('itrStatus', result.arrays.status);
-      }
-
-      // Trigger backend tax computation (personal relief, PAYE reconciliation etc.)
-      if (result.taxPayerId && result.taxObligationId && data.filingPeriod) {
-        try {
-          await getItrReturn(result.taxPayerId, result.taxObligationId, data.filingPeriod);
-        } catch {
-          // Non-fatal: tax-computation page will retry or fallback
-        }
-      }
-
-      router.push(`/nil-mri-tot/itr/tax-computation${phoneParam}`);
-    } catch (e: any) {
-      setCreateError(e.message || '');
-    } finally {
-      setCreating(false);
-    }
+    router.push(`/nil-mri-tot/itr/employment-income${phoneParam}`);
   };
 
   const hasDeductionErrors =
@@ -202,11 +147,11 @@ function ReturnInformationContent() {
     !!deductionError(pmf, limits?.prmc?.max);
 
   return (
-    <Layout title="File Tax Return" onBack={() => router.push(`/nil-mri-tot/itr/employment-income${phoneParam}`)} showMenu>
+    <Layout title="File Tax Return" onBack={() => router.push(`/nil-mri-tot/itr/verify${phoneParam}`)} showMenu>
       <div className="space-y-4">
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
           <h1 className="text-base font-semibold">Income Tax Return</h1>
-          <p className="text-gray-400 text-xs">Step 2/3 — Return Information</p>
+          <p className="text-gray-400 text-xs">Step 1/3 — Return Information</p>
         </div>
 
         {/* Insurance */}
@@ -308,18 +253,10 @@ function ReturnInformationContent() {
           )}
         </Card>
 
-        {createError && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-xs text-red-600">{createError}</p>
-          </div>
-        )}
-
         {/* Navigation */}
         <div className="flex gap-2 pt-2">
           <Button variant="secondary" onClick={() => { taxpayerStore.clear(); router.push('/nil-mri-tot'); }} className="flex-1">Cancel</Button>
-          <Button onClick={handleNext} disabled={hasDeductionErrors || creating} className="flex-1">
-            {creating ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Calculating Tax...</> : 'Next'}
-          </Button>
+          <Button onClick={handleNext} disabled={hasDeductionErrors} className="flex-1">Next</Button>
         </div>
       </div>
 

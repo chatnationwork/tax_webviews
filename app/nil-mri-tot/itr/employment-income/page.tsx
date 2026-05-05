@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { getItrEmploymentDetails, getStoredPhone, sendWhatsAppMessage, renderNoEmployerCard, sendWhatsAppImage } from '@/app/actions/nil-mri-tot';
+import { getItrEmploymentDetails, getStoredPhone, sendWhatsAppMessage, renderNoEmployerCard, sendWhatsAppImage, createItrReturn, getItrReturn } from '@/app/actions/nil-mri-tot';
 import { getKnownPhone } from '@/app/_lib/session-store';
 import { Loader2, AlertTriangle } from 'lucide-react';
 
@@ -64,6 +64,8 @@ function EmploymentIncomeContent() {
   const [error, setError] = useState('');
   const [finishing, setFinishing] = useState(false);
   const [noEmployerMessage, setNoEmployerMessage] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState('');
   const hasLoadedEmploymentRef = useRef(false);
 
   const taxpayerInfo = taxpayerStore.getTaxpayerInfo();
@@ -127,8 +129,57 @@ function EmploymentIncomeContent() {
 
   const totalIncome = rows.reduce((sum, r) => sum + r.totalEmploymentIncome, 0);
 
-  const handleNext = () => {
-    router.push(`/nil-mri-tot/itr/return-information${phoneParam}`);
+  const handleNext = async () => {
+    setCreating(true);
+    setCreateError('');
+    try {
+      const data = taxpayerStore.getItrData();
+      const result = await createItrReturn({
+        pin: taxpayerInfo.pin,
+        period: data.filingPeriod,
+        returnType: 'normal',
+        pensionContribution: Number(data.pensionContribution) || 0,
+        shifContribution: Number(data.shifContribution) || 0,
+        hlContribution: Number(data.hlContribution) || 0,
+        pmfContribution: Number(data.pmfContribution) || 0,
+        insurancePolicies: data.hasInsurancePolicy ? data.insurancePolicies : [],
+        disabilityCertificates: [],
+        employmentIncome: data.employmentIncomeRows,
+        mortgages: [],
+      });
+
+      if (!result.success) {
+        setCreateError(result.message || '');
+        return;
+      }
+
+      taxpayerStore.setItrField('taxReturnId', result.taxReturnId || null);
+      taxpayerStore.setItrField('taxPayerId', result.taxPayerId || null);
+      taxpayerStore.setItrField('taxObligationId', result.taxObligationId || null);
+
+      if (result.arrays) {
+        taxpayerStore.setItrField('itrReturnMortgages', result.arrays.mortgages);
+        taxpayerStore.setItrField('itrReturnInsurancePolicies', result.arrays.insurancePolicies);
+        taxpayerStore.setItrField('itrReturnCarBenefits', result.arrays.carBenefits);
+        taxpayerStore.setItrField('itrReturnDisabilityCerts', result.arrays.disabilityCertificates);
+        taxpayerStore.setItrField('taxReturnRef', result.arrays.taxReturnRef);
+        taxpayerStore.setItrField('itrStatus', result.arrays.status);
+      }
+
+      if (result.taxPayerId && result.taxObligationId && data.filingPeriod) {
+        try {
+          await getItrReturn(result.taxPayerId, result.taxObligationId, data.filingPeriod);
+        } catch {
+          // Non-fatal: tax-computation page will fallback
+        }
+      }
+
+      router.push(`/nil-mri-tot/itr/tax-computation${phoneParam}`);
+    } catch (e: any) {
+      setCreateError(e.message || '');
+    } finally {
+      setCreating(false);
+    }
   };
 
   const handleFinishNoIncome = async () => {
@@ -164,13 +215,13 @@ function EmploymentIncomeContent() {
   return (
     <Layout
       title="File Tax Return"
-      onBack={() => router.push(`/nil-mri-tot/itr/verify${phoneParam}`)}
+      onBack={() => router.push(`/nil-mri-tot/itr/return-information${phoneParam}`)}
       showMenu
     >
       <div className="space-y-4">
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
           <h1 className="text-base font-semibold">Income Tax Return</h1>
-          <p className="text-gray-400 text-xs">Step 1/3 — Employment Income</p>
+          <p className="text-gray-400 text-xs">Step 2/3 — Employment Income</p>
         </div>
 
         <p className="text-sm font-semibold text-gray-700">Details Of Employment Income</p>
@@ -255,9 +306,9 @@ function EmploymentIncomeContent() {
           </div>
         )}
 
-        {error && rows.length > 0 && (
+        {(error || createError) && rows.length > 0 && (
           <Card className="p-3 bg-red-50 border-red-200">
-            <p className="text-xs text-red-600">{error}</p>
+            <p className="text-xs text-red-600">{createError || error}</p>
           </Card>
         )}
 
@@ -273,8 +324,8 @@ function EmploymentIncomeContent() {
             >
               Cancel
             </Button>
-            <Button onClick={handleNext} className="flex-1">
-              Next
+            <Button onClick={handleNext} disabled={creating} className="flex-1">
+              {creating ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Calculating Tax...</> : 'Next'}
             </Button>
           </div>
         ) : null}

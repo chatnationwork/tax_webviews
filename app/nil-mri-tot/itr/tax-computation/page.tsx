@@ -232,7 +232,7 @@ function TaxComputationContent() {
   return (
     <Layout
       title="File Tax Return"
-      onBack={() => router.push(`/nil-mri-tot/itr/return-information${phoneParam}`)}
+      onBack={() => router.push(`/nil-mri-tot/itr/employment-income${phoneParam}`)}
       showMenu
     >
       <div className="space-y-4">

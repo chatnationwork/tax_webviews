@@ -151,7 +151,7 @@ function ItrVerifyContent() {
     taxpayerStore.setItrField('obligationId', itrObligation.obligationId);
     taxpayerStore.setItrField('obligationCode', itrObligation.obligationCode);
     taxpayerStore.setItrField('filingPeriod', filingPeriod);
-    router.push(`/nil-mri-tot/itr/employment-income${phoneParam}`);
+    router.push(`/nil-mri-tot/itr/return-information${phoneParam}`);
   };
 
   const handleBack = async () => {
