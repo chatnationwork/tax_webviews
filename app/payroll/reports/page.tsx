@@ -18,13 +18,12 @@ import {
   getPayrolls, 
   exportReport, 
   sendReportToWhatsApp,
+  resolveFullReportDownloadUrl,
   Payroll,
 } from '../../actions/payroll';
 import { getStoredPhoneServer } from '@/app/actions/auth';
 import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
 
-
-const PAYROLL_BASE_URL = 'https://kratest.pesaflow.com';
 
 const REPORT_TYPES = [
   { value: 'p10', label: 'P10 Tax Report', description: 'Monthly PAYE tax return' },
@@ -34,11 +33,6 @@ const REPORT_TYPES = [
   { value: 'payroll_housing_levy_report', label: 'AHL Report', description: 'Affordable Housing Levy' },
   { value: 'payroll_nssf_report', label: 'NSSF Report', description: 'National Social Security Fund' },
 ];
-
-const getFullDownloadUrl = (downloadUrl: string): string => {
-  if (downloadUrl.startsWith('http')) return downloadUrl;
-  return `${PAYROLL_BASE_URL}${downloadUrl}`;
-};
 
 function ReportsContent() {
   const router = useRouter();
@@ -131,7 +125,7 @@ function ReportsContent() {
         selectedPayroll.ref_no
       );
       
-      const fullDownloadUrl = getFullDownloadUrl(result.download_url);
+      const fullDownloadUrl = await resolveFullReportDownloadUrl(result.download_url);
       await sendReportToWhatsApp(fullDownloadUrl, result.password, phone);
       
       setSuccess(true);

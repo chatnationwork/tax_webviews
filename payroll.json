@@ -1,0 +1,1128 @@
+{
+  "info": {
+    "_postman_id": "904fe36b-cd39-42cd-8696-f25821027d51",
+    "name": "Payroll API Docs v1",
+    "description": "Collection for Payroll Solution API v1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "26799658"
+  },
+  "item": [
+    {
+      "name": "Employee Management",
+      "item": [
+        {
+          "name": "Validate Employee Details",
+          "description": "Query params pin and tax_payer_pin are both the employee KRA PIN. employer_tax_payer_id must be the numeric employer taxpayer ID (see example 21128), not a KRA PIN.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/employee/personal-details/validate?pin=A0******09L&gui=107*****6&type=citizen&first_name=George&employer_tax_payer_id=21128&tax_payer_pin=A0******09L",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "employee",
+                "personal-details",
+                "validate"
+              ],
+              "query": [
+                {
+                  "key": "pin",
+                  "value": "A0******09L"
+                },
+                {
+                  "key": "gui",
+                  "value": "107*****6"
+                },
+                {
+                  "key": "type",
+                  "value": "citizen"
+                },
+                {
+                  "key": "first_name",
+                  "value": "George"
+                },
+                {
+                  "key": "employer_tax_payer_id",
+                  "value": "21128"
+                },
+                {
+                  "key": "tax_payer_pin",
+                  "value": "A0******09L"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Single Employee",
+          "description": "Individual employer flow: employer_type individual; employee.organization_id may be empty string when not applicable.",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employees\": [\n    {\n      \"basic_salary\": \"60000\",\n      \"contract_type\": \"fixed-term\",\n      \"date_of_completion\": \"2026-01-01\",\n      \"date_of_employment\": \"2024-01-01\",\n      \"dob\": \"2001-06-11\",\n      \"email\": \"\",\n      \"employer_tax_payer_id\": \"21128\",\n      \"employment_no\": \"\",\n      \"gender\": \"M\",\n      \"gui\": \"30**********35\",\n      \"housing_allowance\": \"0\",\n      \"items\": [],\n      \"msisdn\": \"25********55\",\n      \"name\": \"TEST USER\",\n      \"no\": \"1\",\n      \"nssf_no\": \"6788778\",\n      \"organization_id\": \"\",\n      \"pin\": \"A0*********L\",\n      \"primary_employee\": \"yes\",\n      \"shif_no\": \"895570\",\n      \"transport_allowance\": \"0\",\n      \"type\": \"citizen\"\n    }\n  ],\n  \"employer_type\": \"individual\",\n  \"employer_tax_payer_id\": 124234\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/employee",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "employee"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Bulk Employees (Upload)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "attachment",
+                  "type": "file",
+                  "value": null
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/employee/upload-employees?type=employees&organization_id=&employer_tax_payer_id=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "employee",
+                "upload-employees"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "employees"
+                },
+                {
+                  "key": "organization_id",
+                  "value": ""
+                },
+                {
+                  "key": "employer_tax_payer_id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Employee",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"basic_salary\": \"65000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/employee/:uuid/update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "employee",
+                ":uuid",
+                "update"
+              ],
+              "variable": [
+                {
+                  "key": "uuid",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Employee",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":false,\"deactivation_reason\":\"Go on break\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/employee/:uuid/toggle-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "employee",
+                ":uuid",
+                "toggle-status"
+              ],
+              "variable": [
+                {
+                  "key": "uuid",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Employee",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":true,\"deactivation_reason\":\"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/employee/:uuid/toggle-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "employee",
+                ":uuid",
+                "toggle-status"
+              ],
+              "variable": [
+                {
+                  "key": "uuid",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Terminate Employee",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"termination_reason\":\"End of contract\",\"termination_date\":\"2025-12-04T04:32:00.000Z\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/employee/:uuid/remove",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "employee",
+                ":uuid",
+                "remove"
+              ],
+              "variable": [
+                {
+                  "key": "uuid",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reinstate Employee",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"new_employment_no\":\"SAMPLEEMP220\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/employee/:uuid/reinstate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "employee",
+                ":uuid",
+                "reinstate"
+              ],
+              "variable": [
+                {
+                  "key": "uuid",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Employees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/employee?page=1&page_size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "employee"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "multi_filter",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "contract_type",
+                  "value": null,
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Employee",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/employee/:uuid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "employee",
+                ":uuid"
+              ],
+              "variable": [
+                {
+                  "key": "uuid",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payroll Processing",
+      "item": [
+        {
+          "name": "Process Regular Payroll",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"period\":\"2025-09-30\",\n  \"employer_tax_payer_id\":\"21128\", \n  \"contract_type\":[\"permanent\",\"contract\",\"internship\",\"fixed-term\",\"casual\"],\n  \"payroll_type\":\"regular\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Fetch Payroll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/:ref_no",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                ":ref_no"
+              ],
+              "variable": [
+                {
+                  "key": "ref_no",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Payroll",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"pending_filing\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/:ref_no/update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                ":ref_no",
+                "update"
+              ],
+              "variable": [
+                {
+                  "key": "ref_no",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Payrolls",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "page_size",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "period",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "payroll_type",
+                  "value": null,
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Payroll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/:ref_no",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                ":ref_no"
+              ],
+              "variable": [
+                {
+                  "key": "ref_no",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Payroll Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Available Periods",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/get-periods",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "get-periods"
+              ],
+              "query": [
+                {
+                  "key": "employer_tax_payer_id",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "organization_id",
+                  "value": null,
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get System Constants",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/get-constants",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "get-constants"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Download Payslip",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/employee/download-payslip/:ref_no",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "employee",
+                "download-payslip",
+                ":ref_no"
+              ],
+              "variable": [
+                {
+                  "key": "ref_no",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Payslips",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/:ref_no/send-payslips",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                ":ref_no",
+                "send-payslips"
+              ],
+              "variable": [
+                {
+                  "key": "ref_no",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Single Payslip",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_uuid\": \"string\",\n  \"email\": \"employee@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/:ref_no/send-one-payslip",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                ":ref_no",
+                "send-one-payslip"
+              ],
+              "variable": [
+                {
+                  "key": "ref_no",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Filing",
+      "item": [
+        {
+          "name": "File PAYE",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/:ref_no/file-return",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                ":ref_no",
+                "file-return"
+              ],
+              "variable": [
+                {
+                  "key": "ref_no",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update PAYE Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"new_itax_token\",\n  \"expires_at\": \"2024-12-31T23:59:59Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/update-paye-token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "update-paye-token"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "Generate Payment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"ref_no\":\"PR-BEINRE\",\"type\":\"AHL\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/make-payment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "make-payment"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "token generation",
+      "item": [
+        {
+          "name": "OTP Validate",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"msisdn\": \"0727307123\",\n    \"otp\": \"NJHWIA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://kratest.pesaflow.com/api/ussd/validate-otp",
+              "protocol": "https",
+              "host": [
+                "kratest",
+                "pesaflow",
+                "com"
+              ],
+              "path": [
+                "api",
+                "ussd",
+                "validate-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OTP Generate",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"msisdn\": \"0727307123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://kratest.pesaflow.com/api/ussd/otp",
+              "protocol": "https",
+              "host": [
+                "kratest",
+                "pesaflow",
+                "com"
+              ],
+              "path": [
+                "api",
+                "ussd",
+                "otp"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tax Reports",
+      "item": [
+        {
+          "name": "Export P10 Tax Report",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"report_type\": \"p10\",\n  \"period\": \"2024-09-30\",\n  \"payroll_ref_no\": \"PR-HALLHV\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/export-reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "export-reports"
+              ]
+            },
+            "description": "Export P10 Tax Report for a specific payroll period."
+          },
+          "response": []
+        },
+        {
+          "name": "Export Fringe Benefit Report",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"report_type\": \"fringe_benefit\",\n  \"period\": \"2024-09-30\",\n  \"payroll_ref_no\": \"PR-HALLHV\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/export-reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "export-reports"
+              ]
+            },
+            "description": "Export Fringe Benefit Tax Report for a specific payroll period."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Templates",
+      "item": [
+        {
+          "name": "Download Template",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/employee/view-template/:name",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "employee",
+                "view-template",
+                ":name"
+              ],
+              "variable": [
+                {
+                  "key": "name",
+                  "value": "Employee Upload Template.xlsx"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payroll Reports",
+      "item": [
+        {
+          "name": "Export Payroll Details (Muster Roll)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"report_type\": \"payroll_details\",\n  \"period\": \"2024-09-30\",\n  \"payroll_ref_no\": \"PR-HALLHV\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/export-reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "export-reports"
+              ]
+            },
+            "description": "Export Payroll Muster Roll Report containing detailed payroll breakdown."
+          },
+          "response": []
+        },
+        {
+          "name": "Export SHIF Report",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"report_type\": \"payroll_shif_report\",\n  \"period\": \"2024-09-30\",\n  \"payroll_ref_no\": \"PR-HALLHV\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/export-reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "export-reports"
+              ]
+            },
+            "description": "Export Social Health Insurance Fund (SHIF) Report."
+          },
+          "response": []
+        },
+        {
+          "name": "Export AHL Report",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"report_type\": \"payroll_housing_levy_report\",\n  \"period\": \"2024-09-30\",\n  \"payroll_ref_no\": \"PR-HALLHV\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/export-reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "export-reports"
+              ]
+            },
+            "description": "Export Affordable Housing Levy (AHL) Report."
+          },
+          "response": []
+        },
+        {
+          "name": "Export NSSF Report",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"report_type\": \"payroll_nssf_report\",\n  \"period\": \"2024-09-30\",\n  \"payroll_ref_no\": \"PR-HALLHV\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/export-reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payroll",
+                "export-reports"
+              ]
+            },
+            "description": "Export National Social Security Fund (NSSF) Report."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Download Report",
+      "item": [
+        {
+          "name": "Download Report File",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/static/reports/:filename",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "static",
+                "reports",
+                ":filename"
+              ],
+              "variable": [
+                {
+                  "key": "filename",
+                  "value": "payroll_items_9Lpptvp3gGM_1765218985.zip"
+                }
+              ]
+            },
+            "description": "Download the generated report file using the download_url from the export response."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://kratest.pesaflow.com/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

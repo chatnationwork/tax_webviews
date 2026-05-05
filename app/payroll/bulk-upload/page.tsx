@@ -92,8 +92,8 @@ function BulkUploadContent() {
         setTemplateSent(true);
         // Save org context
         payrollStore.setOrganizationContext({
-          organizationId: formData.organizationId,
-          taxPayerId: formData.taxPayerId
+          organizationId: formData.organizationId.trim(),
+          taxPayerId: formData.taxPayerId.trim()
         });
         setStep('upload');
       } else {
@@ -107,14 +107,9 @@ function BulkUploadContent() {
   };
 
   const handleContinueToUpload = () => {
-    if (!formData.organizationId && !formData.taxPayerId) {
-      setError('Please provide either Organization ID or TaxPayer ID');
-      return;
-    }
-    
     payrollStore.setOrganizationContext({
-      organizationId: formData.organizationId,
-      taxPayerId: formData.taxPayerId
+      organizationId: formData.organizationId.trim(),
+      taxPayerId: formData.taxPayerId.trim()
     });
     setStep('upload');
   };
@@ -154,6 +149,24 @@ function BulkUploadContent() {
     setError('');
 
     try {
+      const employerTaxPayerId = formData.taxPayerId.trim();
+      const formOrg = formData.organizationId.trim();
+
+      if (!employerTaxPayerId) {
+        setError(
+          'Employer Tax Payer ID is required to submit employees. Add the numeric ID under Employer Tax Payer ID (same as payroll API employer_tax_payer_id).'
+        );
+        setLoading(false);
+        return;
+      }
+      if (!/^\d+$/.test(employerTaxPayerId)) {
+        setError(
+          'Employer Tax Payer ID must be digits only (e.g. 11690252), not a KRA PIN.'
+        );
+        setLoading(false);
+        return;
+      }
+
       // Filter out employees with errors
       const validEmployees = parsedEmployees.filter(emp => !emp.hasError);
       
@@ -163,14 +176,21 @@ function BulkUploadContent() {
         return;
       }
 
-      const result = await submitBulkEmployees(
-        validEmployees,
-        formData.organizationId ? 'organization' : 'individual',
-        formData.organizationId || formData.taxPayerId,
-        true // partial upload
-      );
+      const employeesToSubmit = validEmployees.map((emp) => {
+        const row =
+          emp.organization_id != null && String(emp.organization_id).trim() !== ''
+            ? String(emp.organization_id).trim()
+            : '';
+        const merged = row || formOrg;
+        return { ...emp, organization_id: merged };
+      });
+
+      const result = await submitBulkEmployees(employeesToSubmit, employerTaxPayerId);
 
       if (result.success) {
+        payrollStore.setPayrollContext({
+          employerTaxPayerId: employerTaxPayerId,
+        });
         setStep('success');
       } else {
         setError(result.error || 'Failed to submit employees');
@@ -242,21 +262,25 @@ function BulkUploadContent() {
             <Card>
               <div className="space-y-4">
                 <Input
-                  label="Organisation ID"
+                  label="Organisation ID (optional)"
                   value={formData.organizationId}
                   onChange={(value) => handleChange('organizationId', value)}
-                  placeholder="e.g., 12345"
+                  placeholder="Leave blank for empty organization_id"
                 />
 
                 <Input
-                  label="TaxPayer ID"
+                  label="Employer Tax Payer ID (numeric)"
                   value={formData.taxPayerId}
                   onChange={(value) => handleChange('taxPayerId', value)}
-                  placeholder="e.g., 21128"
+                  placeholder="e.g., 11690252"
+                  required
                 />
 
                 <p className="text-xs text-gray-500">
-                  Provide either Organisation ID (for organizations) or TaxPayer ID (for individuals).
+                  <strong>Organisation ID</strong> is optional — each submitted row uses{' '}
+                  <code className="text-[10px]">organization_id</code> from the file when set, otherwise an empty
+                  string if you leave this blank. Employer Tax Payer ID (numeric) is
+                  required to submit. Submit uses <code className="text-[10px]">employer_type: individual</code>.
                 </p>
               </div>
             </Card>
@@ -409,6 +433,15 @@ function BulkUploadContent() {
               </div>
             </Card>
 
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <p className="text-xs text-gray-600">
+                Submit uses <span className="font-medium">employer_type: individual</span> on{' '}
+                <code className="text-[10px]">POST /payroll/employee</code>. Each row includes{' '}
+                <code className="text-[10px]">organization_id</code> from the file when present, else from the optional
+                Organisation ID field above, else empty string.
+              </p>
+            </div>
+
             <Button onClick={handleSubmitEmployees} disabled={loading || validEmployees.length === 0}>
               {loading ? (
                 <>
@@ -429,8 +462,12 @@ function BulkUploadContent() {
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">Employees Uploaded Successfully!</h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-2">
               {validEmployees.length} employees have been added to your payroll.
+            </p>
+            <p className="text-xs text-gray-500 mb-6 max-w-sm mx-auto">
+              Submitted with <span className="font-medium text-gray-700">employer_type: individual</span>;{' '}
+              <code className="text-[10px]">organization_id</code> is from your file/inputs or empty string.
             </p>
             <Button onClick={() => router.push(buildBackUrl())}>
               Back to Payroll Services

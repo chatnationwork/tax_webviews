@@ -389,7 +389,8 @@ export async function fileNilReturn(
   taxPayerPin: string,
   obligationId: string,
   obligationCode: string,
-  returnPeriod: string
+  returnPeriod: string,
+  hasRentalProperty: boolean
 ): Promise<FileReturnResult> {
   try {
     const payload = {
@@ -398,6 +399,7 @@ export async function fileNilReturn(
       returnPeriod: returnPeriod,
       returnType: 'nil_return',
       tax_payer_pin: taxPayerPin,
+      has_rental_property: hasRentalProperty ? 'Y' : 'N',
     };
 
     logger.info('Filing NIL Return:', payload);

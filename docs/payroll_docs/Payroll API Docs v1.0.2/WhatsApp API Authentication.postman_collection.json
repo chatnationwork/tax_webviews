@@ -1,0 +1,73 @@
+{
+	"info": {
+		"_postman_id": "53447235-8568-44a8-9053-e7ba5db8b210",
+		"name": "WhatsApp API Authentication",
+		"description": "Generating an authentication token for USSD & WhatsApp integrations for Simplified Endpoints.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45312679"
+	},
+	"item": [
+		{
+			"name": "OTP Generate",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"msisdn\": \"0727307123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://kratest.pesaflow.com:30000/api/ussd/otp",
+					"protocol": "https",
+					"host": [
+						"kratest",
+						"pesaflow",
+						"com"
+					],
+					"path": [
+						"api",
+						"ussd",
+						"otp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OTP Validate",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"msisdn\": \"0727307123\",\n    \"otp\": \"NJHWIA\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://kratest.pesaflow.com:30000/api/ussd/validate-otp",
+					"protocol": "https",
+					"host": [
+						"kratest",
+						"pesaflow",
+						"com"
+					],
+					"path": [
+						"api",
+						"ussd",
+						"validate-otp"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

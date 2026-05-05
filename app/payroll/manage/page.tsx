@@ -33,6 +33,7 @@ import {
   searchEmployees, 
   updateEmployee, 
   deactivateEmployee, 
+  activateEmployee,
   terminateEmployee, 
   reinstateEmployee,
   Employee, 
@@ -93,13 +94,37 @@ const EDITABLE_FIELDS = [
   { key: 'department', label: 'Department', type: 'text' },
   { key: 'profession', label: 'Profession', type: 'text' },
   { key: 'salary', label: 'Basic Salary', type: 'number', apiKey: 'basic_salary' },
-  { key: 'contract_type', label: 'Contract Type', type: 'select', options: ['permanent', 'fixed-term', 'contract', 'part-time'] },
+  {
+    key: 'contract_type',
+    label: 'Contract Type',
+    type: 'select',
+    options: ['permanent', 'contract', 'casual', 'fixed-term', 'internship', 'part-time'],
+  },
   { key: 'date_of_completion', label: 'Contract End Date', type: 'date' },
   { key: 'nssf_no', label: 'NSSF Number', type: 'text' },
   { key: 'shif_no', label: 'SHIF Number', type: 'text' },
 ];
 
-type ActionType = 'edit' | 'deactivate' | 'terminate' | 'reinstate' | null;
+type ActionType = 'edit' | 'deactivate' | 'activate' | 'terminate' | 'reinstate' | null;
+
+const isActiveStatus = (status: string | null | undefined) =>
+  (status || '').toLowerCase() === 'active';
+
+function initialEditFields(employee: Employee): Record<string, string> {
+  return {
+    msisdn: employee.msisdn ?? '',
+    email: employee.email ?? '',
+    department: employee.department ?? '',
+    profession: employee.profession ?? '',
+    salary: employee.salary != null ? String(employee.salary) : '',
+    contract_type: employee.contract_type ?? '',
+    date_of_completion: employee.date_of_completion
+      ? String(employee.date_of_completion).split('T')[0]
+      : '',
+    nssf_no: employee.nssf_no ?? '',
+    shif_no: employee.shif_no ?? '',
+  };
+}
 
 const generateEmploymentNo = () => {
   const prefix = 'EMP';
@@ -128,7 +153,7 @@ const EmployeeCard = ({
   const [terminationDate, setTerminationDate] = useState(new Date().toISOString().split('T')[0]);
   const [newEmploymentNo, setNewEmploymentNo] = useState(generateEmploymentNo());
 
-  const handleFieldChange = (key: string, value: any) => {
+  const handleFieldChange = (key: string, value: string) => {
     setEditedFields(prev => ({ ...prev, [key]: value }));
     setSaveError(null);
   };
@@ -149,19 +174,31 @@ const EmployeeCard = ({
 
     try {
       switch (selectedAction) {
-        case 'edit':
-          if (Object.keys(editedFields).length === 0) {
-            resetActionState();
-            return;
-          }
-          const apiPayload: Record<string, any> = {};
+        case 'edit': {
+          const baseline = initialEditFields(employee);
+          const apiPayload: Record<string, string | number> = {};
           for (const [key, value] of Object.entries(editedFields)) {
             const fieldConfig = EDITABLE_FIELDS.find(f => f.key === key);
             const apiKey = fieldConfig?.apiKey || key;
-            apiPayload[apiKey] = value;
+            const before = baseline[key] ?? '';
+            const after = value === undefined || value === null ? '' : String(value);
+            if (String(before) !== String(after)) {
+              if (key === 'salary' && fieldConfig?.type === 'number') {
+                const n = parseFloat(after);
+                apiPayload[apiKey] = Number.isNaN(n) ? after : n;
+              } else {
+                apiPayload[apiKey] = after;
+              }
+            }
+          }
+          if (Object.keys(apiPayload).length === 0) {
+            setSaveError('No changes to save');
+            setSaving(false);
+            return;
           }
           await updateEmployee(employee.uuid, apiPayload);
           break;
+        }
           
         case 'deactivate':
           if (!deactivationReason.trim()) {
@@ -170,6 +207,10 @@ const EmployeeCard = ({
             return;
           }
           await deactivateEmployee(employee.uuid, deactivationReason);
+          break;
+
+        case 'activate':
+          await activateEmployee(employee.uuid);
           break;
           
         case 'terminate':
@@ -258,28 +299,130 @@ const EmployeeCard = ({
       {isExpanded && (
         <div className="border-t border-gray-100 p-4 bg-gray-50">
           {/* Action Buttons */}
-          <div className="grid grid-cols-4 gap-2 mb-4">
-            {['edit', 'deactivate', 'terminate', 'reinstate'].map((action) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (selectedAction === 'edit') {
+                  setSelectedAction(null);
+                  setEditedFields({});
+                } else {
+                  setEditedFields(initialEditFields(employee));
+                  setSelectedAction('edit');
+                }
+              }}
+              className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all text-xs ${
+                selectedAction === 'edit'
+                  ? 'border-indigo-500 bg-indigo-50'
+                  : 'border-gray-200 bg-white'
+              }`}
+            >
+              <Edit3 className="w-4 h-4" />
+              <span>Edit</span>
+            </button>
+            {isActiveStatus(employee.status) ? (
               <button
-                key={action}
-                onClick={() => setSelectedAction(selectedAction === action ? null : action as ActionType)}
+                type="button"
+                onClick={() =>
+                  setSelectedAction(selectedAction === 'deactivate' ? null : 'deactivate')
+                }
                 className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all text-xs ${
-                  selectedAction === action 
-                    ? action === 'edit' ? 'border-indigo-500 bg-indigo-50' 
-                    : action === 'deactivate' ? 'border-amber-500 bg-amber-50'
-                    : action === 'terminate' ? 'border-red-500 bg-red-50'
-                    : 'border-emerald-500 bg-emerald-50'
+                  selectedAction === 'deactivate'
+                    ? 'border-amber-500 bg-amber-50'
                     : 'border-gray-200 bg-white'
                 }`}
               >
-                {action === 'edit' && <Edit3 className="w-4 h-4" />}
-                {action === 'deactivate' && <UserMinus className="w-4 h-4" />}
-                {action === 'terminate' && <UserX className="w-4 h-4" />}
-                {action === 'reinstate' && <UserCheck className="w-4 h-4" />}
-                <span className="capitalize">{action}</span>
+                <UserMinus className="w-4 h-4" />
+                <span>Deactivate</span>
               </button>
-            ))}
+            ) : (
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedAction(selectedAction === 'activate' ? null : 'activate')
+                }
+                className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all text-xs ${
+                  selectedAction === 'activate'
+                    ? 'border-teal-500 bg-teal-50'
+                    : 'border-gray-200 bg-white'
+                }`}
+              >
+                <UserCheck className="w-4 h-4" />
+                <span>Activate</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() =>
+                setSelectedAction(selectedAction === 'terminate' ? null : 'terminate')
+              }
+              className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all text-xs ${
+                selectedAction === 'terminate'
+                  ? 'border-red-500 bg-red-50'
+                  : 'border-gray-200 bg-white'
+              }`}
+            >
+              <UserX className="w-4 h-4" />
+              <span>Terminate</span>
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setSelectedAction(selectedAction === 'reinstate' ? null : 'reinstate')
+              }
+              className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all text-xs ${
+                selectedAction === 'reinstate'
+                  ? 'border-emerald-500 bg-emerald-50'
+                  : 'border-gray-200 bg-white'
+              }`}
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>Reinstate</span>
+            </button>
           </div>
+
+          {selectedAction === 'edit' && (
+            <div className="mb-4 space-y-3 rounded-lg border border-gray-200 bg-white p-3">
+              <p className="text-xs font-medium text-gray-700">Edit fields — only changed values are sent</p>
+              {EDITABLE_FIELDS.map((field) => (
+                <div key={field.key}>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    {field.label}
+                  </label>
+                  {field.type === 'select' ? (
+                    <select
+                      value={editedFields[field.key] ?? ''}
+                      onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                    >
+                      {'options' in field && field.options
+                        ? field.options.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))
+                        : null}
+                    </select>
+                  ) : (
+                    <input
+                      type={
+                        field.type === 'number'
+                          ? 'number'
+                          : field.type === 'date'
+                            ? 'date'
+                            : field.type === 'email'
+                              ? 'email'
+                              : 'text'
+                      }
+                      value={editedFields[field.key] ?? ''}
+                      onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Action Forms */}
           {selectedAction === 'deactivate' && (

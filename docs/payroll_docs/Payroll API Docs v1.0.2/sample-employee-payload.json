@@ -1,0 +1,398 @@
+{
+  "allowance": "0",
+  "benefit": "66900.00",
+  "benefits": [
+    {
+      "amount": "20000.00",
+      "metadata": {
+        "body_type": "pickup",
+        "cc_rating": "3000",
+        "hiring_cost": 1000000,
+        "ownership_cost": 0,
+        "type": "owned"
+      },
+      "subtype": "car-benefit",
+      "type": "benefit"
+    },
+    {
+      "amount": "40000",
+      "metadata": {
+        "type": "employer_rented"
+      },
+      "subtype": "housing-benefit",
+      "type": "benefit"
+    },
+    {
+      "amount": "6900",
+      "metadata": {
+        "meal_benefit": "4000",
+        "non_cash_benefit": "2900",
+        "other_taxable_benefit": "0"
+      },
+      "subtype": "other-benefit",
+      "type": "benefit"
+    }
+  ],
+  "contract_type": "fixed-term",
+  "date_of_completion": "2025-12-03T03:40:00.000Z",
+  "date_of_employment": "2025-12-02T03:40:00.000Z",
+  "deduction": "98742.625",
+  "deduction_type": "PRMF",
+  "gross_pay": "166900.00",
+  "gui": "10*******56",
+  "income": [
+    {
+      "amount": 100000,
+      "subtype": "basic-salary",
+      "type": "salary"
+    },
+    {
+      "amount": "0",
+      "subtype": "housing-allowance",
+      "type": "allowance"
+    },
+    {
+      "amount": "0",
+      "subtype": "transport-allowance",
+      "type": "allowance"
+    },
+    {
+      "amount": "0",
+      "subtype": "leave-pay",
+      "type": "allowance"
+    },
+    {
+      "amount": "0",
+      "subtype": "overtime-allowance",
+      "type": "allowance"
+    },
+    {
+      "amount": "0",
+      "subtype": "directors-fee",
+      "type": "allowance"
+    },
+    {
+      "amount": "0",
+      "subtype": "other-cash-benefits",
+      "type": "allowance"
+    },
+    {
+      "amount": "0",
+      "metadata": {},
+      "subtype": "other-allowance",
+      "type": "allowance"
+    }
+  ],
+  "insurances": [],
+  "items": [
+    {
+      "amount": "0",
+      "currency": "KES",
+      "metadata": {},
+      "subtype": "FBT",
+      "type": "employer"
+    },
+    {
+      "amount": "40000",
+      "metadata": {
+        "type": "employer_rented"
+      },
+      "subtype": "housing-benefit",
+      "type": "benefit"
+    },
+    {
+      "amount": "15000",
+      "editable": false,
+      "metadata": {
+        "prmfs": [
+          {
+            "amount": 30000,
+            "name": "SAMPLE PENSION",
+            "scheme_id": "PRMF PENSION",
+            "type": "PRMF"
+          }
+        ]
+      },
+      "name": "PRMF",
+      "subtype": "PRMF",
+      "type": "allowable-deduction"
+    },
+    {
+      "amount": "2000.00",
+      "editable": false,
+      "metadata": {
+        "excess": "0",
+        "pensions": [
+          {
+            "amount": 2000,
+            "name": "Elisha Scheme",
+            "scheme_id": "KRAPENSIONSCHEME",
+            "type": "pension"
+          }
+        ]
+      },
+      "name": "pension",
+      "subtype": "pension",
+      "type": "allowable-deduction"
+    },
+    {
+      "amount": "2000.00",
+      "editable": false,
+      "metadata": {
+        "mortgages": [
+          {
+            "account_number": "32235235235",
+            "amount": 2000,
+            "end_date": "2026-02-28T03:43:00.000Z",
+            "name": "SAMPLE LENDER",
+            "start_date": "2025-12-02T03:43:00.000Z",
+            "type": "mortgage-interest"
+          }
+        ],
+        "principal_amount": "2000"
+      },
+      "name": "mortgage_interest",
+      "subtype": "mortgage-interest",
+      "type": "allowable-deduction"
+    },
+    {
+      "amount": "50",
+      "currency": "KES",
+      "id": "98456e76-b7c9-4d66-8dbd-4a424bad6fef",
+      "key": "NITA",
+      "metadata": {},
+      "status": "active",
+      "subtype": "NITA",
+      "type": "employer"
+    },
+    {
+      "amount": "2503.50",
+      "currency": "KES",
+      "id": "a70f7ab0-12da-4088-a603-5a4b444c2d24",
+      "key": "AHL",
+      "metadata": {},
+      "status": "active",
+      "subtype": "AHL",
+      "type": "employer"
+    },
+    {
+      "amount": "4320.00",
+      "currency": "KES",
+      "id": "2d8e43d3-595c-4616-999f-2d0fc4378c2b",
+      "key": "NSSF",
+      "metadata": {},
+      "status": "active",
+      "subtype": "NSSF",
+      "type": "employer"
+    },
+    {
+      "amount": "0",
+      "name": "non_cash_benefit",
+      "subtype": "non_cash_benefit",
+      "type": "allowable-deduction"
+    },
+    {
+      "amount": "0",
+      "name": "meal_benefit",
+      "subtype": "meal_benefit",
+      "type": "allowable-deduction"
+    },
+    {
+      "amount": "0.00",
+      "currency": "KES",
+      "metadata": {
+        "insurances": []
+      },
+      "subtype": "insurance-relief",
+      "type": "relief"
+    },
+    {
+      "amount": "2400.00",
+      "currency": "KES",
+      "subtype": "tax-relief",
+      "type": "relief"
+    },
+    {
+      "amount": "6900",
+      "metadata": {
+        "meal_benefit": "4000",
+        "non_cash_benefit": "2900",
+        "other_taxable_benefit": "0"
+      },
+      "subtype": "other-benefit",
+      "type": "benefit"
+    },
+    {
+      "amount": "20000.00",
+      "metadata": {
+        "body_type": "pickup",
+        "cc_rating": "3000",
+        "hiring_cost": 1000000,
+        "ownership_cost": 0,
+        "type": "owned"
+      },
+      "subtype": "car-benefit",
+      "type": "benefit"
+    },
+    {
+      "amount": "0",
+      "metadata": {},
+      "subtype": "other-allowance",
+      "type": "allowance"
+    },
+    {
+      "amount": "0",
+      "subtype": "other-cash-benefits",
+      "type": "allowance"
+    },
+    {
+      "amount": "0",
+      "subtype": "directors-fee",
+      "type": "allowance"
+    },
+    {
+      "amount": "0",
+      "subtype": "overtime-allowance",
+      "type": "allowance"
+    },
+    {
+      "amount": "0",
+      "subtype": "leave-pay",
+      "type": "allowance"
+    },
+    {
+      "amount": "0",
+      "subtype": "transport-allowance",
+      "type": "allowance"
+    },
+    {
+      "amount": "0",
+      "subtype": "housing-allowance",
+      "type": "allowance"
+    },
+    {
+      "amount": "100000",
+      "subtype": "basic-salary",
+      "type": "salary"
+    },
+    {
+      "amount": "2503.50",
+      "currency": "KES",
+      "name": "AHL",
+      "subtype": "AHL",
+      "type": "deduction"
+    },
+    {
+      "amount": "4589.75",
+      "currency": "KES",
+      "name": "SHIF",
+      "subtype": "SHIF",
+      "type": "deduction"
+    },
+    {
+      "amount": "4320.00",
+      "currency": "KES",
+      "name": "NSSF",
+      "subtype": "NSSF",
+      "type": "deduction"
+    },
+    {
+      "amount": "33329.375",
+      "currency": "KES",
+      "name": "PAYE",
+      "subtype": "PAYE",
+      "type": "deduction"
+    },
+    {
+      "amount": "54000",
+      "currency": "KES",
+      "metadata": {
+        "Elisha Scheme": {
+          "amount": 2000,
+          "metadata": {},
+          "name": "Elisha Scheme",
+          "scheme_id": "KRAPENSIONSCHEME",
+          "type": "pension"
+        },
+        "SAMPLE LENDER": {
+          "account_number": "32235235235",
+          "amount": 2000,
+          "end_date": "2026-02-28T03:43:00.000Z",
+          "index": 0,
+          "metadata": {},
+          "name": "SAMPLE LENDER",
+          "start_date": "2025-12-02T03:43:00.000Z",
+          "type": "mortgage-interest"
+        },
+        "SAMPLE PENSION": {
+          "amount": 30000,
+          "metadata": {},
+          "name": "SAMPLE PENSION",
+          "scheme_id": "PRMF PENSION",
+          "type": "PRMF"
+        },
+        "Sample": {
+          "amount": 20000,
+          "metadata": {},
+          "name": "Sample",
+          "type": "custom"
+        }
+      },
+      "subtype": "other",
+      "type": "deduction"
+    },
+    {
+      "amount": "0",
+      "currency": "KES",
+      "subtype": "disability-exemption",
+      "type": "exemption"
+    }
+  ],
+  "metadata": {
+    "bank_account_number": "",
+    "bank_code": "",
+    "bank_name": "",
+    "disability_tax_exempt": false,
+    "disability_tax_exemption_no": "",
+    "nita_registered": false
+  },
+  "mortgages": [
+    {
+      "account_number": "32235235235",
+      "amount": 2000,
+      "end_date": "2026-02-28T03:43:00.000Z",
+      "name": "SAMPLE LENDER",
+      "start_date": "2025-12-02T03:43:00.000Z",
+      "type": "mortgage-interest"
+    }
+  ],
+  "msisdn": "",
+  "name": "G****E K****I MU****I",
+  "net_pay": "68157.375",
+  "nssf_no": "235235235",
+  "pensions": [
+    {
+      "amount": 2000,
+      "name": "Sample Scheme Scheme",
+      "scheme_id": "KRAPENSIONSCHEME",
+      "type": "pension"
+    }
+  ],
+  "pin": "A0*******Z",
+  "primary_employee": true,
+  "prmfs": [
+    {
+      "amount": 30000,
+      "name": "SAMPLE PENSION",
+      "scheme_id": "PRMF PENSION",
+      "type": "PRMF"
+    }
+  ],
+  "relief": "2400.00",
+  "salary": "100000",
+  "tax_due": "44742.625",
+  "taxable_pay": "136486.75",
+  "type": "citizen",
+  "employer_tax_payer_id": 21128,
+  "employer_type": "individual"
+}
