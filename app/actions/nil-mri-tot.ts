@@ -60,6 +60,46 @@ export interface FileReturnResult {
   prn?: string;
 }
 
+/** Acknowledgement / receipt fields vary by obligation and API version — scan common shapes. */
+function extractFileReturnReceiptNumber(data: any): string | undefined {
+  if (!data || typeof data !== 'object') return undefined;
+  const r = data.response;
+  const nested = data.data;
+
+  const fromNested =
+    nested &&
+    (nested.receipt_number ||
+      nested.receiptNumber ||
+      nested.AckNumber ||
+      nested.ack_number ||
+      nested.kra_account_number ||
+      nested.KRAAccountNumber);
+
+  const fromRoot =
+    data.receipt_number ||
+    data.receiptNumber ||
+    data.kra_account_number ||
+    data.KRAAccountNumber ||
+    data.acknowledgement_number ||
+    data.acknowledgement_no;
+
+  const fromResponse =
+    r &&
+    (r.AckNumber ||
+      r.ack_number ||
+      r.kra_account_number ||
+      r.KRAAccountNumber ||
+      r.AcknowledgementNo ||
+      r.AcknowledgementNumber);
+
+  const first =
+    fromNested || fromRoot || fromResponse;
+
+  if (first === undefined || first === null) return undefined;
+  const s = String(first).trim();
+  return s !== '' ? s : undefined;
+}
+
 export interface LookupByIdResult {
   success: boolean;
   error?: string;
@@ -426,13 +466,12 @@ export async function fileNilReturn(
       data.success === true ||
       (data.response && data.response.Status === 'OK');
 
-    // Extract message and receipt based on format
     let message = data.message || 'NIL Return filed successfully';
-    let receiptNumber = data.receipt_number || data.receiptNumber;
+    if (data.response?.Message) message = data.response.Message;
 
-    if (data.response) {
-      if (data.response.Message) message = data.response.Message;
-      if (data.response.AckNumber) receiptNumber = data.response.AckNumber;
+    const receiptNumber = extractFileReturnReceiptNumber(data);
+    if (isSuccess && !receiptNumber) {
+      logger.warn('NIL file-return success but no acknowledgement field matched in response keys');
     }
 
     return {
