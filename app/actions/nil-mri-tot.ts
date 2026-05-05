@@ -1022,19 +1022,25 @@ export interface EmploymentIncomeResult {
     taxPayableOnTaxableSalary: number;
     amountOfTaxPayableRefundable: number;
   }[];
-  /** Disability exemption certificate details from the employment response */
   itExemptionCertDetails?: {
     certNo: string;
     effectiveDate: string;
     expiryDate: string;
   }[];
-  /** Top-level summary fields from the API */
   summary?: {
     totalPAYEDeducted: number;
     totalTaxPayable: number;
     amountPayableOrRefundable: number;
     personalRelief: number;
     isPwd: boolean;
+    ahLevy: number;
+    shiFund: number;
+    pension: number;
+    prmFund: number;
+    insuranceRelief: number;
+    mortgageInterest: number;
+    totalGrossPay: number;
+    totalTaxablePay: number;
   };
   message?: string;
 }
@@ -1085,18 +1091,76 @@ export interface ItrConfigResult {
   message?: string;
 }
 
+export interface ItrReturnArrays {
+  mortgages: {
+    id: string;
+    pinOfLender: string;
+    nameOfLender: string;
+    mortgageAccountNo: string;
+    amountBorrowed: number;
+    outstandingAmount: number;
+    interestAmountPaid: number;
+    validPin: boolean;
+  }[];
+  insurancePolicies: {
+    id: string;
+    pin: string;
+    insurerName: string;
+    typeOfPolicy: string;
+    insurancePolicyNo: string;
+    policyHolder: string;
+    childAge: number;
+    commencementDate: string;
+    maturityDate: string;
+    sumAssured: number;
+    annualPremiumPaid: number;
+    amountOfInsuranceRelief: number;
+    validPin: boolean;
+  }[];
+  carBenefits: {
+    id: string;
+    pinOfEmployer: string;
+    nameOfEmployer: string;
+    carRegNo: string;
+    make: string;
+    bodyType: string;
+    ccRating: string;
+    typeOfCar: string;
+    costOfCar: number;
+    costOfHire: number;
+    periodOfUse: string;
+    carBenefitAmount: number;
+    validPin: boolean;
+    validRegNo: boolean;
+  }[];
+  disabilityCertificates: {
+    id: string;
+    certNo: string;
+    effectiveDate: string;
+    expiryDate: string;
+  }[];
+  taxReturnRef: string;
+  status: string;
+  kraAccountNumber: string;
+  pensionContribution: number;
+  shifContribution: number;
+  hlContribution: number;
+  pmfContribution: number;
+}
+
 export interface CreateItrReturnResult {
   success: boolean;
   taxReturnId?: number;
   taxPayerId?: number;
   taxObligationId?: number;
-  data?: any;
+  arrays?: ItrReturnArrays;
   message?: string;
 }
 
 export interface ItrReturnResult {
   success: boolean;
   computation?: TaxComputationResult['computation'];
+  arrays?: ItrReturnArrays;
   rawData?: any;
   message?: string;
 }
@@ -1189,7 +1253,7 @@ export async function getItrFilingPeriods(
     return {
       success: false,
       periods: [],
-      message: error.response?.data?.message || error.message || 'Failed to retrieve ITR filing periods',
+      message: error.response?.data?.message || error.response?.data?.Message || error.response?.data?.description || error.message,
     };
   }
 }
@@ -1268,13 +1332,21 @@ export async function getItrEmploymentDetails(
         amountPayableOrRefundable: Number(data.amountPayableOrRefuindable || data.amountPayableOrRefundable || 0),
         personalRelief: Number(data.personalRelief || 0),
         isPwd: data.isPwd === 'Y' || data.isPwd === true,
+        ahLevy: Number(data.ahLevy || 0),
+        shiFund: Number(data.shiFund || 0),
+        pension: Number(data.pension || 0),
+        prmFund: Number(data.prmFund || 0),
+        insuranceRelief: Number(data.insuranceRelief || 0),
+        mortgageInterest: Number(data.mortgageInterest || 0),
+        totalGrossPay: Number(data.totalGrossPay || 0),
+        totalTaxablePay: Number(data.totalTaxablePay || 0),
       },
     };
   } catch (error: any) {
     logger.error('Get ITR Employment Details Error:', error.response?.data || error.message);
     return {
       success: false,
-      message: error.response?.data?.message || 'Failed to load employment income details',
+      message: error.response?.data?.message || error.response?.data?.Message || error.message,
     };
   }
 }
@@ -1288,6 +1360,80 @@ export async function getEmploymentIncome(
   returnYear?: number
 ): Promise<EmploymentIncomeResult> {
   return getItrEmploymentDetails(pin, returnYear);
+}
+
+/** Extract the structured arrays that both /tax-return/itr-create and /tax-return-itr share. */
+function extractItrReturnArrays(data: any): ItrReturnArrays {
+  const toNum = (v: unknown): number => {
+    if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
+    if (typeof v === 'string') { const n = Number(v.replace(/,/g, '').trim()); return Number.isFinite(n) ? n : 0; }
+    return 0;
+  };
+
+  const mortgages = Array.isArray(data.mortgage) ? data.mortgage.map((m: any) => ({
+    id: m.id || '',
+    pinOfLender: m.pin_of_lender || '',
+    nameOfLender: m.name_of_lender || '',
+    mortgageAccountNo: m.mortgage_account_no || '',
+    amountBorrowed: toNum(m.amount_borrowed),
+    outstandingAmount: toNum(m.outstanding_amount),
+    interestAmountPaid: toNum(m.interest_amount_paid ?? m.interest_paid),
+    validPin: m.valid_pin === true,
+  })) : [];
+
+  const insurancePolicies = Array.isArray(data.insurance_policy) ? data.insurance_policy.map((p: any) => ({
+    id: p.id || '',
+    pin: p.pin || '',
+    insurerName: p.insurer_name || '',
+    typeOfPolicy: p.type_of_policy || '',
+    insurancePolicyNo: p.insurance_policy_no || '',
+    policyHolder: p.policy_holder || '',
+    childAge: toNum(p.child_age),
+    commencementDate: p.commencement_date || '',
+    maturityDate: p.maturity_date || '',
+    sumAssured: toNum(p.sum_assured),
+    annualPremiumPaid: toNum(p.annual_premium_paid),
+    amountOfInsuranceRelief: toNum(p.amount_of_insurance_relief),
+    validPin: p.valid_pin === true,
+  })) : [];
+
+  const carBenefits = Array.isArray(data.car_benefit) ? data.car_benefit.map((c: any) => ({
+    id: c.id || '',
+    pinOfEmployer: c.pin_of_employer || '',
+    nameOfEmployer: c.name_of_employer || '',
+    carRegNo: c.car_reg_no || '',
+    make: c.make || '',
+    bodyType: c.body_type || '',
+    ccRating: c.cc_rating || '',
+    typeOfCar: c.type_of_car || '',
+    costOfCar: toNum(c.cost_of_car),
+    costOfHire: toNum(c.cost_of_hire),
+    periodOfUse: c.period_of_use || '',
+    carBenefitAmount: toNum(c.car_benefit_amount),
+    validPin: c.valid_pin === true,
+    validRegNo: c.valid_reg_no === true,
+  })) : [];
+
+  const disabilityCertificates = Array.isArray(data.disability_certificate) ? data.disability_certificate.map((d: any) => ({
+    id: d.id || '',
+    certNo: d.cert_no || '',
+    effectiveDate: d.effective_date || '',
+    expiryDate: d.expiry_date || '',
+  })) : [];
+
+  return {
+    mortgages,
+    insurancePolicies,
+    carBenefits,
+    disabilityCertificates,
+    taxReturnRef: data.tax_return_ref || '',
+    status: data.status || '',
+    kraAccountNumber: data.kra_account_number || '',
+    pensionContribution: toNum(data.pension_contribution),
+    shifContribution: toNum(data.shif_contribution),
+    hlContribution: toNum(data.hl_contribution),
+    pmfContribution: toNum(data.pmf_contribution),
+  };
 }
 
 /**
@@ -1379,13 +1525,13 @@ export async function createItrReturn(payload: {
       taxReturnId: data.tax_return_id || data.id || data.data?.id || data.data?.tax_return_id,
       taxPayerId: data.tax_payer_id || data.data?.tax_payer_id,
       taxObligationId: data.tax_obligation_id || data.data?.tax_obligation_id,
-      data: data,
+      arrays: extractItrReturnArrays(data),
     };
   } catch (error: any) {
     logger.error('Create ITR Return Error:', error.response?.data || error.message);
     return {
       success: false,
-      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to create ITR return',
+      message: error.response?.data?.message || error.response?.data?.Message || error.response?.data?.errors?.detail || error.message,
     };
   }
 }
@@ -1456,13 +1602,14 @@ export async function getItrReturn(
     return {
       success: true,
       computation,
+      arrays: extractItrReturnArrays(data),
       rawData: data,
     };
   } catch (error: any) {
     logger.error('Get ITR Return Error:', error.response?.data || error.message);
     return {
       success: false,
-      message: error.response?.data?.message || 'Failed to fetch ITR return computation',
+      message: error.response?.data?.message || error.response?.data?.Message || error.message,
     };
   }
 }
@@ -1493,7 +1640,7 @@ export async function getItrSummary(
     logger.error('Get ITR Summary Error:', error.response?.data || error.message);
     return {
       success: false,
-      message: error.response?.data?.message || 'Failed to fetch ITR summary',
+      message: error.response?.data?.message || error.response?.data?.Message || error.message,
     };
   }
 }

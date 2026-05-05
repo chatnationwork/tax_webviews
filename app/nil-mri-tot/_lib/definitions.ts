@@ -91,6 +91,67 @@ export interface EmploymentIncomeSummary {
   amountPayableOrRefundable: number;
   personalRelief: number;
   isPwd: boolean;
+  // Additional top-level fields returned by the API
+  ahLevy: number;
+  shiFund: number;
+  pension: number;
+  prmFund: number;
+  insuranceRelief: number;
+  mortgageInterest: number;
+  totalGrossPay: number;
+  totalTaxablePay: number;
+}
+
+// Structured arrays from GET /tax-return-itr and POST /tax-return/itr-create
+export interface ItrReturnMortgage {
+  id: string;
+  pinOfLender: string;
+  nameOfLender: string;
+  mortgageAccountNo: string;
+  amountBorrowed: number;
+  outstandingAmount: number;
+  interestAmountPaid: number;
+  validPin: boolean;
+}
+
+export interface ItrReturnInsurancePolicy {
+  id: string;
+  pin: string;
+  insurerName: string;
+  typeOfPolicy: string;
+  insurancePolicyNo: string;
+  policyHolder: string;
+  childAge: number;
+  commencementDate: string;
+  maturityDate: string;
+  sumAssured: number;
+  annualPremiumPaid: number;
+  amountOfInsuranceRelief: number;
+  validPin: boolean;
+}
+
+export interface ItrReturnCarBenefit {
+  id: string;
+  pinOfEmployer: string;
+  nameOfEmployer: string;
+  carRegNo: string;
+  make: string;
+  bodyType: string;
+  ccRating: string;
+  typeOfCar: string;
+  costOfCar: number;
+  costOfHire: number;
+  periodOfUse: string;
+  carBenefitAmount: number;
+  validPin: boolean;
+  validRegNo: boolean;
+}
+
+export interface ItrReturnDisabilityCert {
+  id: string;
+  certNo: string;
+  effectiveDate: string;
+  expiryDate: string;
 }
 
 // ITR — full wizard state
@@ -104,6 +165,13 @@ export interface ItrState {
   itExemptionCertDetails: DisabilityCertDetail[];
   employmentIncomeRows: EmploymentIncomeRow[];
   employmentIncomeSummary?: EmploymentIncomeSummary;
+  // Structured arrays from /tax-return-itr and /tax-return/itr-create
+  itrReturnMortgages?: ItrReturnMortgage[];
+  itrReturnInsurancePolicies?: ItrReturnInsurancePolicy[];
+  itrReturnCarBenefits?: ItrReturnCarBenefit[];
+  itrReturnDisabilityCerts?: ItrReturnDisabilityCert[];
+  taxReturnRef?: string;
+  itrStatus?: string;
   mortgages: MortgageEntry[];
   taxComputation?: TaxComputation;
   itrConfig?: ItrConfig;

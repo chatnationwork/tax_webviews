@@ -134,10 +134,8 @@ function ItrVerifyContent() {
     try {
       const storedPhone = taxpayerStore.getMsisdn() || await getStoredPhone() || getKnownPhone();
       if (storedPhone && taxpayerInfo) {
-        const message =
-          reason === 'no_obligation'
-            ? `Dear ${taxpayerInfo.fullName},\n\nYour PIN: ${taxpayerInfo.pin} does not currently have an Income Tax obligation eligible for ITR filing.\n\nNo action is required at this time.`
-            : `Dear ${taxpayerInfo.fullName},\n\nYour PIN: ${taxpayerInfo.pin} currently has no available filing period for Income Tax Return.\n\nNo action is required at this time.`;
+        const serverMsg = reason === 'no_period' ? periodError : obligationsMessage;
+        const message = `Dear ${taxpayerInfo.fullName},\n\n${serverMsg}`;
         await sendWhatsAppMessage({ recipientPhone: storedPhone, message });
       }
     } catch (e) {

@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button, Input, Select } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
 import { validateInsurancePin, createItrReturn, getItrReturn } from '@/app/actions/nil-mri-tot';
-import { Loader2, Plus, Trash2, Shield, CircleDot, Landmark, Wallet } from 'lucide-react';
-import type { ItrConfigLimits, MortgageEntry, DisabilityCertDetail } from '../../_lib/definitions';
+import { Loader2, Plus, Trash2, Shield, CircleDot } from 'lucide-react';
+import type { ItrConfigLimits, DisabilityCertDetail } from '../../_lib/definitions';
 
 function getConfigForPeriod(itrConfig: any, filingPeriod: string): ItrConfigLimits | null {
   if (!itrConfig) return null;
@@ -30,11 +30,12 @@ function ReturnInformationContent() {
   const itrData = taxpayerStore.getItrData();
   const limits = getConfigForPeriod(itrData.itrConfig, itrData.filingPeriod);
 
-  // --- Deductions ---
-  const [pension, setPension] = useState(String(itrData.pensionContribution || ''));
-  const [shif, setShif] = useState(String(itrData.shifContribution || ''));
-  const [hl, setHl] = useState(String(itrData.hlContribution || ''));
-  const [pmf, setPmf] = useState(String(itrData.pmfContribution || ''));
+  // --- Deductions — pre-fill from store first, fall back to employment income summary ---
+  const summary = itrData.employmentIncomeSummary;
+  const [pension, setPension] = useState(String(itrData.pensionContribution || summary?.pension || ''));
+  const [shif, setShif] = useState(String(itrData.shifContribution || summary?.shiFund || ''));
+  const [hl, setHl] = useState(String(itrData.hlContribution || summary?.ahLevy || ''));
+  const [pmf, setPmf] = useState(String(itrData.pmfContribution || summary?.prmFund || ''));
 
   const deductionError = (value: string, max: number | undefined) => {
     const n = Number(value);
@@ -60,14 +61,6 @@ function ReturnInformationContent() {
   const isPwd = itrData.isPwd;
   const certDetails: DisabilityCertDetail[] = itrData.itExemptionCertDetails || [];
 
-  // --- Mortgage ---
-  const [hasMortgage, setHasMortgage] = useState((itrData.mortgages?.length ?? 0) > 0);
-  const [mortgages, setMortgages] = useState<MortgageEntry[]>(itrData.mortgages || []);
-  const [mortgageForm, setMortgageForm] = useState({
-    pinOfLender: '', nameOfLender: '', mortgageAccountNo: '',
-    amountBorrowed: '', outstandingAmount: '', interestAmountPaid: '',
-  });
-  const [showMortgageModal, setShowMortgageModal] = useState(false);
 
   useEffect(() => {
     if (!taxpayerInfo.pin) {
@@ -130,34 +123,6 @@ function ReturnInformationContent() {
     taxpayerStore.setItrField('insurancePolicies', updated);
   };
 
-  // --- Mortgage handlers ---
-  const handleAddMortgage = () => {
-    const { pinOfLender, nameOfLender, mortgageAccountNo, amountBorrowed, outstandingAmount, interestAmountPaid } = mortgageForm;
-    if (!pinOfLender || !mortgageAccountNo || !amountBorrowed || !interestAmountPaid) return;
-
-    const maxInterest = limits?.mortgage?.interestCap?.max;
-    const interest = Number(interestAmountPaid);
-    const cappedInterest = maxInterest ? Math.min(interest, maxInterest) : interest;
-
-    const entry: MortgageEntry = {
-      pinOfLender, nameOfLender, mortgageAccountNo,
-      amountBorrowed: Number(amountBorrowed),
-      outstandingAmount: Number(outstandingAmount || 0),
-      interestAmountPaid: cappedInterest,
-    };
-    const updated = [...mortgages, entry];
-    setMortgages(updated);
-    taxpayerStore.setItrField('mortgages', updated);
-    setShowMortgageModal(false);
-    setMortgageForm({ pinOfLender: '', nameOfLender: '', mortgageAccountNo: '', amountBorrowed: '', outstandingAmount: '', interestAmountPaid: '' });
-  };
-
-  const handleRemoveMortgage = (index: number) => {
-    const updated = mortgages.filter((_, i) => i !== index);
-    setMortgages(updated);
-    taxpayerStore.setItrField('mortgages', updated);
-  };
-
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
 
@@ -192,17 +157,26 @@ function ReturnInformationContent() {
         insurancePolicies: hasInsurance ? data.insurancePolicies : [],
         disabilityCertificates: [],
         employmentIncome: data.employmentIncomeRows,
-        mortgages: data.mortgages || [],
+        mortgages: [],
       });
 
       if (!result.success) {
-        setCreateError(result.message || 'Failed to create ITR return');
+        setCreateError(result.message || '');
         return;
       }
 
       taxpayerStore.setItrField('taxReturnId', result.taxReturnId || null);
       taxpayerStore.setItrField('taxPayerId', result.taxPayerId || null);
       taxpayerStore.setItrField('taxObligationId', result.taxObligationId || null);
+
+      if (result.arrays) {
+        taxpayerStore.setItrField('itrReturnMortgages', result.arrays.mortgages);
+        taxpayerStore.setItrField('itrReturnInsurancePolicies', result.arrays.insurancePolicies);
+        taxpayerStore.setItrField('itrReturnCarBenefits', result.arrays.carBenefits);
+        taxpayerStore.setItrField('itrReturnDisabilityCerts', result.arrays.disabilityCertificates);
+        taxpayerStore.setItrField('taxReturnRef', result.arrays.taxReturnRef);
+        taxpayerStore.setItrField('itrStatus', result.arrays.status);
+      }
 
       // Trigger backend tax computation (personal relief, PAYE reconciliation etc.)
       if (result.taxPayerId && result.taxObligationId && data.filingPeriod) {
@@ -215,7 +189,7 @@ function ReturnInformationContent() {
 
       router.push(`/nil-mri-tot/itr/tax-computation${phoneParam}`);
     } catch (e: any) {
-      setCreateError(e.message || 'Unexpected error');
+      setCreateError(e.message || '');
     } finally {
       setCreating(false);
     }
@@ -334,58 +308,6 @@ function ReturnInformationContent() {
           )}
         </Card>
 
-        {/* Mortgage */}
-        <Card className="space-y-3 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-gray-800 inline-flex items-center gap-2">
-              <Landmark className="w-4 h-4 text-emerald-600" />
-              Mortgage Interest
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <p className="text-xs text-gray-600 font-medium">Do you have a mortgage?</p>
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input type="radio" name="mortgage" checked={!hasMortgage} onChange={() => setHasMortgage(false)} className="w-3 h-3" />
-              <span className="text-xs text-gray-700">No</span>
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input type="radio" name="mortgage" checked={hasMortgage} onChange={() => setHasMortgage(true)} className="w-3 h-3" />
-              <span className="text-xs text-gray-700">Yes</span>
-            </label>
-          </div>
-
-          {hasMortgage && (
-            <div className="space-y-2">
-              {mortgages.length === 0 ? (
-                <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center space-y-2">
-                  <p className="text-sm font-medium text-gray-700">Add Mortgage Details</p>
-                  <button onClick={() => setShowMortgageModal(true)} className="px-4 py-1.5 bg-gray-900 text-white text-xs rounded-lg hover:bg-gray-700">
-                    Add Mortgage
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {mortgages.map((m, i) => (
-                    <div key={i} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
-                      <div>
-                        <p className="text-xs font-medium text-gray-800">{m.nameOfLender || m.pinOfLender}</p>
-                        <p className="text-xs text-gray-500">A/C {m.mortgageAccountNo} — Interest: KES {m.interestAmountPaid.toLocaleString()}</p>
-                      </div>
-                      <button type="button" onClick={() => handleRemoveMortgage(i)} className="text-red-500 hover:text-red-700" aria-label="Remove mortgage"><Trash2 className="w-4 h-4" /></button>
-                    </div>
-                  ))}
-                  <button type="button" onClick={() => setShowMortgageModal(true)} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium">
-                    <Plus className="w-3 h-3" /> Add another mortgage
-                  </button>
-                </div>
-              )}
-              {limits?.mortgage?.interestCap?.max && (
-                <p className="text-[10px] text-gray-400">Interest is capped at KES {limits.mortgage.interestCap.max.toLocaleString()} per year</p>
-              )}
-            </div>
-          )}
-        </Card>
-
         {createError && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-xs text-red-600">{createError}</p>
@@ -443,26 +365,6 @@ function ReturnInformationContent() {
         </div>
       )}
 
-      {/* Mortgage Modal */}
-      {showMortgageModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-gray-800">Mortgage Details</h2>
-            <Input label="Lender PIN" value={mortgageForm.pinOfLender} onChange={(v) => setMortgageForm({ ...mortgageForm, pinOfLender: v.toUpperCase() })} required placeholder="e.g. A012040964H" />
-            <Input label="Name of Lender" value={mortgageForm.nameOfLender} onChange={(v) => setMortgageForm({ ...mortgageForm, nameOfLender: v })} placeholder="Bank / lender name" />
-            <Input label="Mortgage Account No" value={mortgageForm.mortgageAccountNo} onChange={(v) => setMortgageForm({ ...mortgageForm, mortgageAccountNo: v })} required placeholder="Account number" />
-            <Input label="Amount Borrowed" value={mortgageForm.amountBorrowed} onChange={(v) => setMortgageForm({ ...mortgageForm, amountBorrowed: v })} required type="number" placeholder="0" />
-            <Input label="Outstanding Amount" value={mortgageForm.outstandingAmount} onChange={(v) => setMortgageForm({ ...mortgageForm, outstandingAmount: v })} type="number" placeholder="0" />
-            <Input label="Interest Amount Paid" value={mortgageForm.interestAmountPaid} onChange={(v) => setMortgageForm({ ...mortgageForm, interestAmountPaid: v })} required type="number" placeholder="0"
-              helperText={limits?.mortgage?.interestCap?.max ? `Capped at KES ${limits.mortgage.interestCap.max.toLocaleString()}` : undefined}
-            />
-            <div className="flex gap-2 pt-2">
-              <Button variant="secondary" onClick={() => setShowMortgageModal(false)} className="flex-1">Cancel</Button>
-              <Button onClick={handleAddMortgage} className="flex-1" disabled={!mortgageForm.pinOfLender || !mortgageForm.mortgageAccountNo || !mortgageForm.amountBorrowed || !mortgageForm.interestAmountPaid}>Add</Button>
-            </div>
-          </div>
-        </div>
-      )}
     </Layout>
   );
 }
