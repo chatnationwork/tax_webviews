@@ -72,11 +72,17 @@ function ConfirmContent() {
     const data = payrollStore.getEmployeeData();
     setEmployeeData(data);
     
-    if (!data.idNumber || !data.kraPin || !data.employerTaxPayerId) {
-      // Redirect back to personal info
+    if (!data.idNumber || !data.kraPin) {
       const params = new URLSearchParams();
       if (phone) params.set('phone', phone);
       router.push(`/payroll/add-employee/personal?${params.toString()}`);
+      return;
+    }
+    if (!data.employerTaxPayerId?.trim()) {
+      const params = new URLSearchParams();
+      if (phone) params.set('phone', phone);
+      router.push(`/payroll/add-employee/employment?${params.toString()}`);
+      return;
     }
   }, [phone, router]);
 
@@ -86,7 +92,6 @@ function ConfirmContent() {
 
     try {
       const result = await validateEmployeeDetails(
-        employeeData.employerKraPin,
         employeeData.idNumber,
         employeeData.kraPin,
         employeeData.firstName,
@@ -126,10 +131,11 @@ function ConfirmContent() {
 
     try {
       const data = payrollStore.getEmployeeData();
-      
+
       const result = await addEmployee({
         name: validationData?.name || `${data.firstName}`,
-        pin: data.kraPin,
+        /** Trial: API may expect employer KRA PIN in employee `pin` for individual employer add. */
+        pin: data.employerKraPin.trim(),
         nssf_no: validationData?.nssf_no || data.nssfNo,
         shif_no: validationData?.shif_no || data.shifNo,
         msisdn: phone,
@@ -140,7 +146,13 @@ function ConfirmContent() {
         salary: data.basicSalary,
         employer_tax_payer_id: data.employerTaxPayerId,
         dob: validationData?.dob || data.dob,
-        gui: data.idNumber
+        gui: data.idNumber,
+        gender: validationData?.gender,
+        has_benefits: data.hasBenefits,
+        housing_allowance: data.hasBenefits ? data.housingAllowance ?? 0 : 0,
+        transport_allowance: data.hasBenefits ? data.transportAllowance ?? 0 : 0,
+        organization_id: data.organizationId?.trim() ?? '',
+        date_of_completion: data.dateOfCompletion ?? ''
       });
 
       if (result.success) {
@@ -150,7 +162,7 @@ function ConfirmContent() {
         params.set('name', validationData?.name || data.firstName);
         router.push(`/payroll/add-employee/success?${params.toString()}`);
       } else {
-        setError(result.error || 'Failed to add employee');
+        setError(result.error || result.message || 'Failed to add employee');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to add employee');
@@ -233,10 +245,18 @@ function ConfirmContent() {
             <h3 className="text-sm font-semibold text-gray-900">Employment Details</h3>
           </div>
           <div className="space-y-1">
+            {employeeData.organizationId?.trim() ? (
+              <InfoRow label="Organisation ID" value={employeeData.organizationId} />
+            ) : (
+              <InfoRow label="Organisation ID" value="Not set (empty)" />
+            )}
             <InfoRow label="Employer TaxPayer ID" value={employeeData.employerTaxPayerId} />
             <InfoRow label="Employer KRA PIN" value={employeeData.employerKraPin} />
             <InfoRow label="Employment Type" value={employeeData.employmentType} />
             <InfoRow label="Start Date" value={employeeData.startDate} />
+            {employeeData.dateOfCompletion ? (
+              <InfoRow label="Contract end date" value={employeeData.dateOfCompletion} />
+            ) : null}
           </div>
         </Card>
 
@@ -249,6 +269,18 @@ function ConfirmContent() {
           <div className="space-y-1">
             <InfoRow label="Basic Salary" value={formatCurrency(employeeData.basicSalary)} />
             <InfoRow label="Has Benefits" value={employeeData.hasBenefits ? 'Yes' : 'No'} />
+            {employeeData.hasBenefits && (
+              <>
+                <InfoRow
+                  label="Housing allowance"
+                  value={formatCurrency(employeeData.housingAllowance ?? 0)}
+                />
+                <InfoRow
+                  label="Transport allowance"
+                  value={formatCurrency(employeeData.transportAllowance ?? 0)}
+                />
+              </>
+            )}
           </div>
         </Card>
 

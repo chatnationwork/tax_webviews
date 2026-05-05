@@ -21,11 +21,17 @@ class PayrollStore {
       kraPin: string;
       firstName: string;
       employerTaxPayerId: string;
+      /** Maps to API employee.organization_id; optional — empty string when unknown */
+      organizationId: string;
       employerKraPin: string;
       employmentType: string;
       startDate: string;
       basicSalary: number;
       hasBenefits: boolean;
+      housingAllowance?: number;
+      transportAllowance?: number;
+      /** payroll.json employee.date_of_completion */
+      dateOfCompletion?: string;
       // System-derived fields from validation
       dob?: string;
       nssfNo?: string;
@@ -57,11 +63,15 @@ class PayrollStore {
       kraPin: '',
       firstName: '',
       employerTaxPayerId: '',
+      organizationId: '',
       employerKraPin: '',
       employmentType: 'permanent',
       startDate: '',
       basicSalary: 0,
       hasBenefits: false,
+      housingAllowance: undefined,
+      transportAllowance: undefined,
+      dateOfCompletion: undefined,
     },
     organizationContext: {
       organizationId: '',
@@ -137,11 +147,15 @@ class PayrollStore {
       kraPin: '',
       firstName: '',
       employerTaxPayerId: '',
+      organizationId: '',
       employerKraPin: '',
       employmentType: 'permanent',
       startDate: '',
       basicSalary: 0,
       hasBenefits: false,
+      housingAllowance: undefined,
+      transportAllowance: undefined,
+      dateOfCompletion: undefined,
     };
   }
 
@@ -178,11 +192,15 @@ class PayrollStore {
         kraPin: '',
         firstName: '',
         employerTaxPayerId: '',
+        organizationId: '',
         employerKraPin: '',
         employmentType: 'permanent',
         startDate: '',
         basicSalary: 0,
         hasBenefits: false,
+        housingAllowance: undefined,
+        transportAllowance: undefined,
+        dateOfCompletion: undefined,
       },
       organizationContext: {
         organizationId: '',

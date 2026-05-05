@@ -30,6 +30,9 @@ function NilVerifyContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  /** Maps to `has_rental_property` (Y/N) on file-nil payload. */
+  const [hasProperty, setHasProperty] = useState<boolean | null>(null);
+
   useEffect(() => {
     const info = taxpayerStore.getTaxpayerInfo();
     setTaxpayerInfo(info);
@@ -115,13 +118,16 @@ function NilVerifyContent() {
     fetchPeriod();
   }, [selectedObligation, taxpayerInfo?.pin]);
 
+  useEffect(() => {
+    setHasProperty(null);
+  }, [selectedObligation]);
 
   if (!mounted || !taxpayerInfo?.idNumber) {
     return null;
   }
 
   const handleFileReturn = async () => {
-    if (!selectedObligation || !filingPeriod) return;
+    if (!selectedObligation || !filingPeriod || hasProperty === null) return;
     
     setLoading(true);
     setError('');
@@ -133,11 +139,13 @@ function NilVerifyContent() {
       const selectedObsObj = obligations.find(o => o.value === selectedObligation);
       const obligationCode = selectedObsObj?.obligationCode || obligationId;
 
+      // has_rental_property on the API is driven only by the Yes/No radios above (no lookup).
       const result = await fileNilReturn(
         taxpayerInfo.pin,
         obligationId,
         obligationCode,
-        filingPeriod
+        filingPeriod,
+        hasProperty
       );
 
       // Find the name of the selected obligation
@@ -329,6 +337,36 @@ No action is required at this time.`;
               </div>
             )}
 
+            {obligations.length > 0 && selectedObligation && filingPeriod && !loadingPeriod && (
+              <div className="space-y-2 pt-1">
+                <p className="text-sm font-medium text-gray-800">
+                  Do you have a property? <span className="text-red-600">*</span>
+                </p>
+                <div className="flex flex-wrap gap-6">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-800">
+                    <input
+                      type="radio"
+                      name="nil-has-property"
+                      className="accent-[var(--kra-red)]"
+                      checked={hasProperty === true}
+                      onChange={() => setHasProperty(true)}
+                    />
+                    Yes
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-800">
+                    <input
+                      type="radio"
+                      name="nil-has-property"
+                      className="accent-[var(--kra-red)]"
+                      checked={hasProperty === false}
+                      onChange={() => setHasProperty(false)}
+                    />
+                    No
+                  </label>
+                </div>
+              </div>
+            )}
+
             {/* Finish button when no filing period */}
             {selectedObligation && !loadingPeriod && !filingPeriod && (
               <Button 
@@ -357,7 +395,7 @@ No action is required at this time.`;
               </div>
             )}
 
-            {obligations.length > 0 && filingPeriod && !periodError && (
+            {obligations.length > 0 && filingPeriod && !periodError && hasProperty !== null && (
               <Button 
                 onClick={handleFileReturn}
                 disabled={!selectedObligation || !filingPeriod || loading}

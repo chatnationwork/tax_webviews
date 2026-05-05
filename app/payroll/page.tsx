@@ -50,7 +50,7 @@ function PayrollServicesContent() {
     {
       id: 'bulk-upload',
       title: 'Bulk Upload Employees',
-      description: 'Upload multiple employees via Excel',
+      description: 'Upload Excel; submits as individual employer (employer_type individual)',
       icon: <Upload className="w-6 h-6" />,
       href: "/payroll/bulk-upload",
       color: 'text-purple-600',

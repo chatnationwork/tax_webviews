@@ -4,7 +4,7 @@ import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Briefcase, AlertCircle, Shield } from 'lucide-react';
 import { Layout, Card, Button, Input, Select } from '../../../_components/Layout';
-import {payrollStore } from '../../../_lib/payroll-store';
+import { payrollStore } from '../../../_lib/payroll-store';
 import { getStoredPhoneServer } from '@/app/actions/auth';
 import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
 
@@ -60,13 +60,28 @@ function EmploymentDetailsContent() {
     }
   }, [phone, router, checkingSession]);
 
-  const [formData, setFormData] = useState({
-    employerTaxPayerId: '',
-    employerKraPin: '',
-    employmentType: 'permanent',
-    startDate: '',
-    basicSalary: '',
-    hasBenefits: 'no'
+  const [formData, setFormData] = useState(() => {
+    const emp = payrollStore.getEmployeeData();
+    const org = payrollStore.getOrganizationContext();
+    return {
+      organizationId: emp.organizationId || org.organizationId || '',
+      employerTaxPayerId: emp.employerTaxPayerId || org.taxPayerId || '',
+      employerKraPin: emp.employerKraPin || '',
+      employmentType: emp.employmentType || 'permanent',
+      startDate: emp.startDate || '',
+      basicSalary:
+        emp.basicSalary != null && emp.basicSalary > 0 ? String(emp.basicSalary) : '',
+      hasBenefits: emp.hasBenefits ? 'yes' : 'no',
+      housingAllowance:
+        emp.housingAllowance != null && emp.housingAllowance > 0
+          ? String(emp.housingAllowance)
+          : '',
+      transportAllowance:
+        emp.transportAllowance != null && emp.transportAllowance > 0
+          ? String(emp.transportAllowance)
+          : '',
+      contractEndDate: emp.dateOfCompletion || ''
+    };
   });
   const [error, setError] = useState('');
 
@@ -92,6 +107,12 @@ function EmploymentDetailsContent() {
       setError('Employer TaxPayer ID is required');
       return;
     }
+    if (!/^\d+$/.test(formData.employerTaxPayerId.trim())) {
+      setError(
+        'Employer Tax Payer ID must be digits only (e.g. 11690252) — the numeric eTIMS taxpayer ID, not the employer KRA PIN.'
+      );
+      return;
+    }
     if (!formData.employerKraPin.trim()) {
       setError('Employer KRA PIN is required');
       return;
@@ -105,14 +126,47 @@ function EmploymentDetailsContent() {
       return;
     }
 
+    const hasBen = formData.hasBenefits === 'yes';
+    let housing = 0;
+    let transport = 0;
+    if (hasBen) {
+      housing = Math.max(0, Number(formData.housingAllowance) || 0);
+      transport = Math.max(0, Number(formData.transportAllowance) || 0);
+      if (
+        String(formData.housingAllowance ?? '').trim() !== '' &&
+        (isNaN(Number(formData.housingAllowance)) || Number(formData.housingAllowance) < 0)
+      ) {
+        setError('Enter a valid housing allowance amount or leave blank for 0');
+        return;
+      }
+      if (
+        String(formData.transportAllowance ?? '').trim() !== '' &&
+        (isNaN(Number(formData.transportAllowance)) || Number(formData.transportAllowance) < 0)
+      ) {
+        setError('Enter a valid transport allowance amount or leave blank for 0');
+        return;
+      }
+    }
+
     // Save to store
     payrollStore.setEmployeeData({
-      employerTaxPayerId: formData.employerTaxPayerId,
-      employerKraPin: formData.employerKraPin,
+      organizationId: formData.organizationId.trim(),
+      employerTaxPayerId: formData.employerTaxPayerId.trim(),
+      employerKraPin: formData.employerKraPin.trim(),
       employmentType: formData.employmentType,
       startDate: formData.startDate,
       basicSalary: Number(formData.basicSalary),
-      hasBenefits: formData.hasBenefits === 'yes'
+      hasBenefits: hasBen,
+      housingAllowance: hasBen ? housing : undefined,
+      transportAllowance: hasBen ? transport : undefined,
+      dateOfCompletion: formData.contractEndDate.trim() || undefined
+    });
+    payrollStore.setOrganizationContext({
+      organizationId: formData.organizationId.trim(),
+      taxPayerId: formData.employerTaxPayerId.trim()
+    });
+    payrollStore.setPayrollContext({
+      employerTaxPayerId: formData.employerTaxPayerId
     });
 
     // Navigate to confirmation
@@ -173,12 +227,27 @@ function EmploymentDetailsContent() {
         <Card>
           <div className="space-y-4">
             <Input
-              label="Employer TaxPayer ID"
+              label="Organisation ID (optional)"
+              value={formData.organizationId}
+              onChange={(value) => handleChange('organizationId', value)}
+              placeholder="Leave blank if not applicable"
+            />
+            <p className="text-xs text-gray-500 -mt-2">
+              Leave blank to send an empty <code className="text-[10px]">organization_id</code> on the API; fill only if
+              you have an organisation record ID.
+            </p>
+
+            <Input
+              label="Employer Tax Payer ID (numeric)"
               value={formData.employerTaxPayerId}
               onChange={(value) => handleChange('employerTaxPayerId', value)}
-              placeholder="e.g., 21128"
+              placeholder="e.g., 11690252"
               required
             />
+            <p className="text-xs text-gray-500 -mt-2">
+              Use the numeric organisation taxpayer ID from eTIMS / your payroll portal — not the employer KRA PIN
+              (that is the next field).
+            </p>
 
             <Input
               label="Employer KRA PIN"
@@ -211,6 +280,13 @@ function EmploymentDetailsContent() {
             />
 
             <Input
+              label="Contract end date (optional)"
+              value={formData.contractEndDate}
+              onChange={(value) => handleChange('contractEndDate', value)}
+              type="date"
+            />
+
+            <Input
               label="Basic Salary (KES)"
               value={formData.basicSalary}
               onChange={(value) => handleChange('basicSalary', value)}
@@ -230,6 +306,31 @@ function EmploymentDetailsContent() {
               ]}
               required
             />
+
+            {formData.hasBenefits === 'yes' && (
+              <>
+                <Input
+                  label="Housing allowance (KES, optional)"
+                  value={formData.housingAllowance}
+                  onChange={(value) => handleChange('housingAllowance', value)}
+                  type="number"
+                  placeholder="0"
+                  min="0"
+                />
+                <Input
+                  label="Transport allowance (KES, optional)"
+                  value={formData.transportAllowance}
+                  onChange={(value) => handleChange('transportAllowance', value)}
+                  type="number"
+                  placeholder="0"
+                  min="0"
+                />
+                <p className="text-xs text-gray-500">
+                  Sent as housing_allowance and transport_allowance string fields per payroll.json Add Single
+                  Employee.
+                </p>
+              </>
+            )}
           </div>
         </Card>
 

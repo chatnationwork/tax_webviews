@@ -4,10 +4,16 @@ import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Calculator, CheckCircle, AlertCircle, Calendar, Shield } from 'lucide-react';
 import { Layout, Card, Button, Input } from '../../_components/Layout';
-import { processRegularPayroll } from '../../actions/payroll';
+import {
+  processRegularPayroll,
+  getPayrollPeriods,
+  type PayrollPeriod
+} from '../../actions/payroll';
+import { payrollStore } from '../../_lib/payroll-store';
 import { getStoredPhoneServer } from '@/app/actions/auth';
 import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
 
+/** Matches payroll.json → Process Regular Payroll → contract_type array values */
 const CONTRACT_TYPES = [
   { value: 'permanent', label: 'Permanent' },
   { value: 'contract', label: 'Contract' },
@@ -15,6 +21,17 @@ const CONTRACT_TYPES = [
   { value: 'fixed-term', label: 'Fixed Term' },
   { value: 'casual', label: 'Casual' }
 ];
+
+/** Payroll API period is a date string e.g. 2025-09-30 (collection), not YYYY-MM from month inputs */
+function monthInputToPayrollPeriod(monthValue: string): string {
+  if (!monthValue) return '';
+  const [y, m] = monthValue.split('-').map((s) => parseInt(s, 10));
+  if (!y || !m) return monthValue;
+  const lastDay = new Date(y, m, 0);
+  const d = String(lastDay.getDate()).padStart(2, '0');
+  const mm = String(m).padStart(2, '0');
+  return `${y}-${mm}-${d}`;
+}
 
 function ProcessPayrollContent() {
   const router = useRouter();
@@ -69,10 +86,67 @@ function ProcessPayrollContent() {
   }, [phone, router, checkingSession]);
 
   const [formData, setFormData] = useState({
-    period: '',
     employerTaxPayerId: '',
     contractTypes: ['permanent'] as string[]
   });
+
+  const [availablePeriods, setAvailablePeriods] = useState<PayrollPeriod[]>([]);
+  const [periodsLoading, setPeriodsLoading] = useState(false);
+  const [periodFetchError, setPeriodFetchError] = useState<string | null>(null);
+  /** Period from GET /payroll/get-periods (full YYYY-MM-DD) */
+  const [apiPeriod, setApiPeriod] = useState('');
+  /** Fallback: YYYY-MM from month input */
+  const [manualMonth, setManualMonth] = useState('');
+  const [useManualPeriod, setUseManualPeriod] = useState(false);
+
+  useEffect(() => {
+    const pc = payrollStore.getPayrollContext();
+    const emp = payrollStore.getEmployeeData();
+    const id =
+      pc.employerTaxPayerId?.trim() ||
+      emp.employerTaxPayerId?.trim() ||
+      payrollStore.getOrganizationContext().taxPayerId?.trim();
+    if (id) {
+      setFormData((prev) =>
+        prev.employerTaxPayerId ? prev : { ...prev, employerTaxPayerId: id }
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    const employerId = formData.employerTaxPayerId.trim();
+    setApiPeriod('');
+    setPeriodFetchError(null);
+    if (!employerId) {
+      setAvailablePeriods([]);
+      setUseManualPeriod(true);
+      return;
+    }
+
+    const orgId = payrollStore.getOrganizationContext().organizationId?.trim();
+    let cancelled = false;
+    setPeriodsLoading(true);
+    setAvailablePeriods([]);
+
+    getPayrollPeriods(employerId, orgId || undefined).then((result) => {
+      if (cancelled) return;
+      setPeriodsLoading(false);
+      if (result.success && result.periods.length > 0) {
+        setAvailablePeriods(result.periods);
+        setPeriodFetchError(null);
+        setUseManualPeriod(false);
+      } else {
+        setAvailablePeriods([]);
+        setPeriodFetchError(result.error || 'No periods returned for this employer');
+        setUseManualPeriod(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [formData.employerTaxPayerId]);
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [refNo, setRefNo] = useState('');
@@ -94,13 +168,14 @@ function ProcessPayrollContent() {
   };
 
   const handleSubmit = async () => {
-    // Validation
-    if (!formData.period) {
-      setError('Please select a period');
-      return;
-    }
     if (!formData.employerTaxPayerId.trim()) {
       setError('Employer TaxPayer ID is required');
+      return;
+    }
+    if (!/^\d+$/.test(formData.employerTaxPayerId.trim())) {
+      setError(
+        'Employer Tax Payer ID must be numeric digits only (e.g. 11690252), not a KRA PIN.'
+      );
       return;
     }
     if (formData.contractTypes.length === 0) {
@@ -108,12 +183,32 @@ function ProcessPayrollContent() {
       return;
     }
 
+    let periodPayload = '';
+    const canUseApiList = availablePeriods.length > 0 && !useManualPeriod;
+    if (canUseApiList) {
+      if (!apiPeriod.trim()) {
+        setError('Please select a payroll period');
+        return;
+      }
+      periodPayload = apiPeriod.trim();
+    } else {
+      if (!manualMonth.trim()) {
+        setError('Please select a payroll month');
+        return;
+      }
+      periodPayload = monthInputToPayrollPeriod(manualMonth.trim());
+      if (!periodPayload) {
+        setError('Invalid payroll period');
+        return;
+      }
+    }
+
     setLoading(true);
     setError('');
 
     try {
       const result = await processRegularPayroll(
-        formData.period,
+        periodPayload,
         formData.employerTaxPayerId,
         formData.contractTypes
       );
@@ -220,28 +315,90 @@ function ProcessPayrollContent() {
         {/* Form */}
         <Card>
           <div className="space-y-4">
-            <div>
-              <label className="block text-xs text-gray-600 mb-1 font-medium">
-                Period <span className="text-[var(--kra-red)]">*</span>
-              </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="month"
-                  value={formData.period}
-                  onChange={(e) => handleChange('period', e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--kra-red)] focus:border-transparent"
-                />
-              </div>
-            </div>
-
             <Input
-              label="Employer TaxPayer ID"
+              label="Employer Tax Payer ID (numeric)"
               value={formData.employerTaxPayerId}
               onChange={(value) => handleChange('employerTaxPayerId', value)}
-              placeholder="e.g., 21128"
+              placeholder="e.g., 11690252"
               required
             />
+            <p className="text-xs text-gray-500 -mt-2">
+              Numeric taxpayer ID for the employer (same as validate/add employee APIs), not a KRA PIN.
+            </p>
+
+            <div>
+              <label className="block text-xs text-gray-600 mb-1 font-medium">
+                Payroll period <span className="text-[var(--kra-red)]">*</span>
+              </label>
+              {periodsLoading && (
+                <div className="flex items-center gap-2 py-2 text-xs text-gray-600">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading available periods…
+                </div>
+              )}
+              {!periodsLoading &&
+                availablePeriods.length > 0 &&
+                !useManualPeriod && (
+                  <div className="space-y-2">
+                    <select
+                      value={apiPeriod}
+                      onChange={(e) => setApiPeriod(e.target.value)}
+                      className="w-full pl-3 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--kra-red)] focus:border-transparent bg-white"
+                    >
+                      <option value="">Select period…</option>
+                      {availablePeriods.map((p) => (
+                        <option key={p.period} value={p.period}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUseManualPeriod(true);
+                        setApiPeriod('');
+                      }}
+                      className="text-xs text-blue-700 underline"
+                    >
+                      Enter month manually instead
+                    </button>
+                  </div>
+                )}
+              {!periodsLoading &&
+                (useManualPeriod || availablePeriods.length === 0) && (
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <input
+                        type="month"
+                        aria-label="Payroll month"
+                        title="Payroll month"
+                        value={manualMonth}
+                        onChange={(e) => setManualMonth(e.target.value)}
+                        className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--kra-red)] focus:border-transparent"
+                      />
+                    </div>
+                    {periodFetchError && (
+                      <p className="text-xs text-amber-700">{periodFetchError}</p>
+                    )}
+                    {availablePeriods.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUseManualPeriod(false);
+                          setManualMonth('');
+                        }}
+                        className="text-xs text-blue-700 underline"
+                      >
+                        Choose from API periods instead
+                      </button>
+                    )}
+                  </div>
+                )}
+              <p className="text-xs text-gray-500 mt-1">
+                Periods load from payroll/get-periods after you enter your employer tax payer ID.
+              </p>
+            </div>
 
             <div>
               <label className="block text-xs text-gray-600 mb-2 font-medium">
