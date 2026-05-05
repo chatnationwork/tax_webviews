@@ -30,11 +30,12 @@ function ReturnInformationContent() {
   const itrData = taxpayerStore.getItrData();
   const limits = getConfigForPeriod(itrData.itrConfig, itrData.filingPeriod);
 
-  // --- Deductions ---
-  const [pension, setPension] = useState(String(itrData.pensionContribution || ''));
-  const [shif, setShif] = useState(String(itrData.shifContribution || ''));
-  const [hl, setHl] = useState(String(itrData.hlContribution || ''));
-  const [pmf, setPmf] = useState(String(itrData.pmfContribution || ''));
+  // --- Deductions — pre-fill from store first, fall back to employment income summary ---
+  const summary = itrData.employmentIncomeSummary;
+  const [pension, setPension] = useState(String(itrData.pensionContribution || summary?.pension || ''));
+  const [shif, setShif] = useState(String(itrData.shifContribution || summary?.shiFund || ''));
+  const [hl, setHl] = useState(String(itrData.hlContribution || summary?.ahLevy || ''));
+  const [pmf, setPmf] = useState(String(itrData.pmfContribution || summary?.prmFund || ''));
 
   const deductionError = (value: string, max: number | undefined) => {
     const n = Number(value);
@@ -196,13 +197,22 @@ function ReturnInformationContent() {
       });
 
       if (!result.success) {
-        setCreateError(result.message || 'Failed to create ITR return');
+        setCreateError(result.message || '');
         return;
       }
 
       taxpayerStore.setItrField('taxReturnId', result.taxReturnId || null);
       taxpayerStore.setItrField('taxPayerId', result.taxPayerId || null);
       taxpayerStore.setItrField('taxObligationId', result.taxObligationId || null);
+
+      if (result.arrays) {
+        taxpayerStore.setItrField('itrReturnMortgages', result.arrays.mortgages);
+        taxpayerStore.setItrField('itrReturnInsurancePolicies', result.arrays.insurancePolicies);
+        taxpayerStore.setItrField('itrReturnCarBenefits', result.arrays.carBenefits);
+        taxpayerStore.setItrField('itrReturnDisabilityCerts', result.arrays.disabilityCertificates);
+        taxpayerStore.setItrField('taxReturnRef', result.arrays.taxReturnRef);
+        taxpayerStore.setItrField('itrStatus', result.arrays.status);
+      }
 
       // Trigger backend tax computation (personal relief, PAYE reconciliation etc.)
       if (result.taxPayerId && result.taxObligationId && data.filingPeriod) {
@@ -215,7 +225,7 @@ function ReturnInformationContent() {
 
       router.push(`/nil-mri-tot/itr/tax-computation${phoneParam}`);
     } catch (e: any) {
-      setCreateError(e.message || 'Unexpected error');
+      setCreateError(e.message || '');
     } finally {
       setCreating(false);
     }

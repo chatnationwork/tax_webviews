@@ -114,10 +114,10 @@ function EmploymentIncomeContent() {
             taxpayerStore.setItrField('hasDisabilityExemption', isPwd);
           }
         } else {
-          setError(result.message || 'Failed to load employment income');
+          setError(result.message || '');
         }
       } catch (e: any) {
-        setError(e.message || 'Unexpected error');
+        setError(e.message || '');
       } finally {
         setLoading(false);
       }
