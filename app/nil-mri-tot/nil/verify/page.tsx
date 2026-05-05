@@ -5,7 +5,13 @@ import { useEffect, useState, Suspense } from 'react';
 import { Layout, Button, Select, Card, IdentityStrip } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { fileNilReturn, getFilingPeriods, getTaxpayerObligations, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
+import {
+  fileNilReturn,
+  getFilingPeriods,
+  getTaxpayerObligations,
+  getStoredPhone,
+  sendWhatsAppMessage,
+} from '@/app/actions/nil-mri-tot';
 import { analytics } from '@/app/_lib/analytics';
 import { useConfig } from '@/app/_lib/runtime-config';
 import { getKnownPhone } from '@/app/_lib/session-store';
@@ -154,22 +160,38 @@ function NilVerifyContent() {
 
       if (result.success) {
         taxpayerStore.setSelectedNilType(obligationName);
-        taxpayerStore.setReceiptNumber(result.receiptNumber || '');
+        const receipt = (result.receiptNumber && String(result.receiptNumber).trim()) || '';
+        taxpayerStore.setReceiptNumber(receipt);
         taxpayerStore.setSuccessMessage(result.message);
-        if (result.taxDue) {
-            taxpayerStore.setTaxAmount(Number(result.taxDue) || 0);
-        }
+        taxpayerStore.setTaxAmount(Number(result.taxDue ?? 0) || 0);
         // Clear any previous error
         taxpayerStore.setError('');
-        
+
+        // Notify while we still have the server action result (store alone can miss ack after navigation).
+        try {
+          const waPhone = phone || (await getStoredPhone()) || getKnownPhone();
+          if (waPhone) {
+            const baseMessage = result.message || 'Successfully Filled NIL Return';
+            const taxDue = Number(result.taxDue ?? 0) || 0;
+            const ackLine = receipt || 'N/A';
+            await sendWhatsAppMessage({
+              recipientPhone: waPhone,
+              message: `${baseMessage}\n\nKRA Account Number: ${ackLine}\nTax Due: KES ${taxDue}`,
+            });
+          }
+        } catch (e) {
+          console.error('NIL filing WhatsApp notification failed:', e);
+        }
+
         if (phone) analytics.setUserId(phone);
-        analytics.track('nil_return_filed', { 
-            return_type: 'nil', 
-            obligation: obligationName,
-            receipt_number: result.receiptNumber 
+        analytics.track('nil_return_filed', {
+          return_type: 'nil',
+          obligation: obligationName,
+          receipt_number: receipt || undefined,
         });
-        
-        router.push('/nil-mri-tot/nil/result');
+
+        const q = receipt ? `?ack=${encodeURIComponent(receipt)}` : '';
+        router.push(`/nil-mri-tot/nil/result${q}`);
       } else {
         // Handle API error by redirecting to result page
         taxpayerStore.setSelectedNilType(obligationName);
