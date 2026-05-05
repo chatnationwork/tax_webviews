@@ -30,7 +30,7 @@ function NilVerifyContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  /** UI-only declaration (not sent to file-nil APIs). */
+  /** Maps to `has_rental_property` (Y/N) on file-nil payload. */
   const [hasProperty, setHasProperty] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -139,6 +139,7 @@ function NilVerifyContent() {
       const selectedObsObj = obligations.find(o => o.value === selectedObligation);
       const obligationCode = selectedObsObj?.obligationCode || obligationId;
 
+      // has_rental_property on the API is driven only by the Yes/No radios above (no lookup).
       const result = await fileNilReturn(
         taxpayerInfo.pin,
         obligationId,

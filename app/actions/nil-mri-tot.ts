@@ -383,7 +383,8 @@ export async function getFilingPeriods(
 // ============= Filing =============
 
 /**
- * File a NIL return
+ * File a NIL return.
+ * `hasRentalProperty` must come from the user’s Yes/No choice on NIL verify only — not from a properties API lookup.
  */
 export async function fileNilReturn(
   taxPayerPin: string,
