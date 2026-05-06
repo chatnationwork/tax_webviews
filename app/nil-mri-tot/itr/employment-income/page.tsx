@@ -83,6 +83,14 @@ function EmploymentIncomeContent() {
       setLoading(true);
       try {
         const itrData = taxpayerStore.getItrData();
+
+        // Use data already fetched by return-information page (Step 1/3)
+        if (itrData.employmentIncomeSummary !== undefined) {
+          setRows(itrData.employmentIncomeRows || []);
+          setLoading(false);
+          return;
+        }
+
         let returnYear: number | undefined;
         if (itrData.filingPeriod) {
           const yearMatch = itrData.filingPeriod.match(/(\d{4})/g);
@@ -147,7 +155,7 @@ function EmploymentIncomeContent() {
         hlContribution: Number(data.hlContribution) || 0,
         pmfContribution: Number(data.pmfContribution) || 0,
         insurancePolicies: data.hasInsurancePolicy ? data.insurancePolicies : [],
-        disabilityCertificates: [],
+        disabilityCertificates: data.disabilityCertificates || [],
         employmentIncome: data.employmentIncomeRows,
         mortgages: [],
       });

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button, Input, Select } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { validateInsurancePin } from '@/app/actions/nil-mri-tot';
+import { validateInsurancePin, getItrEmploymentDetails } from '@/app/actions/nil-mri-tot';
 import { Loader2, Plus, Trash2, Shield, CircleDot } from 'lucide-react';
 import type { ItrConfigLimits, DisabilityCertDetail } from '../../_lib/definitions';
 
@@ -57,16 +57,74 @@ function ReturnInformationContent() {
   const [insurancePinError, setInsurancePinError] = useState('');
   const [validatingInsurancePin, setValidatingInsurancePin] = useState(false);
 
-  // --- Disability (pre-populated from employment income response) ---
-  const isPwd = itrData.isPwd;
-  const certDetails: DisabilityCertDetail[] = itrData.itExemptionCertDetails || [];
-
+  // --- Disability (fetched early so cert is visible on Step 1/3) ---
+  const [isPwd, setIsPwd] = useState(itrData.isPwd);
+  const [certDetails, setCertDetails] = useState<DisabilityCertDetail[]>(itrData.itExemptionCertDetails || []);
+  const [loadingDisability, setLoadingDisability] = useState(false);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
     if (!taxpayerInfo.pin) {
       router.push('/nil-mri-tot/itr/validation');
     }
   }, [taxpayerInfo.pin, router]);
+
+  useEffect(() => {
+    if (hasLoadedRef.current) return;
+    const itrInfo = taxpayerStore.getItrData();
+    // Skip if already fetched (e.g. navigating back from employment-income)
+    if (itrInfo.employmentIncomeSummary !== undefined) {
+      hasLoadedRef.current = true;
+      return;
+    }
+    if (!taxpayerInfo.pin) return;
+    hasLoadedRef.current = true;
+
+    const fetchEmploymentDetails = async () => {
+      setLoadingDisability(true);
+      try {
+        let returnYear: number | undefined;
+        if (itrInfo.filingPeriod) {
+          const yearMatch = itrInfo.filingPeriod.match(/(\d{4})/g);
+          if (yearMatch && yearMatch.length > 0) returnYear = parseInt(yearMatch[0]);
+        }
+        const result = await getItrEmploymentDetails(taxpayerInfo.pin, returnYear);
+        if (result.success) {
+          const pwd = result.summary?.isPwd ?? false;
+          const certs = result.itExemptionCertDetails || [];
+
+          taxpayerStore.setItrField('isPwd', pwd);
+          taxpayerStore.setItrField('itExemptionCertDetails', certs);
+          taxpayerStore.setItrField('hasDisabilityExemption', certs.length > 0 ? true : pwd);
+
+          if (result.summary) {
+            taxpayerStore.setItrField('employmentIncomeSummary', result.summary);
+            taxpayerStore.setItrField('pensionContribution', result.summary.pension || 0);
+            taxpayerStore.setItrField('shifContribution', result.summary.shiFund || 0);
+            taxpayerStore.setItrField('hlContribution', result.summary.ahLevy || 0);
+            taxpayerStore.setItrField('pmfContribution', result.summary.prmFund || 0);
+            setPension(String(result.summary.pension || 0));
+            setShif(String(result.summary.shiFund || 0));
+            setHl(String(result.summary.ahLevy || 0));
+            setPmf(String(result.summary.prmFund || 0));
+          }
+
+          if (result.rows) {
+            taxpayerStore.setItrField('employmentIncomeRows', result.rows);
+          }
+
+          setIsPwd(pwd);
+          setCertDetails(certs);
+        }
+      } catch {
+        // Non-fatal — disability section falls back to "not applicable"
+      } finally {
+        setLoadingDisability(false);
+      }
+    };
+
+    fetchEmploymentDetails();
+  }, [taxpayerInfo.pin]);
 
   // --- Insurance handlers ---
   const handleValidateInsurancePin = async () => {
@@ -226,12 +284,21 @@ function ReturnInformationContent() {
               <CircleDot className="w-4 h-4 text-blue-500" />
               Disability Exemption
             </p>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full ${isPwd ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-              {isPwd ? 'Eligible' : 'Not applicable'}
-            </span>
+            {loadingDisability ? (
+              <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+            ) : (
+              <span className={`text-[10px] px-2 py-0.5 rounded-full ${isPwd ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                {isPwd ? 'Eligible' : 'Not applicable'}
+              </span>
+            )}
           </div>
 
-          {isPwd && certDetails.length > 0 ? (
+          {loadingDisability ? (
+            <div className="border border-dashed border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+              <p className="text-xs text-gray-400">Checking disability exemption...</p>
+            </div>
+          ) : isPwd && certDetails.length > 0 ? (
             <div className="space-y-2">
               {certDetails.map((cert, i) => (
                 <div key={i} className="bg-green-50 border border-green-200 rounded-lg p-3">
