@@ -1,11 +1,14 @@
-'use client';
+"use client";
 
-import { forwardRef, useState, ChangeEvent } from 'react';
+import { forwardRef, useState, ChangeEvent } from "react";
 
 // ============= ID Input Component =============
 // For National ID / Alien ID - numeric, up to 8 digits
 
-interface IDInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+interface IDInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "onChange"
+> {
   label?: string;
   helperText?: string;
   error?: string;
@@ -15,12 +18,25 @@ interface IDInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>,
 }
 
 export const IDInput = forwardRef<HTMLInputElement, IDInputProps>(
-  ({ label, helperText, error, required = true, onChange, onValidationChange, className = '', value, ...props }, ref) => {
-    const [internalError, setInternalError] = useState('');
+  (
+    {
+      label,
+      helperText,
+      error,
+      required = true,
+      onChange,
+      onValidationChange,
+      className = "",
+      value,
+      ...props
+    },
+    ref,
+  ) => {
+    const [internalError, setInternalError] = useState("");
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
       const inputValue = e.target.value;
-      
+
       // Only allow numeric characters
       if (inputValue && !/^\d*$/.test(inputValue)) {
         return; // Ignore non-numeric input
@@ -28,13 +44,13 @@ export const IDInput = forwardRef<HTMLInputElement, IDInputProps>(
 
       // Limit to 8 digits
       const truncatedValue = inputValue.slice(0, 12);
-      
+
       // Validate
-      let validationError = '';
+      let validationError = "";
       if (truncatedValue.length > 0 && truncatedValue.length < 6) {
-        validationError = 'ID must be at least 6 digits';
+        validationError = "ID must be at least 6 digits";
       }
-      
+
       setInternalError(validationError);
       onValidationChange?.(!validationError && truncatedValue.length >= 6);
       onChange?.(truncatedValue);
@@ -46,7 +62,12 @@ export const IDInput = forwardRef<HTMLInputElement, IDInputProps>(
       <div className="w-full">
         {label && (
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {label} {required ? <span className="text-red-500">*</span> : <span className="text-gray-400 text-xs">(optional)</span>}
+            {label}{" "}
+            {required ? (
+              <span className="text-red-500">*</span>
+            ) : (
+              <span className="text-gray-400 text-xs">(optional)</span>
+            )}
           </label>
         )}
         <input
@@ -54,12 +75,12 @@ export const IDInput = forwardRef<HTMLInputElement, IDInputProps>(
           type="text"
           inputMode="numeric"
           pattern="\d*"
-          maxLength={8}
+          maxLength={10}
           value={value}
           onChange={handleChange}
           placeholder="e.g., 12345678"
           className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent ${
-            displayError ? 'border-red-500' : 'border-gray-300'
+            displayError ? "border-red-500" : "border-gray-300"
           } ${className}`}
           {...props}
         />
@@ -71,16 +92,18 @@ export const IDInput = forwardRef<HTMLInputElement, IDInputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
-IDInput.displayName = 'IDInput';
-
+IDInput.displayName = "IDInput";
 
 // ============= PIN Input Component =============
 // For KRA PIN - alphanumeric, exactly 11 characters (e.g., A012345678Z)
 
-interface PINInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+interface PINInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "onChange"
+> {
   label?: string;
   helperText?: string;
   error?: string;
@@ -90,40 +113,53 @@ interface PINInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>
 }
 
 export const PINInput = forwardRef<HTMLInputElement, PINInputProps>(
-  ({ label, helperText, error, required = true, onChange, onValidationChange, className = '', value, ...props }, ref) => {
-    const [internalError, setInternalError] = useState('');
+  (
+    {
+      label,
+      helperText,
+      error,
+      required = true,
+      onChange,
+      onValidationChange,
+      className = "",
+      value,
+      ...props
+    },
+    ref,
+  ) => {
+    const [internalError, setInternalError] = useState("");
 
     const validatePIN = (pin: string): string => {
-      if (!pin) return '';
-      
+      if (!pin) return "";
+
       // PIN format: Letter + 9 digits + Letter (e.g., A012345678Z)
       if (pin.length > 0 && pin.length < 11) {
-        return 'PIN must be 11 characters';
+        return "PIN must be 11 characters";
       }
-      
+
       if (pin.length === 11) {
         // Check format: starts with letter, ends with letter, middle is digits
         const pinRegex = /^[A-Z]\d{9}[A-Z]$/;
         if (!pinRegex.test(pin.toUpperCase())) {
-          return 'Invalid PIN format (e.g., A012345678Z)';
+          return "Invalid PIN format (e.g., A012345678Z)";
         }
       }
-      
-      return '';
+
+      return "";
     };
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
       let inputValue = e.target.value.toUpperCase();
-      
+
       // Only allow alphanumeric characters
-      inputValue = inputValue.replace(/[^A-Z0-9]/g, '');
-      
+      inputValue = inputValue.replace(/[^A-Z0-9]/g, "");
+
       // Limit to 11 characters
       const truncatedValue = inputValue.slice(0, 11);
-      
+
       // Validate
       const validationError = validatePIN(truncatedValue);
-      
+
       setInternalError(validationError);
       onValidationChange?.(!validationError && truncatedValue.length === 11);
       onChange?.(truncatedValue);
@@ -135,7 +171,12 @@ export const PINInput = forwardRef<HTMLInputElement, PINInputProps>(
       <div className="w-full">
         {label && (
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {label} {required ? <span className="text-red-500">*</span> : <span className="text-gray-400 text-xs">(optional)</span>}
+            {label}{" "}
+            {required ? (
+              <span className="text-red-500">*</span>
+            ) : (
+              <span className="text-gray-400 text-xs">(optional)</span>
+            )}
           </label>
         )}
         <input
@@ -146,7 +187,7 @@ export const PINInput = forwardRef<HTMLInputElement, PINInputProps>(
           onChange={handleChange}
           placeholder="e.g., A012345678Z"
           className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent font-mono uppercase ${
-            displayError ? 'border-red-500' : 'border-gray-300'
+            displayError ? "border-red-500" : "border-gray-300"
           } ${className}`}
           {...props}
         />
@@ -159,19 +200,22 @@ export const PINInput = forwardRef<HTMLInputElement, PINInputProps>(
               <p className="text-sm text-gray-500">{helperText}</p>
             )}
           </div>
-          <span className={`text-xs ${
-            (value as string)?.length === 11 ? 'text-green-600' : 'text-gray-400'
-          }`}>
+          <span
+            className={`text-xs ${
+              (value as string)?.length === 11
+                ? "text-green-600"
+                : "text-gray-400"
+            }`}
+          >
             {(value as string)?.length || 0}/11
           </span>
         </div>
       </div>
     );
-  }
+  },
 );
 
-PINInput.displayName = 'PINInput';
-
+PINInput.displayName = "PINInput";
 
 // ============= Validation Helpers =============
 
@@ -191,7 +235,10 @@ export const isValidPINOrID = (value: string): boolean => {
 };
 
 export const formatPIN = (pin: string): string => {
-  return pin.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 11);
+  return pin
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, 11);
 };
 
 export const maskPIN = (pin: string): string => {
@@ -204,27 +251,50 @@ export const maskID = (id: string): string => {
   return `${id.slice(0, 4)}****${id.slice(-2)}`;
 };
 
-
 // ============= PIN or ID Input Component =============
 // Accepts either PIN (11 chars: A + 9 digits + letter) or ID (6-8 numeric digits)
 
-interface PINOrIDInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+interface PINOrIDInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "onChange"
+> {
   label?: string;
   helperText?: string;
   error?: string;
   required?: boolean;
   onChange?: (value: string) => void;
-  onValidationChange?: (isValid: boolean, type: 'pin' | 'id' | 'invalid' | 'empty') => void;
+  onValidationChange?: (
+    isValid: boolean,
+    type: "pin" | "id" | "invalid" | "empty",
+  ) => void;
 }
 
 export const PINOrIDInput = forwardRef<HTMLInputElement, PINOrIDInputProps>(
-  ({ label, helperText, error, required = true, onChange, onValidationChange, className = '',placeholder='A012345678Z or 12345678', value, ...props }, ref) => {
-    const [internalError, setInternalError] = useState('');
-    const [detectedType, setDetectedType] = useState<'pin' | 'id' | 'invalid' | 'empty'>('empty');
+  (
+    {
+      label,
+      helperText,
+      error,
+      required = true,
+      onChange,
+      onValidationChange,
+      className = "",
+      placeholder = "A012345678Z or 12345678",
+      value,
+      ...props
+    },
+    ref,
+  ) => {
+    const [internalError, setInternalError] = useState("");
+    const [detectedType, setDetectedType] = useState<
+      "pin" | "id" | "invalid" | "empty"
+    >("empty");
 
-    const validateValue = (val: string): { error: string; type: 'pin' | 'id' | 'invalid' | 'empty' } => {
-      if (!val || val.trim() === '') {
-        return { error: '', type: 'empty' };
+    const validateValue = (
+      val: string,
+    ): { error: string; type: "pin" | "id" | "invalid" | "empty" } => {
+      if (!val || val.trim() === "") {
+        return { error: "", type: "empty" };
       }
 
       const trimmed = val.trim().toUpperCase();
@@ -233,58 +303,66 @@ export const PINOrIDInput = forwardRef<HTMLInputElement, PINOrIDInputProps>(
       if (/[A-Z]/.test(trimmed)) {
         // Validate as PIN
         if (trimmed.length < 11) {
-          return { error: 'PIN must be 11 characters', type: 'invalid' };
+          return { error: "PIN must be 11 characters", type: "invalid" };
         }
         if (trimmed.length === 11) {
           const pinRegex = /^[A-Z]\d{9}[A-Z]$/;
           if (!pinRegex.test(trimmed)) {
-            return { error: 'Invalid PIN format (e.g., A012345678Z)', type: 'invalid' };
+            return {
+              error: "Invalid PIN format (e.g., A012345678Z)",
+              type: "invalid",
+            };
           }
-          return { error: '', type: 'pin' };
+          return { error: "", type: "pin" };
         }
-        return { error: 'Invalid format', type: 'invalid' };
+        return { error: "Invalid format", type: "invalid" };
       } else {
         // Validate as ID (numeric only)
         if (!/^\d+$/.test(trimmed)) {
-          return { error: 'ID must be numeric', type: 'invalid' };
+          return { error: "ID must be numeric", type: "invalid" };
         }
         if (trimmed.length < 6) {
-          return { error: 'ID must be at least 6 digits', type: 'invalid' };
+          return { error: "ID must be at least 6 digits", type: "invalid" };
         }
         if (trimmed.length > 8) {
-          return { error: 'ID must be at most 8 digits', type: 'invalid' };
+          return { error: "ID must be at most 8 digits", type: "invalid" };
         }
-        return { error: '', type: 'id' };
+        return { error: "", type: "id" };
       }
     };
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
       let inputValue = e.target.value.toUpperCase();
-      
+
       // Only allow alphanumeric characters
-      inputValue = inputValue.replace(/[^A-Z0-9]/g, '');
-      
+      inputValue = inputValue.replace(/[^A-Z0-9]/g, "");
+
       // Limit length
       const maxLength = /[A-Z]/.test(inputValue) ? 11 : 8;
       const truncatedValue = inputValue.slice(0, maxLength);
-      
+
       // Validate
       const { error: validationError, type } = validateValue(truncatedValue);
-      
+
       setInternalError(validationError);
       setDetectedType(type);
-      onValidationChange?.(type === 'pin' || type === 'id', type);
+      onValidationChange?.(type === "pin" || type === "id", type);
       onChange?.(truncatedValue);
     };
 
     const displayError = error || internalError;
-    const currentValue = (value as string) || '';
+    const currentValue = (value as string) || "";
 
     return (
       <div className="w-full">
         {label && (
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {label} {required ? <span className="text-red-500">*</span> : <span className="text-gray-400 text-xs">(optional)</span>}
+            {label}{" "}
+            {required ? (
+              <span className="text-red-500">*</span>
+            ) : (
+              <span className="text-gray-400 text-xs">(optional)</span>
+            )}
           </label>
         )}
         <input
@@ -294,7 +372,7 @@ export const PINOrIDInput = forwardRef<HTMLInputElement, PINOrIDInputProps>(
           onChange={handleChange}
           placeholder={placeholder}
           className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase ${
-            displayError ? 'border-red-500' : 'border-gray-300'
+            displayError ? "border-red-500" : "border-gray-300"
           } ${className}`}
           {...props}
         />
@@ -308,18 +386,22 @@ export const PINOrIDInput = forwardRef<HTMLInputElement, PINOrIDInputProps>(
             )}
           </div>
           {currentValue.length > 0 && (
-            <span className={`text-xs ${
-              detectedType === 'pin' || detectedType === 'id' ? 'text-green-600' : 'text-gray-400'
-            }`}>
-              {detectedType === 'pin' && '✓ PIN'}
-              {detectedType === 'id' && '✓ ID'}
-              {detectedType === 'invalid' && `${currentValue.length} chars`}
+            <span
+              className={`text-xs ${
+                detectedType === "pin" || detectedType === "id"
+                  ? "text-green-600"
+                  : "text-gray-400"
+              }`}
+            >
+              {detectedType === "pin" && "✓ PIN"}
+              {detectedType === "id" && "✓ ID"}
+              {detectedType === "invalid" && `${currentValue.length} chars`}
             </span>
           )}
         </div>
       </div>
     );
-  }
+  },
 );
 
-PINOrIDInput.displayName = 'PINOrIDInput';
+PINOrIDInput.displayName = "PINOrIDInput";
