@@ -99,9 +99,13 @@ function EmploymentIncomeContent() {
           setRows(result.rows);
           taxpayerStore.setItrField('employmentIncomeRows', result.rows);
 
-          // Store the server-computed summary for fallback in tax-computation
+          // Store the server-computed summary and update contribution values
           if (result.summary) {
             taxpayerStore.setItrField('employmentIncomeSummary', result.summary);
+            taxpayerStore.setItrField('pensionContribution', result.summary.pension || 0);
+            taxpayerStore.setItrField('shifContribution', result.summary.shiFund || 0);
+            taxpayerStore.setItrField('hlContribution', result.summary.ahLevy || 0);
+            taxpayerStore.setItrField('pmfContribution', result.summary.prmFund || 0);
           }
 
           // Store disability/PWD info from the employment response
