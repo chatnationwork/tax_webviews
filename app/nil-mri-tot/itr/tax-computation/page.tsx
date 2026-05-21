@@ -46,60 +46,6 @@ function mapSummaryToComputation(data: Record<string, any>): Record<string, numb
   };
 }
 
-/**
- * Compute the tax summary client-side from the draft + employment income data.
- * Used as a fallback when itr-summary endpoint is not yet available for the draft.
- */
-function computeFromDraftData(): Record<string, number> {
-  const itr = taxpayerStore.getItrData();
-  const rows = itr.employmentIncomeRows || [];
-  const summary = itr.employmentIncomeSummary;
-
-  const pension = itr.pensionContribution;
-  const shif = itr.shifContribution;
-  const hl = itr.hlContribution;
-  const pmf = itr.pmfContribution;
-  const mortgageInterest = (itr.mortgages || []).reduce((sum, m) => sum + (m.interestAmountPaid || 0), 0);
-
-  const totalDeduction = pension + shif + hl + pmf + mortgageInterest;
-  const employmentIncome = rows.reduce((sum, r) => sum + r.totalEmploymentIncome, 0);
-  const netTaxableIncome = Math.max(0, employmentIncome - totalDeduction);
-
-  // Use the server-computed tax from the employment income response
-  const taxOnTaxableIncome = summary?.totalTaxPayable ?? rows.reduce((sum, r) => sum + r.taxPayableOnTaxableSalary, 0);
-  const personalRelief = summary?.personalRelief ?? 28800;
-  const insuranceRelief = itr.hasInsurancePolicy
-    ? itr.insurancePolicies.reduce((sum, p) => sum + (p.amountOfInsuranceRelief || 0), 0)
-    : 0;
-
-  const payeDeducted = summary?.totalPAYEDeducted ?? rows.reduce((sum, r) => sum + r.amountOfTaxDeductedPaye, 0);
-  const totalOfTaxPayableLessReliefsAndExemptions = taxOnTaxableIncome - personalRelief - insuranceRelief;
-  const taxCredits = payeDeducted;
-  const taxRefundDue = totalOfTaxPayableLessReliefsAndExemptions - taxCredits;
-
-  return {
-    totalDeduction,
-    definedPensionContribution: pension,
-    socialHealthInsuranceContribution: shif,
-    housingLevyContribution: hl,
-    postRetirementMedicalContribution: pmf,
-    mortgageInterest,
-    depositInHomeOwnershipSavingPlan: 0,
-    employmentIncome,
-    allowableTaxExemptionDisability: 0,
-    netTaxableIncome,
-    taxOnTaxableIncome,
-    totalOfTaxPayableLessReliefsAndExemptions,
-    personalRelief,
-    insuranceRelief,
-    taxCredits,
-    payeDeductedFromSalary: payeDeducted,
-    incomeTaxPaidInAdvance: 0,
-    creditsTotalReliefDtaa: 0,
-    taxRefundDue,
-  };
-}
-
 function TaxComputationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -115,7 +61,7 @@ function TaxComputationContent() {
   const taxpayerInfo = taxpayerStore.getTaxpayerInfo();
   const phoneParam = phone ? `?phone=${encodeURIComponent(phone)}` : '';
 
-  /** Fetch the backend-computed summary. Falls back to client-side if unavailable. */
+  /** Fetch the backend-computed summary from itr-summary. */
   const fetchSummary = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -126,21 +72,17 @@ function TaxComputationContent() {
         return;
       }
 
-      // Try the backend summary endpoint first
       const summaryResult = await getItrSummary(currentItr.taxReturnId);
-      if (summaryResult.success && summaryResult.summary) {
-        const comp = mapSummaryToComputation(summaryResult.summary);
-        setComputation(comp);
-        taxpayerStore.setItrField('taxComputation', comp as any);
+      if (!summaryResult.success || !summaryResult.summary) {
+        setError(summaryResult.message || '');
         return;
       }
 
-      // Fallback: compute from draft data + employment income summary
-      const comp = computeFromDraftData();
+      const comp = mapSummaryToComputation(summaryResult.summary);
       setComputation(comp);
       taxpayerStore.setItrField('taxComputation', comp as any);
     } catch (e: any) {
-      setError(e.message || 'Unexpected error');
+      setError(e.message || '');
     } finally {
       setLoading(false);
     }

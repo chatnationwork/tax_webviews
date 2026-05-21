@@ -182,7 +182,7 @@ function EmploymentIncomeContent() {
         try {
           await getItrReturn(result.taxPayerId, result.taxObligationId, data.filingPeriod);
         } catch {
-          // Non-fatal: tax-computation page will fallback
+          // Non-fatal prefetch before tax computation
         }
       }
 
