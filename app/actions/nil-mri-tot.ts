@@ -1,8 +1,8 @@
-'use server';
+"use server";
 
-import logger from '@/lib/logger';
+import logger from "@/lib/logger";
 
-import axios from 'axios';
+import axios from "axios";
 import {
   getAuthHeaders,
   generateOTP as sharedGenerateOTP,
@@ -12,23 +12,22 @@ import {
   getStoredPhoneServer,
   sendWhatsAppMessage as sharedSendWhatsAppMessage,
   SendWhatsAppMessageParams,
-  SendWhatsAppMessageResult
-} from './auth';
-import { cleanPhoneNumber } from '../_lib/utils';
-import { checkPin } from './checkers';
-
+  SendWhatsAppMessageResult,
+} from "./auth";
+import { cleanPhoneNumber } from "../_lib/utils";
+import { checkPin } from "./checkers";
 
 const BASE_URL = `${process.env.API_URL}/ussd`;
 
 // Obligation IDs
 const OBLIGATION_IDS = {
-  VAT: '1',
-  ITR: '2',
-  PAYE: '7',
-  TOT: '8',
-  MRI: '33',
-  AHL: '41',
-  NITA: '42',
+  VAT: "1",
+  ITR: "2",
+  PAYE: "7",
+  TOT: "8",
+  MRI: "33",
+  AHL: "41",
+  NITA: "42",
 } as const;
 
 // ============= Types =============
@@ -62,7 +61,7 @@ export interface FileReturnResult {
 
 /** Acknowledgement / receipt fields vary by obligation and API version — scan common shapes. */
 function extractFileReturnReceiptNumber(data: any): string | undefined {
-  if (!data || typeof data !== 'object') return undefined;
+  if (!data || typeof data !== "object") return undefined;
   const r = data.response;
   const nested = data.data;
 
@@ -92,12 +91,11 @@ function extractFileReturnReceiptNumber(data: any): string | undefined {
       r.AcknowledgementNo ||
       r.AcknowledgementNumber);
 
-  const first =
-    fromNested || fromRoot || fromResponse;
+  const first = fromNested || fromRoot || fromResponse;
 
   if (first === undefined || first === null) return undefined;
   const s = String(first).trim();
-  return s !== '' ? s : undefined;
+  return s !== "" ? s : undefined;
 }
 
 export interface LookupByIdResult {
@@ -122,18 +120,131 @@ export interface VerifyOTPResult {
 
 // ============= Helpers =============
 
+const TAXPAYER_ALREADY_REGISTERED_MSG =
+  "Tax Payer already registered For Service";
+
+function isTaxpayerAlreadyRegisteredForService(data: unknown): boolean {
+  if (!data || typeof data !== "object") return false;
+  const errors = (data as { errors?: unknown }).errors;
+  if (!errors || typeof errors !== "object" || Array.isArray(errors)) {
+    return false;
+  }
+  const msisdnErrors = (errors as { msisdn?: unknown }).msisdn;
+  if (!Array.isArray(msisdnErrors)) return false;
+  return msisdnErrors.some(
+    (msg) =>
+      typeof msg === "string" && msg.includes(TAXPAYER_ALREADY_REGISTERED_MSG),
+  );
+}
+
+function hasInitSessionErrors(data: unknown): boolean {
+  if (!data || typeof data !== "object") return false;
+  const errors = (data as { errors?: unknown }).errors;
+  if (typeof errors === "string") return errors.trim().length > 0;
+  if (errors && typeof errors === "object" && !Array.isArray(errors)) {
+    return Object.keys(errors).length > 0;
+  }
+  return false;
+}
+
+function getInitSessionErrorMessage(data: unknown): string | undefined {
+  if (!data || typeof data !== "object") return undefined;
+  const body = data as { errors?: unknown; message?: unknown };
+
+  if (typeof body.errors === "string" && body.errors.trim()) {
+    return body.errors.trim();
+  }
+
+  if (
+    body.errors &&
+    typeof body.errors === "object" &&
+    !Array.isArray(body.errors)
+  ) {
+    const messages = Object.values(body.errors as Record<string, unknown>)
+      .flatMap((value) => {
+        if (Array.isArray(value)) {
+          return value.filter((m): m is string => typeof m === "string");
+        }
+        if (typeof value === "string") return [value];
+        return [];
+      })
+      .filter((m) => m.trim().length > 0);
+    if (messages[0]) return messages[0];
+  }
+
+  if (typeof body.message === "string" && body.message.trim()) {
+    return body.message.trim();
+  }
+
+  return undefined;
+}
+
+/**
+ * POST /api/ussd/initiate-session — required after successful ID lookup.
+ * Proceed on success or when taxpayer is already registered for the service.
+ */
+async function initiateCitizenSession(
+  idNumber: string,
+  msisdn: string,
+): Promise<{ canProceed: boolean; error?: string }> {
+  try {
+    const headers = await getApiHeaders(true);
+    const response = await axios.post(
+      `${BASE_URL}/initiate-session`,
+      {
+        id_number: idNumber,
+        msisdn,
+        type: "citizen",
+      },
+      { headers, timeout: 30000 },
+    );
+
+    logger.info(
+      "Initiate session response:",
+      JSON.stringify(response.data, null, 2),
+    );
+
+    if (isTaxpayerAlreadyRegisteredForService(response.data)) {
+      return { canProceed: true };
+    }
+
+    if (hasInitSessionErrors(response.data)) {
+      const errorMessage =
+        getInitSessionErrorMessage(response.data) ||
+        "Failed to initiate session";
+      logger.warn("Initiate session rejected:", errorMessage);
+      return { canProceed: false, error: errorMessage };
+    }
+
+    return { canProceed: true };
+  } catch (error: any) {
+    const data = error.response?.data;
+    logger.error("Initiate session error:", data || error.message);
+
+    if (isTaxpayerAlreadyRegisteredForService(data)) {
+      return { canProceed: true };
+    }
+
+    const errorMessage =
+      getInitSessionErrorMessage(data) ||
+      (typeof data?.message === "string" ? data.message : undefined) ||
+      "Failed to initiate session";
+    logger.warn("Initiate session rejected:", errorMessage);
+    return { canProceed: false, error: errorMessage };
+  }
+}
+
 // Using shared getAuthHeaders
 async function getApiHeaders(requiresAuth: boolean = true) {
   if (!requiresAuth) {
     return {
-      'Content-Type': 'application/json',
-      'x-source-for': 'whatsapp',
-      'x-forwarded-for': 'whatsapp'
+      "Content-Type": "application/json",
+      "x-source-for": "whatsapp",
+      "x-forwarded-for": "whatsapp",
     };
   }
   return getAuthHeaders();
 }
-
 
 // ============= OTP & Session =============
 
@@ -147,19 +258,21 @@ export async function generateOTP(msisdn: string): Promise<GenerateOTPResult> {
   return {
     success: result.success,
     message: result.message,
-    error: result.error
+    error: result.error,
   };
 }
 
-export async function verifyOTP(msisdn: string, otp: string): Promise<VerifyOTPResult> {
+export async function verifyOTP(
+  msisdn: string,
+  otp: string,
+): Promise<VerifyOTPResult> {
   const result = await sharedValidateOTP(msisdn, otp);
   return {
     success: result.success,
     message: result.message,
-    error: result.error
+    error: result.error,
   };
 }
-
 
 /**
  * Check if user has a valid session and slide expiration
@@ -178,27 +291,37 @@ export async function getStoredPhone(): Promise<string | null> {
   return getStoredPhoneServer();
 }
 
-
 // ============= Lookup & Obligations =============
 
 /**
  * Lookup user details by ID number using lookup API
  */
-export async function lookupById(idNumber: string, phoneNumber: string, yearOfBirth: string): Promise<LookupByIdResult> {
+export async function lookupById(
+  idNumber: string,
+  phoneNumber: string,
+  yearOfBirth: string,
+): Promise<LookupByIdResult> {
   if (!idNumber || idNumber.trim().length < 6) {
-    return { success: false, error: 'ID number must be at least 6 characters' };
+    return { success: false, error: "ID number must be at least 6 characters" };
   }
   if (!phoneNumber) {
-    return { success: false, error: 'Phone number is required' };
+    return { success: false, error: "Phone number is required" };
   }
   if (!yearOfBirth) {
-    return { success: false, error: 'Year of birth is required' };
+    return { success: false, error: "Year of birth is required" };
   }
 
   // Clean phone number
   const cleanNumber = cleanPhoneNumber(phoneNumber);
 
-  logger.info('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth);
+  logger.info(
+    "Looking up ID:",
+    idNumber,
+    "Phone:",
+    cleanNumber,
+    "YOB to verify:",
+    yearOfBirth,
+  );
 
   try {
     const headers = await getApiHeaders(true);
@@ -206,26 +329,25 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       `${BASE_URL}/id-lookup`,
       {
         id_number: idNumber.trim(),
-        msisdn: cleanNumber
+        msisdn: cleanNumber,
       },
       {
         headers,
-        timeout: 30000
-      }
+        timeout: 30000,
+      },
     );
 
-    logger.info('ID lookup response:', JSON.stringify(response.data, null, 2));
+    logger.info("ID lookup response:", JSON.stringify(response.data, null, 2));
 
     // Check if we got a valid response with data
     if (response.data && response.data.name && response.data.yob) {
-
       // Validate Year of Birth
-      const returnedYob = response.data.yob ? response.data.yob.toString() : '';
+      const returnedYob = response.data.yob ? response.data.yob.toString() : "";
 
       if (returnedYob !== yearOfBirth.trim()) {
         return {
           success: false,
-          error: `Some of your information didnt match. Please check your details and try again`
+          error: `Some of your information didnt match. Please check your details and try again`,
         };
       }
 
@@ -233,52 +355,68 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
 
       // FALLBACK: If PIN is missing, try GUI lookup
       if (!pin) {
-        logger.info('PIN missing in primary lookup, attempting GUI lookup fallback...');
+        logger.info(
+          "PIN missing in primary lookup, attempting GUI lookup fallback...",
+        );
         const guiResult = await guiLookup(idNumber.trim());
         if (guiResult.success && guiResult.pin) {
           pin = guiResult.pin;
-          logger.info('PIN retrieved via GUI lookup');
+          logger.info("PIN retrieved via GUI lookup");
         } else {
-          logger.warn('GUI lookup fallback failed:', guiResult.error);
+          logger.warn("GUI lookup fallback failed:", guiResult.error);
         }
+      }
+
+      const trimmedId = response.data.id_number || idNumber.trim();
+      const sessionResult = await initiateCitizenSession(
+        trimmedId,
+        cleanNumber,
+      );
+      if (!sessionResult.canProceed) {
+        return {
+          success: false,
+          error: sessionResult.error || "Failed to initiate session",
+        };
       }
 
       return {
         success: true,
-        idNumber: response.data.id_number || idNumber.trim(),
+        idNumber: trimmedId,
         name: response.data.name,
         pin: pin,
       };
     } else {
       return {
         success: false,
-        error: response.data.message || 'ID lookup failed or invalid response'
+        error: response.data.message || "ID lookup failed or invalid response",
       };
     }
   } catch (error: any) {
-    logger.error('ID lookup error:', error.response?.data || error.message);
-    return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
+    logger.error("ID lookup error:", error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.message || "ID lookup failed",
+    };
   }
 }
 
 /**
  * Fallback: Get PIN via GUI Lookup
  */
-export async function guiLookup(idNumber: string): Promise<{ success: boolean; pin?: string; name?: string; error?: string }> {
+export async function guiLookup(
+  idNumber: string,
+): Promise<{ success: boolean; pin?: string; name?: string; error?: string }> {
   try {
     const headers = await getApiHeaders(true);
-    const response = await axios.get(
-      `${process.env.API_URL}/itax/gui-lookup`,
-      {
-        params: {
-          gui: idNumber,
-          tax_payer_type: 'KE'
-        },
-        headers
-      }
-    );
+    const response = await axios.get(`${process.env.API_URL}/itax/gui-lookup`, {
+      params: {
+        gui: idNumber,
+        tax_payer_type: "KE",
+      },
+      headers,
+    });
 
-    logger.info('GUI Lookup Response:', response.data);
+    logger.info("GUI Lookup Response:", response.data);
 
     const pin = response.data.pin || response.data.PIN;
     const name = response.data.name || response.data.TaxpayerName;
@@ -287,13 +425,13 @@ export async function guiLookup(idNumber: string): Promise<{ success: boolean; p
       return {
         success: true,
         pin: pin,
-        name: name
+        name: name,
       };
     }
 
-    return { success: false, error: 'PIN not found in GUI lookup' };
+    return { success: false, error: "PIN not found in GUI lookup" };
   } catch (error: any) {
-    logger.error('GUI Lookup Error:', error.message);
+    logger.error("GUI Lookup Error:", error.message);
     return { success: false, error: error.message };
   }
 }
@@ -302,23 +440,20 @@ export async function guiLookup(idNumber: string): Promise<{ success: boolean; p
  * Get taxpayer obligations
  */
 export async function getTaxpayerObligations(
-  pin: string
+  pin: string,
 ): Promise<TaxpayerObligationsResult> {
   try {
     const url = `${BASE_URL}/tax-payer-obligations/${pin}`;
 
-    logger.info('Obligations URL:', url);
+    logger.info("Obligations URL:", url);
 
     const headers = await getApiHeaders(true);
 
-    logger.info('Obligations headers:', headers);
+    logger.info("Obligations headers:", headers);
 
-  
-    const response = await axios.get(url,
-      {
-        headers
-      }
-    );
+    const response = await axios.get(url, {
+      headers,
+    });
 
     const data = response.data;
 
@@ -339,14 +474,20 @@ export async function getTaxpayerObligations(
     }
 
     // Filter obligations based on allowed list
-    const allowedKeywords = ['Income Tax', 'MRI', 'VAT', 'PAYE', 'Turnover Tax'];
-    obligations = obligations.filter(obl =>
-      allowedKeywords.some(keyword =>
-        obl.obligationName?.toLowerCase().includes(keyword.toLowerCase())
-      )
+    const allowedKeywords = [
+      "Income Tax",
+      "MRI",
+      "VAT",
+      "PAYE",
+      "Turnover Tax",
+    ];
+    obligations = obligations.filter((obl) =>
+      allowedKeywords.some((keyword) =>
+        obl.obligationName?.toLowerCase().includes(keyword.toLowerCase()),
+      ),
     );
 
-    logger.info('Obligations:', obligations);
+    logger.info("Obligations:", obligations);
 
     return {
       success: true,
@@ -354,12 +495,15 @@ export async function getTaxpayerObligations(
       message: data.message,
     };
   } catch (error: any) {
-    logger.error('Get Obligations Error:', error.response?.data || error.message);
+    logger.error(
+      "Get Obligations Error:",
+      error.response?.data || error.message,
+    );
 
     return {
       success: false,
       obligations: [],
-      message: 'Failed to retrieve obligations',
+      message: "Failed to retrieve obligations",
     };
   }
 }
@@ -369,26 +513,26 @@ export async function getTaxpayerObligations(
  */
 export async function getFilingPeriods(
   pin: string,
-  obligationId: string
+  obligationId: string,
 ): Promise<FilingPeriodResult> {
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.post(
       `${BASE_URL}/obligation-filling-period`,
       {
-        branch_id: '',
-        from_date: '',
-        from_itms_or_prtl: 'PRTL',
-        is_amended: 'N',
+        branch_id: "",
+        from_date: "",
+        from_itms_or_prtl: "PRTL",
+        is_amended: "N",
         obligation_id: obligationId,
         pin: pin,
       },
       {
-        headers
-      }
+        headers,
+      },
     );
 
-    logger.info('Filing periods response:', response.data);
+    logger.info("Filing periods response:", response.data);
 
     const data = response.data;
 
@@ -405,17 +549,20 @@ export async function getFilingPeriods(
     }
 
     return {
-      success: data.status === 'OK' || periods.length > 0,
+      success: data.status === "OK" || periods.length > 0,
       periods: periods,
       message: data.description || data.message,
     };
   } catch (error: any) {
-    logger.error('Filing Period Error:', error.response?.data || error.message);
+    logger.error("Filing Period Error:", error.response?.data || error.message);
 
     return {
       success: false,
       periods: [],
-      message: error.response?.data || error.message || 'Failed to retrieve filing periods',
+      message:
+        error.response?.data ||
+        error.message ||
+        "Failed to retrieve filing periods",
     };
   }
 }
@@ -431,32 +578,27 @@ export async function fileNilReturn(
   obligationId: string,
   obligationCode: string,
   returnPeriod: string,
-  hasRentalProperty: boolean
+  hasRentalProperty: boolean,
 ): Promise<FileReturnResult> {
   try {
     const payload = {
       kra_obligation_id: obligationId,
       obligation_code: obligationCode,
       returnPeriod: returnPeriod,
-      returnType: 'nil_return',
+      returnType: "nil_return",
       tax_payer_pin: taxPayerPin,
-      has_rental_property: hasRentalProperty ? 'Y' : 'N',
+      has_rental_property: hasRentalProperty ? "Y" : "N",
     };
 
-    logger.info('Filing NIL Return:', payload);
-
+    logger.info("Filing NIL Return:", payload);
 
     const headers = await getApiHeaders(true);
-    const response = await axios.post(
-      `${BASE_URL}/file-return`,
-      payload,
-      {
-        headers
-      }
-    );
+    const response = await axios.post(`${BASE_URL}/file-return`, payload, {
+      headers,
+    });
 
     const data = response.data;
-    logger.info('File NIL Return Response:', data);
+    logger.info("File NIL Return Response:", data);
     // Check for various success formats
     // 1. Standard format: code=1/200 or success=true
     // 2. Nested response format: response.Status='OK' (common in KRA APIs)
@@ -464,14 +606,16 @@ export async function fileNilReturn(
       data.code === 1 ||
       data.code === 200 ||
       data.success === true ||
-      (data.response && data.response.Status === 'OK');
+      (data.response && data.response.Status === "OK");
 
-    let message = data.message || 'NIL Return filed successfully';
+    let message = data.message || "NIL Return filed successfully";
     if (data.response?.Message) message = data.response.Message;
 
     const receiptNumber = extractFileReturnReceiptNumber(data);
     if (isSuccess && !receiptNumber) {
-      logger.warn('NIL file-return success but no acknowledgement field matched in response keys');
+      logger.warn(
+        "NIL file-return success but no acknowledgement field matched in response keys",
+      );
     }
 
     return {
@@ -482,12 +626,19 @@ export async function fileNilReturn(
       taxDue: data.tax_due,
     };
   } catch (error: any) {
-    logger.error('File NIL Return Error:', error.response?.data || error.message);
+    logger.error(
+      "File NIL Return Error:",
+      error.response?.data || error.message,
+    );
 
     return {
       success: false,
       code: error.response?.status || 500,
-      message: error.response?.data?.Message || error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file NIL return. .',
+      message:
+        error.response?.data?.Message ||
+        error.response?.data?.message ||
+        error.response?.data?.errors?.detail ||
+        "Failed to file NIL return. .",
     };
   }
 }
@@ -499,7 +650,7 @@ export async function fileMriReturn(
   taxPayerPin: string,
   returnPeriod: string,
   rentalIncome: number,
-  totalProperties: number
+  totalProperties: number,
 ): Promise<FileReturnResult> {
   try {
     const headers = await getApiHeaders(true);
@@ -508,8 +659,8 @@ export async function fileMriReturn(
     let startDate = returnPeriod;
     let endDate = returnPeriod;
 
-    if (returnPeriod.includes('-')) {
-      const parts = returnPeriod.split('-').map(p => p.trim());
+    if (returnPeriod.includes("-")) {
+      const parts = returnPeriod.split("-").map((p) => p.trim());
       if (parts.length >= 2) {
         startDate = parts[0];
         endDate = parts[1];
@@ -526,45 +677,51 @@ export async function fileMriReturn(
       taxable_amount: `${rentalIncome}`,
     };
 
-    logger.info('Filing MRI Return:', payload);
+    logger.info("Filing MRI Return:", payload);
 
-    const response = await axios.post(
-      `${BASE_URL}/file-return`,
-      payload,
-      {
-        headers
-      }
-    );
+    const response = await axios.post(`${BASE_URL}/file-return`, payload, {
+      headers,
+    });
 
     const data = response.data;
-    logger.info('File MRI Return Response:', data);
+    logger.info("File MRI Return Response:", data);
 
-
-
-    if (data.response && (data.response.Status === 'OK' || data.response.ResponseCode === '88000')) {
+    if (
+      data.response &&
+      (data.response.Status === "OK" || data.response.ResponseCode === "88000")
+    ) {
       return {
         success: true,
         code: 200,
-        message: data.response.Message || 'MRI Return filed successfully',
+        message: data.response.Message || "MRI Return filed successfully",
         receiptNumber: data.response.AckNumber || data.kra_account_number,
         prn: data.response.PRN || data.prn,
-        taxDue: data.tax_due || data.response.TaxPayable
+        taxDue: data.tax_due || data.response.TaxPayable,
       };
     }
 
     return {
       success: data.code === 1 || data.code === 200 || data.success === true,
       code: data.code || 200,
-      message: data.message || 'MRI Return filed successfully',
-      receiptNumber: data.receipt_number || data.receiptNumber || `MRI-${Date.now()}`,
-      taxDue: data.tax_due
+      message: data.message || "MRI Return filed successfully",
+      receiptNumber:
+        data.receipt_number || data.receiptNumber || `MRI-${Date.now()}`,
+      taxDue: data.tax_due,
     };
   } catch (error: any) {
-    logger.error('File MRI Return Error:', error.response?.data || error.message);
+    logger.error(
+      "File MRI Return Error:",
+      error.response?.data || error.message,
+    );
 
     const errorData = error.response?.data;
     // API returns ErrorCode with the user-friendly message
-    const errorMessage = errorData?.ErrorCode || errorData?.Message || errorData?.message || errorData?.errors?.detail || 'Failed to file MRI return. .';
+    const errorMessage =
+      errorData?.ErrorCode ||
+      errorData?.Message ||
+      errorData?.message ||
+      errorData?.errors?.detail ||
+      "Failed to file MRI return. .";
 
     return {
       success: false,
@@ -581,8 +738,7 @@ export async function fileTotReturn(
   taxPayerPin: string,
   returnPeriod: string,
   grossSales: number,
-  filingMode: 'Daily' | 'Monthly' | 'daily' | 'monthly',
-
+  filingMode: "Daily" | "Monthly" | "daily" | "monthly",
 ): Promise<FileReturnResult> {
   try {
     const headers = await getApiHeaders(true);
@@ -590,8 +746,8 @@ export async function fileTotReturn(
     let startDate = returnPeriod;
     let endDate = returnPeriod;
 
-    if (returnPeriod.includes('-')) {
-      const parts = returnPeriod.split('-').map(p => p.trim());
+    if (returnPeriod.includes("-")) {
+      const parts = returnPeriod.split("-").map((p) => p.trim());
       if (parts.length >= 2) {
         startDate = parts[0];
         endDate = parts[1];
@@ -604,32 +760,31 @@ export async function fileTotReturn(
       obligation_code: OBLIGATION_IDS.TOT,
       start_date: startDate,
       end_date: endDate,
-      filingCycle: filingMode.toLowerCase() === 'monthly' ? 'M' : 'D',
+      filingCycle: filingMode.toLowerCase() === "monthly" ? "M" : "D",
       taxable_amount: `${grossSales}`,
     };
 
-    logger.info('Filing TOT Return:', payload);
+    logger.info("Filing TOT Return:", payload);
 
-    const response = await axios.post(
-      `${BASE_URL}/file-return`,
-      payload,
-      {
-        headers
-      }
-    );
+    const response = await axios.post(`${BASE_URL}/file-return`, payload, {
+      headers,
+    });
 
     const data = response.data;
 
-    logger.info(data)
+    logger.info(data);
 
     // Check for TOT specific nested response structure
-    if (data.response && (data.response.Status === 'OK' || data.response.ResponseCode === '87000')) {
+    if (
+      data.response &&
+      (data.response.Status === "OK" || data.response.ResponseCode === "87000")
+    ) {
       return {
         success: true,
         code: 200,
-        message: data.response.Message || 'TOT Return filed successfully',
+        message: data.response.Message || "TOT Return filed successfully",
         receiptNumber: data.response.AckNumber || data.kra_account_number,
-        prn: data.response.PRN || data.prn
+        prn: data.response.PRN || data.prn,
       };
     }
 
@@ -638,24 +793,33 @@ export async function fileTotReturn(
       return {
         success: true,
         code: 200,
-        message: 'TOT Return filed successfully',
+        message: "TOT Return filed successfully",
         receiptNumber: data.receipt_number || `TOT-${Date.now()}`,
-        prn: data.prn
+        prn: data.prn,
       };
     }
 
     return {
       success: data.code === 1 || data.code === 200 || data.success === true,
       code: data.code || 200,
-      message: data.message || 'TOT Return filed successfully',
-      receiptNumber: data.receipt_number || data.receiptNumber || `TOT-${Date.now()}`,
+      message: data.message || "TOT Return filed successfully",
+      receiptNumber:
+        data.receipt_number || data.receiptNumber || `TOT-${Date.now()}`,
     };
   } catch (error: any) {
-    logger.error('File TOT Return Error:', error.response?.data || error.message);
+    logger.error(
+      "File TOT Return Error:",
+      error.response?.data || error.message,
+    );
 
     const errorData = error.response?.data;
     // API returns ErrorCode with the user-friendly message
-    const errorMessage = errorData?.ErrorCode || errorData?.Message || errorData?.message || errorData?.errors?.detail || 'Failed to file TOT return. .';
+    const errorMessage =
+      errorData?.ErrorCode ||
+      errorData?.Message ||
+      errorData?.message ||
+      errorData?.errors?.detail ||
+      "Failed to file TOT return. .";
 
     return {
       success: false,
@@ -683,7 +847,7 @@ export async function calculateTax(
   obligationCode: string,
   returnPeriod: string,
   amount: number,
-  filingCycle: string = 'M'
+  filingCycle: string = "M",
 ): Promise<CalculateTaxResult> {
   try {
     const headers = await getApiHeaders(true);
@@ -692,8 +856,8 @@ export async function calculateTax(
     let startDate = returnPeriod;
     let endDate = returnPeriod;
 
-    if (returnPeriod.includes('-')) {
-      const parts = returnPeriod.split('-').map(p => p.trim());
+    if (returnPeriod.includes("-")) {
+      const parts = returnPeriod.split("-").map((p) => p.trim());
       if (parts.length >= 2) {
         startDate = parts[0];
         endDate = parts[1];
@@ -708,23 +872,19 @@ export async function calculateTax(
       end_date: endDate,
       filingCycle: filingCycle,
       taxable_amount: `${amount}`,
-      calc_only: "true"
+      calc_only: "true",
     };
 
-    logger.info('Calculating Tax Payload:', payload);
+    logger.info("Calculating Tax Payload:", payload);
 
-    const response = await axios.post(
-      `${BASE_URL}/file-return`,
-      payload,
-      {
-        headers
-      }
-    );
+    const response = await axios.post(`${BASE_URL}/file-return`, payload, {
+      headers,
+    });
 
     const data = response.data;
-    logger.info('Calculate Tax Response:', data);
+    logger.info("Calculate Tax Response:", data);
 
-    // Assuming the API returns the calculated tax in a specific field, 
+    // Assuming the API returns the calculated tax in a specific field,
     // or we might need to inspect the response structure for "calc_only" requests.
     // Based on typical flows, it might return the tax amount in 'total_tax' or similar.
     // Let's assume it returns 'tax_due' or check the 'data' object.
@@ -740,27 +900,26 @@ export async function calculateTax(
       data.code === 1 ||
       data.code === 200 ||
       data.success === true ||
-      (data.calc_only === 'true' && data.tax_due)
+      (data.calc_only === "true" && data.tax_due)
     ) {
       const tax = data.tax_due || data.total_tax || data.total_amount || 0;
 
       return {
         success: true,
         tax: Number(tax),
-        message: data.message || 'Tax calculated successfully'
+        message: data.message || "Tax calculated successfully",
       };
     }
 
     return {
       success: false,
-      message: data.message || 'Failed to calculate tax'
+      message: data.message || "Failed to calculate tax",
     };
-
   } catch (error: any) {
-    logger.error('Calculate Tax Error:', error.response?.data || error.message);
+    logger.error("Calculate Tax Error:", error.response?.data || error.message);
     return {
       success: false,
-      message: error.response?.data?.message || 'Failed to calculate tax'
+      message: error.response?.data?.message || "Failed to calculate tax",
     };
   }
 }
@@ -790,23 +949,26 @@ export async function getProperties(pin: string): Promise<PropertiesResult> {
     const headers = await getApiHeaders(true);
     const response = await axios.get(
       `${process.env.API_URL}/properties/lookup/${pin}`,
-      { headers }
+      { headers },
     );
 
     const data = response.data;
 
     return {
-      success: data.ResponseCode === '20000' || data.Status === 'OK',
+      success: data.ResponseCode === "20000" || data.Status === "OK",
       properties: data.PropertiesList || [],
-      message: data.ResponseMsg
+      message: data.ResponseMsg,
     };
   } catch (error: any) {
-    logger.error('Get Properties Error:', error.response?.data || error.message);
+    logger.error(
+      "Get Properties Error:",
+      error.response?.data || error.message,
+    );
 
     return {
       success: false,
       properties: [],
-      message: 'Failed to fetch properties'
+      message: "Failed to fetch properties",
     };
   }
 }
@@ -825,9 +987,8 @@ export async function generatePrn(
   obligationId: string,
   taxPeriodFrom: string,
   taxPeriodTo: string,
-  amount: string
+  amount: string,
 ): Promise<GeneratePrnResult> {
-
   try {
     const headers = await getApiHeaders(true);
 
@@ -840,37 +1001,38 @@ export async function generatePrn(
       tax_period_from: taxPeriodFrom,
       tax_period_to: taxPeriodTo,
       amount: roundedAmount,
-    }
+    };
 
-    logger.info(`${BASE_URL}/generate-prn`)
-    logger.info('Generate PRN Payload:', payload);
+    logger.info(`${BASE_URL}/generate-prn`);
+    logger.info("Generate PRN Payload:", payload);
 
-    const response = await axios.post(
-      `${BASE_URL}/generate-prn`,
-      payload
-      ,
-      { headers }
-    );
+    const response = await axios.post(`${BASE_URL}/generate-prn`, payload, {
+      headers,
+    });
 
     const data = response.data;
-    logger.info('Generate PRN Response:', data);
+    logger.info("Generate PRN Response:", data);
 
     // Handle PascalCase response (PaymentRegNo) and standard response (prn)
     const prn = data.PaymentRegNo || data.prn;
     // Check for success indicators: Status=OK, ResponseCode=50000 (success), or presence of PRN
-    const isSuccess = data.Status === 'OK' || data.ResponseCode === '50000' || !!prn;
+    const isSuccess =
+      data.Status === "OK" || data.ResponseCode === "50000" || !!prn;
 
     return {
       success: isSuccess,
-      message: data.ResponseMsg || data.message || 'PRN generated successfully',
+      message: data.ResponseMsg || data.message || "PRN generated successfully",
       prn: prn,
-      data: data
+      data: data,
     };
   } catch (error: any) {
-    logger.error('Generate PRN Error:', error.response?.data || error.message);
+    logger.error("Generate PRN Error:", error.response?.data || error.message);
     return {
       success: false,
-      message: error.response?.data?.message || error.message || 'Failed to generate PRN',
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to generate PRN",
     };
   }
 }
@@ -883,37 +1045,37 @@ export interface MakePaymentResult {
 
 export async function makePayment(
   msisdn: string,
-  prn: string
+  prn: string,
 ): Promise<MakePaymentResult> {
   try {
     const headers = await getApiHeaders(true);
-    logger.info(`${BASE_URL}/make-payment`)
+    logger.info(`${BASE_URL}/make-payment`);
     const payload = {
       msisdn: msisdn,
       prn: prn,
-    }
+    };
 
-    logger.info('Make Payment Payload:', payload);
+    logger.info("Make Payment Payload:", payload);
 
-    const response = await axios.post(
-      `${BASE_URL}/make-payment`,
-      payload
-      ,
-      { headers }
-    );
+    const response = await axios.post(`${BASE_URL}/make-payment`, payload, {
+      headers,
+    });
 
-    logger.info('Make Payment Response:', response.data);
+    logger.info("Make Payment Response:", response.data);
 
     return {
       success: true,
-      message: response.data.message || 'Payment initiated successfully',
-      data: response.data
+      message: response.data.message || "Payment initiated successfully",
+      data: response.data,
     };
   } catch (error: any) {
-    logger.error('Make Payment Error:', error.response?.data || error.message);
+    logger.error("Make Payment Error:", error.response?.data || error.message);
     return {
       success: false,
-      message: error.response?.data?.message || error.message || 'Failed to initiate payment',
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to initiate payment",
     };
   }
 }
@@ -922,7 +1084,7 @@ export async function makePayment(
  * Send WhatsApp message
  */
 export async function sendWhatsAppMessage(
-  params: SendWhatsAppMessageParams
+  params: SendWhatsAppMessageParams,
 ): Promise<SendWhatsAppMessageResult> {
   return sharedSendWhatsAppMessage(params);
 }
@@ -930,10 +1092,12 @@ export async function sendWhatsAppMessage(
 /**
  * Send WhatsApp image
  */
-export async function sendWhatsAppImage(
-  params: { recipientPhone: string; imageUrl: string; caption?: string }
-): Promise<SendWhatsAppMessageResult> {
-  const { sendWhatsAppImage: sharedSendWhatsAppImage } = await import('./auth');
+export async function sendWhatsAppImage(params: {
+  recipientPhone: string;
+  imageUrl: string;
+  caption?: string;
+}): Promise<SendWhatsAppMessageResult> {
+  const { sendWhatsAppImage: sharedSendWhatsAppImage } = await import("./auth");
   return sharedSendWhatsAppImage(params);
 }
 
@@ -962,49 +1126,50 @@ export interface LiabilitiesResult {
  */
 export async function getTaxPayerLiabilities(
   pin: string,
-  obligationId: string
+  obligationId: string,
 ): Promise<LiabilitiesResult> {
   try {
     const headers = await getApiHeaders(true);
-    const response = await axios.get(
-      `${BASE_URL}/tax-payer-liabilities`,
-      {
-        params: {
-          obligation_id: obligationId,
-          tax_payer_pin: pin,
-        },
-        headers
-      }
-    );
+    const response = await axios.get(`${BASE_URL}/tax-payer-liabilities`, {
+      params: {
+        obligation_id: obligationId,
+        tax_payer_pin: pin,
+      },
+      headers,
+    });
 
     const data = response.data;
-    logger.info('Get Liabilities Response:', data);
+    logger.info("Get Liabilities Response:", data);
 
-    if (data.Status === 'OK' || data.ResponseCode === '30000') {
+    if (data.Status === "OK" || data.ResponseCode === "30000") {
       return {
         success: true,
         liabilities: data.LiabilitiesList || [],
-        message: data.ResponseMsg || 'Liabilities retrieved successfully',
+        message: data.ResponseMsg || "Liabilities retrieved successfully",
         pin: data.PinNo,
-        obligationId: data.ObligationId
+        obligationId: data.ObligationId,
       };
     }
 
     return {
       success: false,
-      message: data.ResponseMsg || data.message || 'Failed to retrieve liabilities'
+      message:
+        data.ResponseMsg || data.message || "Failed to retrieve liabilities",
     };
   } catch (error: any) {
-    logger.error('Get Liabilities Error:', error.response?.data || error.message);
+    logger.error(
+      "Get Liabilities Error:",
+      error.response?.data || error.message,
+    );
     return {
       success: false,
-      message: error.response?.data?.message || 'Failed to retrieve liabilities'
+      message:
+        error.response?.data?.message || "Failed to retrieve liabilities",
     };
   }
 }
 
 // ============= ITR Actions =============
-
 
 export interface EmploymentIncomeResult {
   success: boolean;
@@ -1159,7 +1324,7 @@ export interface CreateItrReturnResult {
 
 export interface ItrReturnResult {
   success: boolean;
-  computation?: TaxComputationResult['computation'];
+  computation?: TaxComputationResult["computation"];
   arrays?: ItrReturnArrays;
   rawData?: any;
   message?: string;
@@ -1182,20 +1347,24 @@ export async function getItrConfig(): Promise<ItrConfigResult> {
     const headers = await getApiHeaders(true);
     const response = await axios.get(
       `${process.env.API_URL}/settings/itr/config`,
-      { headers, timeout: 30000 }
+      { headers, timeout: 30000 },
     );
 
-    logger.info('ITR Config Response:', JSON.stringify(response.data, null, 2));
+    logger.info("ITR Config Response:", JSON.stringify(response.data, null, 2));
 
     return {
       success: true,
       config: response.data,
     };
   } catch (error: any) {
-    logger.error('Get ITR Config Error:', error.response?.data || error.message);
+    logger.error(
+      "Get ITR Config Error:",
+      error.response?.data || error.message,
+    );
     return {
       success: false,
-      message: error.response?.data?.message || 'Failed to fetch ITR configuration',
+      message:
+        error.response?.data?.message || "Failed to fetch ITR configuration",
     };
   }
 }
@@ -1207,7 +1376,7 @@ export async function getItrConfig(): Promise<ItrConfigResult> {
  */
 export async function getItrFilingPeriods(
   pin: string,
-  obligationId: string
+  obligationId: string,
 ): Promise<FilingPeriodResult> {
   try {
     const headers = await getApiHeaders(true);
@@ -1217,17 +1386,20 @@ export async function getItrFilingPeriods(
         params: {
           pin: pin,
           obligation_id: obligationId,
-          is_amended: 'N',
-          branch_id: '',
-          from_date: '',
-          from_itms_or_prtl: 'PRTL',
+          is_amended: "N",
+          branch_id: "",
+          from_date: "",
+          from_itms_or_prtl: "PRTL",
         },
         headers,
         timeout: 30000,
-      }
+      },
     );
 
-    logger.info('ITR Filing Periods Response:', JSON.stringify(response.data, null, 2));
+    logger.info(
+      "ITR Filing Periods Response:",
+      JSON.stringify(response.data, null, 2),
+    );
 
     const data = response.data;
     let periods: string[] = [];
@@ -1235,7 +1407,9 @@ export async function getItrFilingPeriods(
     if (Array.isArray(data)) {
       // Response is an array of period strings
       periods = data.map((item: any) =>
-        typeof item === 'string' ? item : (item.period || `${item.from_date} - ${item.to_date}`)
+        typeof item === "string"
+          ? item
+          : item.period || `${item.from_date} - ${item.to_date}`,
       );
     } else if (data.periods && Array.isArray(data.periods)) {
       periods = data.periods;
@@ -1249,11 +1423,18 @@ export async function getItrFilingPeriods(
       message: data.description || data.message,
     };
   } catch (error: any) {
-    logger.error('ITR Filing Period Error:', error.response?.data || error.message);
+    logger.error(
+      "ITR Filing Period Error:",
+      error.response?.data || error.message,
+    );
     return {
       success: false,
       periods: [],
-      message: error.response?.data?.message || error.response?.data?.Message || error.response?.data?.description || error.message,
+      message:
+        error.response?.data?.message ||
+        error.response?.data?.Message ||
+        error.response?.data?.description ||
+        error.message,
     };
   }
 }
@@ -1264,7 +1445,7 @@ export async function getItrFilingPeriods(
  */
 export async function getItrEmploymentDetails(
   pin: string,
-  returnYear?: number
+  returnYear?: number,
 ): Promise<EmploymentIncomeResult> {
   const year = returnYear ?? new Date().getFullYear() - 1;
 
@@ -1280,11 +1461,14 @@ export async function getItrEmploymentDetails(
         },
         headers,
         timeout: 30000,
-      }
+      },
     );
 
     const data = response.data;
-    logger.info('ITR Employment Details Response:', JSON.stringify(data, null, 2));
+    logger.info(
+      "ITR Employment Details Response:",
+      JSON.stringify(data, null, 2),
+    );
 
     // Handle various response shapes
     let details: any[] = [];
@@ -1299,39 +1483,70 @@ export async function getItrEmploymentDetails(
     }
 
     const rows = details.map((item: any) => ({
-      employerPin: item.employer_pin || item.employerPin || '',
-      employerName: item.employer_name || item.employerName || '',
+      employerPin: item.employer_pin || item.employerPin || "",
+      employerName: item.employer_name || item.employerName || "",
       grossPay: Number(item.gross_pay || item.grossPay || 0),
-      valueOfCarBenefit: Number(item.value_of_car_benefit || item.valueOfCarBenefit || 0),
+      valueOfCarBenefit: Number(
+        item.value_of_car_benefit || item.valueOfCarBenefit || 0,
+      ),
       pension: Number(item.pension || 0),
-      netValueOfHousing: Number(item.net_value_of_housing || item.netValueOfHousing || 0),
-      allowancesBenefits: Number(item.allowances_benefits || item.allowancesBenefits || 0),
-      totalEmploymentIncome: Number(item.total_employment_income || item.grossPay || item.gross_pay || 0),
-      taxableSalary: Number(item.taxable_salary || item.taxablePay || item.taxable_pay || 0),
-      amountOfTaxDeductedPaye: Number(item.amount_of_tax_deducted_paye || item.PAYEDeducted || item.paye_deducted || 0),
-      taxPayableOnTaxableSalary: Number(item.tax_payable_on_taxable_salary || item.taxPayableOnTaxablePay || item.tax_payable_on_table_pay || 0),
-      amountOfTaxPayableRefundable: Number(item.amount_of_tax_payable_refundable || 0),
+      netValueOfHousing: Number(
+        item.net_value_of_housing || item.netValueOfHousing || 0,
+      ),
+      allowancesBenefits: Number(
+        item.allowances_benefits || item.allowancesBenefits || 0,
+      ),
+      totalEmploymentIncome: Number(
+        item.total_employment_income || item.grossPay || item.gross_pay || 0,
+      ),
+      taxableSalary: Number(
+        item.taxable_salary || item.taxablePay || item.taxable_pay || 0,
+      ),
+      amountOfTaxDeductedPaye: Number(
+        item.amount_of_tax_deducted_paye ||
+          item.PAYEDeducted ||
+          item.paye_deducted ||
+          0,
+      ),
+      taxPayableOnTaxableSalary: Number(
+        item.tax_payable_on_taxable_salary ||
+          item.taxPayableOnTaxablePay ||
+          item.tax_payable_on_table_pay ||
+          0,
+      ),
+      amountOfTaxPayableRefundable: Number(
+        item.amount_of_tax_payable_refundable || 0,
+      ),
     }));
 
     // Parse disability exemption certificate details from the employment response
-    const rawCerts = Array.isArray(data.itExemptionCertDetails) ? data.itExemptionCertDetails : [];
+    const rawCerts = Array.isArray(data.itExemptionCertDetails)
+      ? data.itExemptionCertDetails
+      : [];
     const itExemptionCertDetails = rawCerts.map((c: any) => ({
-      certNo: c.exemptionCertNo || c.certNo || '',
-      effectiveDate: c.certEffectiveDate || c.effectiveDate || '',
-      expiryDate: c.certExpiryDate || c.expiryDate || '',
+      certNo: c.exemptionCertNo || c.certNo || "",
+      effectiveDate: c.certEffectiveDate || c.effectiveDate || "",
+      expiryDate: c.certExpiryDate || c.expiryDate || "",
     }));
 
     return {
       success: true,
       rows,
       itExemptionCertDetails,
-      message: rows.length === 0 ? (data.message || data.Message || undefined) : undefined,
+      message:
+        rows.length === 0
+          ? data.message || data.Message || undefined
+          : undefined,
       summary: {
         totalPAYEDeducted: Number(data.totalPAYEDeducted || 0),
         totalTaxPayable: Number(data.totalTaxPayable || 0),
-        amountPayableOrRefundable: Number(data.amountPayableOrRefuindable || data.amountPayableOrRefundable || 0),
+        amountPayableOrRefundable: Number(
+          data.amountPayableOrRefuindable ||
+            data.amountPayableOrRefundable ||
+            0,
+        ),
         personalRelief: Number(data.personalRelief || 0),
-        isPwd: data.isPwd === 'Y' || data.isPwd === true,
+        isPwd: data.isPwd === "Y" || data.isPwd === true,
         ahLevy: Number(data.ahLevy || 0),
         shiFund: Number(data.shiFund || 0),
         pension: Number(data.pension || 0),
@@ -1343,10 +1558,16 @@ export async function getItrEmploymentDetails(
       },
     };
   } catch (error: any) {
-    logger.error('Get ITR Employment Details Error:', error.response?.data || error.message);
+    logger.error(
+      "Get ITR Employment Details Error:",
+      error.response?.data || error.message,
+    );
     return {
       success: false,
-      message: error.response?.data?.message || error.response?.data?.Message || error.message,
+      message:
+        error.response?.data?.message ||
+        error.response?.data?.Message ||
+        error.message,
     };
   }
 }
@@ -1357,7 +1578,7 @@ export async function getItrEmploymentDetails(
  */
 export async function getEmploymentIncome(
   pin: string,
-  returnYear?: number
+  returnYear?: number,
 ): Promise<EmploymentIncomeResult> {
   return getItrEmploymentDetails(pin, returnYear);
 }
@@ -1365,70 +1586,81 @@ export async function getEmploymentIncome(
 /** Extract the structured arrays that both /tax-return/itr-create and /tax-return-itr share. */
 function extractItrReturnArrays(data: any): ItrReturnArrays {
   const toNum = (v: unknown): number => {
-    if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
-    if (typeof v === 'string') { const n = Number(v.replace(/,/g, '').trim()); return Number.isFinite(n) ? n : 0; }
+    if (typeof v === "number") return Number.isFinite(v) ? v : 0;
+    if (typeof v === "string") {
+      const n = Number(v.replace(/,/g, "").trim());
+      return Number.isFinite(n) ? n : 0;
+    }
     return 0;
   };
 
-  const mortgages = Array.isArray(data.mortgage) ? data.mortgage.map((m: any) => ({
-    id: m.id || '',
-    pinOfLender: m.pin_of_lender || '',
-    nameOfLender: m.name_of_lender || '',
-    mortgageAccountNo: m.mortgage_account_no || '',
-    amountBorrowed: toNum(m.amount_borrowed),
-    outstandingAmount: toNum(m.outstanding_amount),
-    interestAmountPaid: toNum(m.interest_amount_paid ?? m.interest_paid),
-    validPin: m.valid_pin === true,
-  })) : [];
+  const mortgages = Array.isArray(data.mortgage)
+    ? data.mortgage.map((m: any) => ({
+        id: m.id || "",
+        pinOfLender: m.pin_of_lender || "",
+        nameOfLender: m.name_of_lender || "",
+        mortgageAccountNo: m.mortgage_account_no || "",
+        amountBorrowed: toNum(m.amount_borrowed),
+        outstandingAmount: toNum(m.outstanding_amount),
+        interestAmountPaid: toNum(m.interest_amount_paid ?? m.interest_paid),
+        validPin: m.valid_pin === true,
+      }))
+    : [];
 
-  const insurancePolicies = Array.isArray(data.insurance_policy) ? data.insurance_policy.map((p: any) => ({
-    id: p.id || '',
-    pin: p.pin || '',
-    insurerName: p.insurer_name || '',
-    typeOfPolicy: p.type_of_policy || '',
-    insurancePolicyNo: p.insurance_policy_no || '',
-    policyHolder: p.policy_holder || '',
-    childAge: toNum(p.child_age),
-    commencementDate: p.commencement_date || '',
-    maturityDate: p.maturity_date || '',
-    sumAssured: toNum(p.sum_assured),
-    annualPremiumPaid: toNum(p.annual_premium_paid),
-    amountOfInsuranceRelief: toNum(p.amount_of_insurance_relief),
-    validPin: p.valid_pin === true,
-  })) : [];
+  const insurancePolicies = Array.isArray(data.insurance_policy)
+    ? data.insurance_policy.map((p: any) => ({
+        id: p.id || "",
+        pin: p.pin || "",
+        insurerName: p.insurer_name || "",
+        typeOfPolicy: p.type_of_policy || "",
+        insurancePolicyNo: p.insurance_policy_no || "",
+        policyHolder: p.policy_holder || "",
+        childAge: toNum(p.child_age),
+        commencementDate: p.commencement_date || "",
+        maturityDate: p.maturity_date || "",
+        sumAssured: toNum(p.sum_assured),
+        annualPremiumPaid: toNum(p.annual_premium_paid),
+        amountOfInsuranceRelief: toNum(p.amount_of_insurance_relief),
+        validPin: p.valid_pin === true,
+      }))
+    : [];
 
-  const carBenefits = Array.isArray(data.car_benefit) ? data.car_benefit.map((c: any) => ({
-    id: c.id || '',
-    pinOfEmployer: c.pin_of_employer || '',
-    nameOfEmployer: c.name_of_employer || '',
-    carRegNo: c.car_reg_no || '',
-    make: c.make || '',
-    bodyType: c.body_type || '',
-    ccRating: c.cc_rating || '',
-    typeOfCar: c.type_of_car || '',
-    costOfCar: toNum(c.cost_of_car),
-    costOfHire: toNum(c.cost_of_hire),
-    periodOfUse: c.period_of_use || '',
-    carBenefitAmount: toNum(c.car_benefit_amount),
-    validPin: c.valid_pin === true,
-    validRegNo: c.valid_reg_no === true,
-  })) : [];
+  const carBenefits = Array.isArray(data.car_benefit)
+    ? data.car_benefit.map((c: any) => ({
+        id: c.id || "",
+        pinOfEmployer: c.pin_of_employer || "",
+        nameOfEmployer: c.name_of_employer || "",
+        carRegNo: c.car_reg_no || "",
+        make: c.make || "",
+        bodyType: c.body_type || "",
+        ccRating: c.cc_rating || "",
+        typeOfCar: c.type_of_car || "",
+        costOfCar: toNum(c.cost_of_car),
+        costOfHire: toNum(c.cost_of_hire),
+        periodOfUse: c.period_of_use || "",
+        carBenefitAmount: toNum(c.car_benefit_amount),
+        validPin: c.valid_pin === true,
+        validRegNo: c.valid_reg_no === true,
+      }))
+    : [];
 
-  const disabilityCertificates = Array.isArray(data.disability_certificate) ? data.disability_certificate.map((d: any) => ({
-    id: d.id || '',
-    certNo: d.cert_no || '',
-    effectiveDate: d.effective_date || '',
-    expiryDate: d.expiry_date || '',
-  })) : [];
+  const disabilityCertificates = Array.isArray(data.disability_certificate)
+    ? data.disability_certificate.map((d: any) => ({
+        id: d.id || "",
+        certNo: d.cert_no || "",
+        effectiveDate: d.effective_date || "",
+        expiryDate: d.expiry_date || "",
+      }))
+    : [];
 
   return {
     mortgages,
     insurancePolicies,
     carBenefits,
     disabilityCertificates,
-    taxReturnRef: data.tax_return_ref || '',
-    status: data.status || '',
-    kraAccountNumber: data.kra_account_number || '',
+    taxReturnRef: data.tax_return_ref || "",
+    status: data.status || "",
+    kraAccountNumber: data.kra_account_number || "",
     pensionContribution: toNum(data.pension_contribution),
     shifContribution: toNum(data.shif_contribution),
     hlContribution: toNum(data.hl_contribution),
@@ -1465,73 +1697,112 @@ export async function createItrReturn(payload: {
       hl_contribution: String(payload.hlContribution),
       pmf_contribution: String(payload.pmfContribution),
       insurance_policy: payload.insurancePolicies.map((p: any) => ({
-        pin: p.insuranceCompanyPin || p.pin || '',
-        insurer_name: p.insuranceCompanyName || p.insurer_name || '',
-        insurance_policy_no: p.insurancePolicyNumber || p.insurance_policy_no || '',
-        type_of_policy: p.typeOfPolicy || p.type_of_policy || '',
-        policy_holder: p.policyHolder || p.policy_holder || '',
+        pin: p.insuranceCompanyPin || p.pin || "",
+        insurer_name: p.insuranceCompanyName || p.insurer_name || "",
+        insurance_policy_no:
+          p.insurancePolicyNumber || p.insurance_policy_no || "",
+        type_of_policy: p.typeOfPolicy || p.type_of_policy || "",
+        policy_holder: p.policyHolder || p.policy_holder || "",
         child_age: Number(p.ageOfChild || p.child_age || 0),
-        commencement_date: p.commencementDate || p.commencement_date || '',
-        maturity_date: p.maturityDate || p.maturity_date || '',
+        commencement_date: p.commencementDate || p.commencement_date || "",
+        maturity_date: p.maturityDate || p.maturity_date || "",
         sum_assured: Number(p.sumAssured || p.sum_assured || 0),
-        annual_premium_paid: Number(p.annualPremiumPaid || p.annual_premium_paid || 0),
-        amount_of_insurance_relief: Number(p.amountOfInsuranceRelief || p.amount_of_insurance_relief || 0),
+        annual_premium_paid: Number(
+          p.annualPremiumPaid || p.annual_premium_paid || 0,
+        ),
+        amount_of_insurance_relief: Number(
+          p.amountOfInsuranceRelief || p.amount_of_insurance_relief || 0,
+        ),
       })),
       disability_certificate: payload.disabilityCertificates.map((d: any) => ({
-        cert_no: d.certNo || d.certificateNumber || d.cert_no || '',
-        effective_date: d.effectiveDate || d.effective_date || '',
-        expiry_date: d.expiryDate || d.expiry_date || '',
+        cert_no: d.certNo || d.certificateNumber || d.cert_no || "",
+        effective_date: d.effectiveDate || d.effective_date || "",
+        expiry_date: d.expiryDate || d.expiry_date || "",
       })),
       employment_income: payload.employmentIncome.map((e: any) => ({
-        employer_pin: e.employerPin || e.employer_pin || '',
-        employer_name: e.employerName || e.employer_name || '',
+        employer_pin: e.employerPin || e.employer_pin || "",
+        employer_name: e.employerName || e.employer_name || "",
         gross_pay: Number(e.grossPay || e.gross_pay || 0),
-        value_of_car_benefit: Number(e.valueOfCarBenefit || e.value_of_car_benefit || 0),
+        value_of_car_benefit: Number(
+          e.valueOfCarBenefit || e.value_of_car_benefit || 0,
+        ),
         pension: Number(e.pension || 0),
-        net_value_of_housing: Number(e.netValueOfHousing || e.net_value_of_housing || 0),
-        allowances_benefits: Number(e.allowancesBenefits || e.allowances_benefits || 0),
-        total_employment_income: Number(e.totalEmploymentIncome || e.total_employment_income || 0),
+        net_value_of_housing: Number(
+          e.netValueOfHousing || e.net_value_of_housing || 0,
+        ),
+        allowances_benefits: Number(
+          e.allowancesBenefits || e.allowances_benefits || 0,
+        ),
+        total_employment_income: Number(
+          e.totalEmploymentIncome || e.total_employment_income || 0,
+        ),
         taxable_salary: Number(e.taxableSalary || e.taxable_salary || 0),
-        amount_of_tax_deducted_paye: Number(e.amountOfTaxDeductedPaye || e.amount_of_tax_deducted_paye || 0),
-        tax_payable_on_taxable_salary: Number(e.taxPayableOnTaxableSalary || e.tax_payable_on_taxable_salary || 0),
-        amount_of_tax_payable_refundable: Number(e.amountOfTaxPayableRefundable || e.amount_of_tax_payable_refundable || 0),
+        amount_of_tax_deducted_paye: Number(
+          e.amountOfTaxDeductedPaye || e.amount_of_tax_deducted_paye || 0,
+        ),
+        tax_payable_on_taxable_salary: Number(
+          e.taxPayableOnTaxableSalary || e.tax_payable_on_taxable_salary || 0,
+        ),
+        amount_of_tax_payable_refundable: Number(
+          e.amountOfTaxPayableRefundable ||
+            e.amount_of_tax_payable_refundable ||
+            0,
+        ),
       })),
     };
 
     if (payload.mortgages && payload.mortgages.length > 0) {
       body.mortgage = payload.mortgages.map((m: any) => ({
-        pin_of_lender: m.pinOfLender || m.pin_of_lender || '',
-        name_of_lender: m.nameOfLender || m.name_of_lender || '',
-        mortgage_account_no: m.mortgageAccountNo || m.mortgage_account_no || '',
+        pin_of_lender: m.pinOfLender || m.pin_of_lender || "",
+        name_of_lender: m.nameOfLender || m.name_of_lender || "",
+        mortgage_account_no: m.mortgageAccountNo || m.mortgage_account_no || "",
         amount_borrowed: String(m.amountBorrowed || m.amount_borrowed || 0),
-        outstanding_amount: String(m.outstandingAmount || m.outstanding_amount || 0),
-        interest_amount_paid: String(m.interestAmountPaid || m.interest_amount_paid || 0),
+        outstanding_amount: String(
+          m.outstandingAmount || m.outstanding_amount || 0,
+        ),
+        interest_amount_paid: String(
+          m.interestAmountPaid || m.interest_amount_paid || 0,
+        ),
       }));
     }
 
-    logger.info('Creating ITR Return (Phase 1):', JSON.stringify(body, null, 2));
+    logger.info(
+      "Creating ITR Return (Phase 1):",
+      JSON.stringify(body, null, 2),
+    );
 
     const response = await axios.post(
       `${process.env.API_URL}/tax-return/itr-create`,
       body,
-      { headers, timeout: 30000 }
+      { headers, timeout: 30000 },
     );
 
     const data = response.data;
-    logger.info('Create ITR Return Response:', JSON.stringify(data, null, 2));
+    logger.info("Create ITR Return Response:", JSON.stringify(data, null, 2));
 
     return {
       success: true,
-      taxReturnId: data.tax_return_id || data.id || data.data?.id || data.data?.tax_return_id,
+      taxReturnId:
+        data.tax_return_id ||
+        data.id ||
+        data.data?.id ||
+        data.data?.tax_return_id,
       taxPayerId: data.tax_payer_id || data.data?.tax_payer_id,
       taxObligationId: data.tax_obligation_id || data.data?.tax_obligation_id,
       arrays: extractItrReturnArrays(data),
     };
   } catch (error: any) {
-    logger.error('Create ITR Return Error:', error.response?.data || error.message);
+    logger.error(
+      "Create ITR Return Error:",
+      error.response?.data || error.message,
+    );
     return {
       success: false,
-      message: error.response?.data?.message || error.response?.data?.Message || error.response?.data?.errors?.detail || error.message,
+      message:
+        error.response?.data?.message ||
+        error.response?.data?.Message ||
+        error.response?.data?.errors?.detail ||
+        error.message,
     };
   }
 }
@@ -1544,12 +1815,12 @@ export async function getItrReturn(
   taxPayerId: number,
   taxObligationId: number,
   period: string,
-  returnType: string = 'normal'
+  returnType: string = "normal",
 ): Promise<ItrReturnResult> {
   const toNumber = (value: unknown): number => {
-    if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
-    if (typeof value === 'string') {
-      const normalized = value.replace(/,/g, '').trim();
+    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+    if (typeof value === "string") {
+      const normalized = value.replace(/,/g, "").trim();
       if (!normalized) return 0;
       const parsed = Number(normalized);
       return Number.isFinite(parsed) ? parsed : 0;
@@ -1561,42 +1832,66 @@ export async function getItrReturn(
 
   try {
     const headers = await getApiHeaders(true);
-    const response = await axios.get(
-      `${process.env.API_URL}/tax-return-itr`,
-      {
-        params: {
-          tax_payer_id: taxPayerId,
-          tax_obligation_id: taxObligationId,
-          period: period,
-          return_type: returnType,
-        },
-        headers,
-        timeout: 30000,
-      }
-    );
+    const response = await axios.get(`${process.env.API_URL}/tax-return-itr`, {
+      params: {
+        tax_payer_id: taxPayerId,
+        tax_obligation_id: taxObligationId,
+        period: period,
+        return_type: returnType,
+      },
+      headers,
+      timeout: 30000,
+    });
 
     const data = response.data;
-    logger.info('Get ITR Return Response:', JSON.stringify(data, null, 2));
+    logger.info("Get ITR Return Response:", JSON.stringify(data, null, 2));
 
     const meta = data.meta_data ?? {};
 
-    const computation: TaxComputationResult['computation'] = {
+    const computation: TaxComputationResult["computation"] = {
       totalDeduction: toNumber(data.total_deduction ?? meta.total_deduction),
-      definedPensionContribution: toNumber(data.pension_contribution ?? data.defined_pension_contribution ?? meta.pension_contribution),
-      socialHealthInsuranceContribution: toNumber(data.shif_contribution ?? meta.shif_contribution),
-      housingLevyContribution: toNumber(data.hl_contribution ?? meta.hl_contribution),
-      postRetirementMedicalContribution: toNumber(data.pmf_contribution ?? meta.pmf_contribution),
-      employmentIncome: toNumber(data.taxable_amount ?? meta.employment_income ?? data.employment_income),
-      allowableTaxExemptionDisability: toNumber(data.allowable_tax_exemption_incase_of_person_with_disability ?? data.disability_exemption),
-      netTaxableIncome: toNumber(meta.net_taxable_income ?? data.net_taxable_income),
-      taxOnTaxableIncome: toNumber(meta.total_tax_payable ?? data.tax_on_taxable_income),
+      definedPensionContribution: toNumber(
+        data.pension_contribution ??
+          data.defined_pension_contribution ??
+          meta.pension_contribution,
+      ),
+      socialHealthInsuranceContribution: toNumber(
+        data.shif_contribution ?? meta.shif_contribution,
+      ),
+      housingLevyContribution: toNumber(
+        data.hl_contribution ?? meta.hl_contribution,
+      ),
+      postRetirementMedicalContribution: toNumber(
+        data.pmf_contribution ?? meta.pmf_contribution,
+      ),
+      employmentIncome: toNumber(
+        data.taxable_amount ?? meta.employment_income ?? data.employment_income,
+      ),
+      allowableTaxExemptionDisability: toNumber(
+        data.allowable_tax_exemption_incase_of_person_with_disability ??
+          data.disability_exemption,
+      ),
+      netTaxableIncome: toNumber(
+        meta.net_taxable_income ?? data.net_taxable_income,
+      ),
+      taxOnTaxableIncome: toNumber(
+        meta.total_tax_payable ?? data.tax_on_taxable_income,
+      ),
       personalRelief: toNumber(meta.personal_relief ?? data.personal_relief),
       insuranceRelief: toNumber(data.insurance_relief ?? meta.insurance_relief),
       taxCredits: toNumber(data.tax_credits ?? meta.tax_credits),
-      payeDeductedFromSalary: toNumber(data.paye_deducted_from_salary ?? meta.total_payed_deducted),
-      incomeTaxPaidInAdvance: toNumber(data.income_tax_paid_in_advance ?? meta.income_tax_paid_in_advance),
+      payeDeductedFromSalary: toNumber(
+        data.paye_deducted_from_salary ?? meta.total_payed_deducted,
+      ),
+      incomeTaxPaidInAdvance: toNumber(
+        data.income_tax_paid_in_advance ?? meta.income_tax_paid_in_advance,
+      ),
       creditsTotalReliefDtaa: toNumber(meta.credits ?? data.credits),
-      taxRefundDue: toNumber(data.tax_due ?? data.tax_due_refund_due ?? meta.amount_payable_or_refundable),
+      taxRefundDue: toNumber(
+        data.tax_due ??
+          data.tax_due_refund_due ??
+          meta.amount_payable_or_refundable,
+      ),
     };
 
     return {
@@ -1606,10 +1901,16 @@ export async function getItrReturn(
       rawData: data,
     };
   } catch (error: any) {
-    logger.error('Get ITR Return Error:', error.response?.data || error.message);
+    logger.error(
+      "Get ITR Return Error:",
+      error.response?.data || error.message,
+    );
     return {
       success: false,
-      message: error.response?.data?.message || error.response?.data?.Message || error.message,
+      message:
+        error.response?.data?.message ||
+        error.response?.data?.Message ||
+        error.message,
     };
   }
 }
@@ -1619,28 +1920,36 @@ export async function getItrReturn(
  * GET /api/tax-return/itr-summary/{id}
  */
 export async function getItrSummary(
-  taxReturnId: number
+  taxReturnId: number,
 ): Promise<ItrSummaryResult> {
   try {
     const headers = await getApiHeaders(true);
     const url = `${process.env.API_URL}/tax-return/itr-summary/${taxReturnId}`;
-    logger.info(`ITR Summary Request: GET ${url} | taxReturnId=${taxReturnId} (type: ${typeof taxReturnId}) | Auth: ${headers.Authorization ? 'Bearer ...' + String(headers.Authorization).slice(-10) : 'MISSING'}`);
-    const response = await axios.get(
-      url,
-      { headers, timeout: 30000 }
+    logger.info(
+      `ITR Summary Request: GET ${url} | taxReturnId=${taxReturnId} (type: ${typeof taxReturnId}) | Auth: ${headers.Authorization ? "Bearer ..." + String(headers.Authorization).slice(-10) : "MISSING"}`,
     );
+    const response = await axios.get(url, { headers, timeout: 30000 });
 
-    logger.info('ITR Summary Response:', JSON.stringify(response.data, null, 2));
+    logger.info(
+      "ITR Summary Response:",
+      JSON.stringify(response.data, null, 2),
+    );
 
     return {
       success: true,
       summary: response.data,
     };
   } catch (error: any) {
-    logger.error('Get ITR Summary Error:', error.response?.data || error.message);
+    logger.error(
+      "Get ITR Summary Error:",
+      error.response?.data || error.message,
+    );
     return {
       success: false,
-      message: error.response?.data?.message || error.response?.data?.Message || error.message,
+      message:
+        error.response?.data?.message ||
+        error.response?.data?.Message ||
+        error.message,
     };
   }
 }
@@ -1673,19 +1982,20 @@ export async function fileItrReturn(
     credits: number;
     netTaxableIncome: number;
     employmentIncome: any[];
-  }
+  },
 ): Promise<FileItrReturnResult> {
   try {
     const headers = await getApiHeaders(true);
 
     const payload = {
+      tax_payer_id: taxPayerId,
       tax_return_id: taxReturnId,
-      obligation_id: obligationId,
-      returnType: 'normal',
-      returnPeriod: returnPeriod,
+      tax_obligation_id: obligationId,
+      return_type: "normal",
+      period: returnPeriod,
       taxable_amount: String(taxableAmount),
       tax_due: String(taxDue),
-      currency: 'KES',
+      currency: "KES",
       meta_data: {
         return_year: metaData.returnYear,
         tax_code: metaData.taxCode,
@@ -1701,35 +2011,42 @@ export async function fileItrReturn(
         credits: metaData.credits,
         net_taxable_income: String(metaData.netTaxableIncome),
         employment_income: metaData.employmentIncome.map((row: any) => ({
-          employer_pin: row.employerPin || row.employer_pin || '',
-          employer_name: row.employerName || row.employer_name || '',
+          employer_pin: row.employerPin || row.employer_pin || "",
+          employer_name: row.employerName || row.employer_name || "",
           gross_pay: Number(row.grossPay || row.gross_pay || 0),
           pension: Number(row.pension || 0),
           taxable_pay: Number(row.taxableSalary || row.taxable_pay || 0),
-          tax_payable_on_table_pay: Number(row.taxPayableOnTaxableSalary || row.tax_payable_on_table_pay || 0),
-          paye_deducted: Number(row.amountOfTaxDeductedPaye || row.paye_deducted || 0),
+          tax_payable_on_table_pay: Number(
+            row.taxPayableOnTaxableSalary || row.tax_payable_on_table_pay || 0,
+          ),
+          paye_deducted: Number(
+            row.amountOfTaxDeductedPaye || row.paye_deducted || 0,
+          ),
         })),
       },
     };
 
-    logger.info('Submitting ITR Return (Phase 2):', JSON.stringify(payload, null, 2));
+    logger.info(
+      "Submitting ITR Return (Phase 2):",
+      JSON.stringify(payload, null, 2),
+    );
 
     const response = await axios.post(
       `${process.env.API_URL}/tax-return/create`,
       payload,
-      { headers, timeout: 30000 }
+      { headers, timeout: 30000 },
     );
 
     const data = response.data;
-    logger.info('Submit ITR Return Response:', JSON.stringify(data, null, 2));
+    logger.info("Submit ITR Return Response:", JSON.stringify(data, null, 2));
 
     const isSuccess =
       data.code === 1 ||
       data.code === 200 ||
       data.success === true ||
-      (data.response && data.response.Status === 'OK');
+      (data.response && data.response.Status === "OK");
 
-    let message = data.message || 'ITR filed successfully';
+    let message = data.message || "ITR filed successfully";
     let receiptNumber = data.receipt_number || data.receiptNumber;
     if (data.response) {
       if (data.response.Message) message = data.response.Message;
@@ -1744,11 +2061,18 @@ export async function fileItrReturn(
       taxDue: data.tax_due,
     };
   } catch (error: any) {
-    logger.error('Submit ITR Return Error:', error.response?.data || error.message);
+    logger.error(
+      "Submit ITR Return Error:",
+      error.response?.data || error.message,
+    );
     return {
       success: false,
       code: error.response?.status || 500,
-      message: error.response?.data?.Message || error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to submit ITR return',
+      message:
+        error.response?.data?.Message ||
+        error.response?.data?.message ||
+        error.response?.data?.errors?.detail ||
+        "Failed to submit ITR return",
     };
   }
 }
@@ -1756,13 +2080,15 @@ export async function fileItrReturn(
 /**
  * Validate insurance company PIN and return company details.
  */
-export async function validateInsurancePin(pin: string): Promise<ValidateInsurancePinResult> {
-  const normalizedPin = (pin || '').trim().toUpperCase();
+export async function validateInsurancePin(
+  pin: string,
+): Promise<ValidateInsurancePinResult> {
+  const normalizedPin = (pin || "").trim().toUpperCase();
   if (!normalizedPin || normalizedPin.length !== 11) {
     return {
       success: false,
       pin: normalizedPin,
-      error: 'PIN must be exactly 11 characters',
+      error: "PIN must be exactly 11 characters",
     };
   }
 
@@ -1771,7 +2097,7 @@ export async function validateInsurancePin(pin: string): Promise<ValidateInsuran
     return {
       success: false,
       pin: normalizedPin,
-      error: result.error || 'Invalid insurance company PIN',
+      error: result.error || "Invalid insurance company PIN",
     };
   }
 
@@ -1786,14 +2112,18 @@ export async function validateInsurancePin(pin: string): Promise<ValidateInsuran
  * Check disability exemption certificate for ITR
  */
 export async function getDisabilityExemption(
-  pin: string
-): Promise<{ success: boolean; hasCertificate: boolean; certificateNumber?: string; message?: string }> {
-
+  pin: string,
+): Promise<{
+  success: boolean;
+  hasCertificate: boolean;
+  certificateNumber?: string;
+  message?: string;
+}> {
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.get(
       `${BASE_URL}/disability-exemption/${pin}`,
-      { headers, timeout: 30000 }
+      { headers, timeout: 30000 },
     );
     const data = response.data;
     return {
@@ -1802,11 +2132,15 @@ export async function getDisabilityExemption(
       certificateNumber: data.certificate_number,
     };
   } catch (error: any) {
-    console.error('Get Disability Exemption Error:', error.response?.data || error.message);
+    console.error(
+      "Get Disability Exemption Error:",
+      error.response?.data || error.message,
+    );
     return {
       success: false,
       hasCertificate: false,
-      message: error.response?.data?.message || 'Failed to check disability exemption',
+      message:
+        error.response?.data?.message || "Failed to check disability exemption",
     };
   }
 }
@@ -1818,20 +2152,20 @@ export async function renderItrFilingCard(variables: {
   try {
     const url = `${process.env.HYPECARD_API_URL || process.env.API_URL}/hypecard-templates/render-stateless-url`;
     logger.info(`[renderItrFilingCard] Calling: ${url}`);
-    
+
     const response = await axios.post(
       url,
       {
-        templateName: 'itr-filing-card',
+        templateName: "itr-filing-card",
         variables,
       },
       {
         headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.INTERNAL_API_KEY,
+          "Content-Type": "application/json",
+          "x-api-key": process.env.INTERNAL_API_KEY,
         },
         timeout: 15000,
-      }
+      },
     );
     logger.info(`[renderItrFilingCard] Success! URL: ${response.data.url}`);
     return { url: response.data.url, mimeType: response.data.mimeType };
@@ -1840,7 +2174,7 @@ export async function renderItrFilingCard(variables: {
     const errorMessage = errorData?.message || err.message;
     logger.error(`[renderItrFilingCard] Failed: ${errorMessage}`, {
       status: err.response?.status,
-      data: errorData
+      data: errorData,
     });
     return { error: `Filing card generation failed: ${errorMessage}` };
   }
@@ -1853,20 +2187,20 @@ export async function renderNoEmployerCard(variables: {
   try {
     const url = `${process.env.HYPECARD_API_URL || process.env.API_URL}/hypecard-templates/render-stateless-url`;
     logger.info(`[renderNoEmployerCard] Calling: ${url}`);
-    
+
     const response = await axios.post(
       url,
       {
-        templateName: 'itr-no-employer-card',
+        templateName: "itr-no-employer-card",
         variables,
       },
       {
         headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.INTERNAL_API_KEY,
+          "Content-Type": "application/json",
+          "x-api-key": process.env.INTERNAL_API_KEY,
         },
         timeout: 15000,
-      }
+      },
     );
     logger.info(`[renderNoEmployerCard] Success! URL: ${response.data.url}`);
     return { url: response.data.url, mimeType: response.data.mimeType };
@@ -1875,7 +2209,7 @@ export async function renderNoEmployerCard(variables: {
     const errorMessage = errorData?.message || err.message;
     logger.error(`[renderNoEmployerCard] Failed: ${errorMessage}`, {
       status: err.response?.status,
-      data: errorData
+      data: errorData,
     });
     return { error: `No Employer card generation failed: ${errorMessage}` };
   }
